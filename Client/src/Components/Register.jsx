@@ -12,13 +12,15 @@ import { Visibility, VisibilityOff } from '@mui/icons-material';
 import GoogleIcon from '@mui/icons-material/Google';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { AnimatedTypography } from './AnimatedTypography';
+import { Typewriter } from 'react-simple-typewriter'; // Import Typewriter directly
 
 const Register = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
+    fullName: '',
     email: '',
-    password: ''
+    password: '',
+    confirmPassword: ''
   });
 
   const handleChange = (e) => {
@@ -34,8 +36,12 @@ const Register = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log('Form submitted:', formData);
-    // Connect to backend API here
+    if (formData.password !== formData.confirmPassword) {
+      alert("Passwords do not match");
+    } else {
+      console.log('Form submitted:', formData);
+      // Connect to backend API here
+    }
   };
 
   return (
@@ -77,8 +83,26 @@ const Register = () => {
         >
           HarmoniX
         </Typography>
-        
-        <AnimatedTypography />
+
+        {/* Inline Animated Typography */}
+        <Typography
+          variant="h2"
+          component={motion.div}
+          initial={{ y: 20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 0.5 }}
+          sx={{ mb: 24, fontWeight: 300 }}
+        >
+          <Typewriter
+            words={['Join Now And Start\nYour Music Journey\nWith Us!']}
+            loop={1}
+            cursor
+            cursorStyle="_"
+            typeSpeed={50}
+            deleteSpeed={50}
+            delaySpeed={3000}
+          />
+        </Typography>
       </Box>
       
       {/* Right side with form */}
@@ -115,6 +139,27 @@ const Register = () => {
               Create an account
             </Typography>
             
+            {/* Full Name Field */}
+            <Box sx={{ mb: 2 }}>
+              <Typography variant="body1" sx={{ mb: 1, color: 'black' }}>
+                Full Name
+              </Typography>
+              <TextField
+                fullWidth
+                name="fullName"
+                placeholder="John Doe"
+                value={formData.fullName}
+                onChange={handleChange}
+                variant="outlined"
+                sx={{ 
+                  '& .MuiOutlinedInput-root': {
+                    borderRadius: 1
+                  }
+                }}
+              />
+            </Box>
+            
+            {/* Email Field */}
             <Box sx={{ mb: 2 }}>
               <Typography variant="body1" sx={{ mb: 1, color: 'black' }}>
                 Email
@@ -134,6 +179,7 @@ const Register = () => {
               />
             </Box>
             
+            {/* Password Field */}
             <Box sx={{ mb: 2 }}>
               <Typography variant="body1" sx={{ mb: 1, color: 'black' }}>
                 Password
@@ -166,6 +212,40 @@ const Register = () => {
               />
             </Box>
             
+            {/* Confirm Password Field */}
+            <Box sx={{ mb: 2 }}>
+              <Typography variant="body1" sx={{ mb: 1, color: 'black' }}>
+                Confirm Password
+              </Typography>
+              <TextField
+                fullWidth
+                name="confirmPassword"
+                type={showPassword ? 'text' : 'password'}
+                placeholder="Confirm your password"
+                value={formData.confirmPassword}
+                onChange={handleChange}
+                variant="outlined"
+                InputProps={{
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <IconButton
+                        onClick={handleClickShowPassword}
+                        edge="end"
+                      >
+                        {showPassword ? <VisibilityOff /> : <Visibility />}
+                      </IconButton>
+                    </InputAdornment>
+                  ),
+                }}
+                sx={{ 
+                  '& .MuiOutlinedInput-root': {
+                    borderRadius: 1
+                  }
+                }}
+              />
+            </Box>
+            
+            {/* Create Account Button */}
             <Button
               component={motion.button}
               whileHover={{ scale: 1.02 }}
@@ -184,6 +264,7 @@ const Register = () => {
               Create account
             </Button>
             
+            {/* Google Sign-In Button */}
             <Button
               component={motion.button}
               whileHover={{ scale: 1.02 }}
@@ -208,6 +289,7 @@ const Register = () => {
               Continue with Google
             </Button>
             
+            {/* Login Link */}
             <Typography 
               variant="body2" 
               align="center"
