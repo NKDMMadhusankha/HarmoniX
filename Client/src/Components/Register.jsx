@@ -35,7 +35,7 @@ const Register = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     console.log('Form submitted:', formData);
-    // Here you would connect to your backend API
+    // Connect to backend API here
   };
 
   return (
@@ -43,7 +43,10 @@ const Register = () => {
       display: 'flex',
       height: '100vh',
       width: '100vw',
-      overflow: 'hidden'
+      overflow: 'hidden',
+      position: 'fixed', // Prevents scrolling
+      top: 0,
+      left: 0
     }}>
       {/* Left side with gradient */}
       <Box
@@ -75,20 +78,7 @@ const Register = () => {
           HarmoniX
         </Typography>
         
-        <AnimatedTypography/>
-
-        {/* <Typography 
-          variant="h2" 
-          component={motion.div}
-          initial={{ y: 20, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ delay: 0.5 }}
-          sx={{ mb: 4, fontWeight: 300 }}
-        >
-          Join now and start<br />
-          your music journey<br />
-          with us!
-        </Typography> */}
+        <AnimatedTypography />
       </Box>
       
       {/* Right side with form */}
@@ -120,13 +110,13 @@ const Register = () => {
               animate={{ y: 0, opacity: 1 }}
               transition={{ duration: 0.5 }}
               variant="h5" 
-              sx={{ mb: 3, fontWeight: 500 , color: 'black', }}
+              sx={{ mb: 1, fontWeight: 600 , color: 'black', fontSize: '2rem', fontFamily: 'Poppins' }}
             >
               Create an account
             </Typography>
             
             <Box sx={{ mb: 2 }}>
-              <Typography variant="body1" sx={{ mb: 1, color: 'black', }}>
+              <Typography variant="body1" sx={{ mb: 1, color: 'black' }}>
                 Email
               </Typography>
               <TextField
@@ -145,7 +135,7 @@ const Register = () => {
             </Box>
             
             <Box sx={{ mb: 2 }}>
-              <Typography variant="body1" sx={{ mb: 1, color: 'black', }}>
+              <Typography variant="body1" sx={{ mb: 1, color: 'black' }}>
                 Password
               </Typography>
               <TextField
