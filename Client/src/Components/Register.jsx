@@ -94,7 +94,7 @@ const Register = () => {
           sx={{ mb: 24, fontWeight: 300 }}
         >
           <Typewriter
-            words={['Join Now And Start\nYour Music Journey\nWith Us!']}
+            words={['Join Now And Start\nYour Music Journey\nWith Us !']}
             loop={1}
             cursor
             cursorStyle="_"
