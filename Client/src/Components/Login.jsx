@@ -43,25 +43,27 @@ const LoginForm = () => {
         alignItems: 'center',
         justifyContent: 'center',
         background: "url('/src/assets/formbg.png') center/cover no-repeat",
-        backgroundSize: '105%',
-
+        backgroundSize: '105%', // Fix for Img
         overflow: 'hidden',
         position: 'fixed',
       }}
     >
-      <Typography 
-        variant={isSmallScreen ? 'h5' : 'h4'} 
-        sx={{ 
-          position: 'absolute', 
-          top: isSmallScreen ? 20 : 40, 
-          left: isSmallScreen ? 20 : 40, 
-          color: 'white', 
-          fontWeight: 'bold' 
+     {/* Logo Image */}
+     <Box sx={{
+        position: 'absolute',
+        top: isSmallScreen ? 20 : -80,
+        left: isSmallScreen ? 20 : 0,
+        }}>
+    <img
+        src="/src/assets/logo.png"
+        alt="HarmoniX Logo"
+        style={{
+        width: isSmallScreen ? '30vw' : '15vw', // Adjust the width based on screen size
+        maxWidth: '270px', // Optional: maximum width for larger screens
+        height: 'auto', // Maintain the aspect ratio
         }}
-      >
-        HarmoniX
-      </Typography>
-
+    />
+    </Box>
       <Paper
         elevation={3}
         sx={{

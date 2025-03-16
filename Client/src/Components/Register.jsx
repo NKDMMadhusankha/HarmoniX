@@ -14,6 +14,11 @@ import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Typewriter } from 'react-simple-typewriter'; // Import Typewriter directly
 
+function Register() {
+  const [fullname, setName] = useState();
+  const [email, setEmail] = useState();
+  const [password, setPassword] = useState();
+
 const Register = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
@@ -36,12 +41,9 @@ const Register = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (formData.password !== formData.confirmPassword) {
-      alert("Passwords do not match");
-    } else {
-      console.log('Form submitted:', formData);
-      // Connect to backend API here
-    }
+    axios.post('', fullname, email, password)
+    .then(result => console.log(result))
+    .catch(err => console.log(err))
   };
 
   return (
@@ -149,7 +151,7 @@ const Register = () => {
                 name="fullName"
                 placeholder="John Doe"
                 value={formData.fullName}
-                onChange={handleChange}
+                onChange={(e) => setName(e.target.value)}
                 variant="outlined"
                 sx={{ 
                   '& .MuiOutlinedInput-root': {
@@ -169,7 +171,7 @@ const Register = () => {
                 name="email"
                 placeholder="harmonix@gmail.com"
                 value={formData.email}
-                onChange={handleChange}
+                onChange={(e) => setEmail(e.target.value)}
                 variant="outlined"
                 sx={{ 
                   '& .MuiOutlinedInput-root': {
@@ -190,7 +192,7 @@ const Register = () => {
                 type={showPassword ? 'text' : 'password'}
                 placeholder="Enter your password"
                 value={formData.password}
-                onChange={handleChange}
+                onChange={(e) => setPassword(e.target.value)}
                 variant="outlined"
                 InputProps={{
                   endAdornment: (
