@@ -167,7 +167,7 @@ const Register = () => {
               <TextField
                 fullWidth
                 name="email"
-                placeholder="merakic@gmail.com"
+                placeholder="harmonix@gmail.com"
                 value={formData.email}
                 onChange={handleChange}
                 variant="outlined"
