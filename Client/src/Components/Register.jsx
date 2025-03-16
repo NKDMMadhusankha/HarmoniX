@@ -14,10 +14,6 @@ import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Typewriter } from 'react-simple-typewriter'; // Import Typewriter directly
 
-function Register() {
-  const [fullname, setName] = useState();
-  const [email, setEmail] = useState();
-  const [password, setPassword] = useState();
 
 const Register = () => {
   const [showPassword, setShowPassword] = useState(false);

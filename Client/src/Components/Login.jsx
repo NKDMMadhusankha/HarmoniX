@@ -13,6 +13,7 @@ import {
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import { useTheme } from '@mui/material/styles';
+import { Link as RouterLink } from 'react-router-dom';  // Import Link from react-router-dom
 
 const LoginForm = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -143,7 +144,13 @@ const LoginForm = () => {
             <Typography variant="body2" component="span" sx={{ mr: 1 }}>
               Don't Have An Account ?
             </Typography>
-            <Link href="#" underline="none" color="primary" variant="body2">
+            <Link 
+              component={RouterLink} // Link from react-router-dom for internal routing
+              to="/register" 
+              underline="none" 
+              color="primary" 
+              variant="body2"
+            >
               Sign Up
             </Link>
           </Box>
