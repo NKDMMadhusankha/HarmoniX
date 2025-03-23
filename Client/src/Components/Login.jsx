@@ -9,43 +9,50 @@ import {
   IconButton, 
   Link,
   useMediaQuery,
-  Alert // Import Alert component for error messages
+  Alert
 } from '@mui/material';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import { useTheme } from '@mui/material/styles';
 import { Link as RouterLink } from 'react-router-dom';  
-import axios from 'axios'; // Import axios for making API requests
+import axios from 'axios';
 
 const LoginForm = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState(''); // State to store error message
+  const [error, setError] = useState('');
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down('sm'));
+  const isXsScreen = useMediaQuery(theme.breakpoints.down('xs'));
 
   const handleClickShowPassword = () => {
     setShowPassword(!showPassword);
   };
 
-  const handleSubmit = async (event) => {
-    event.preventDefault();
-    setError(''); // Clear previous error message
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
-    const userData = {
-      email,  // Using the actual input value
-      password,
+    const payload = {
+      email: email,   // Value from email input
+      password: password,   // Value from password input
     };
 
-    console.log("Sending Login Request:", userData);
-
     try {
-      const response = await axios.post("http://localhost:5000/api/auth/login", userData);
-      console.log("Login Success:", response.data);
+      const response = await axios.post('http://localhost:5000/api/auth/login', payload, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      // Store the token in localStorage or sessionStorage
+      localStorage.setItem('authToken', response.data.token);
+
+      console.log('Login success:', response.data);
+      // Optionally, redirect the user to another page (e.g., user dashboard)
     } catch (error) {
-      console.error("Login Error:", error.response ? error.response.data : error.message);
-      setError(error.response ? error.response.data.error : error.message); // Set error message
+      console.error('Login Error:', error.response ? error.response.data : error.message);
+      setError('Invalid email or password');  // You can customize the error message here
     }
   };
 
@@ -67,12 +74,11 @@ const LoginForm = () => {
         position: 'fixed',
       }}
     >
-      {/* Logo */}
       <Box sx={{
         position: 'absolute',
         top: isSmallScreen ? 20 : -80,
         left: isSmallScreen ? 20 : 0,
-        }}>
+      }}>
         <img
           src="/src/assets/logo.png"
           alt="HarmoniX Logo"
@@ -95,16 +101,16 @@ const LoginForm = () => {
           color: 'white',
         }}
       >
-        <Typography 
-          variant={isSmallScreen ? 'h6' : 'h5'} 
-          align="center" 
-          sx={{ mb: 3, fontWeight: 500, color: 'white' ,mt: 10}}
+        <Typography
+          variant={isSmallScreen ? 'h6' : 'h5'}
+          align="center"
+          sx={{ mb: 3, fontWeight: 500, color: 'white', mt: isSmallScreen ? 6 : 10 }}
         >
           Login to your account
         </Typography>
-        
+
         <Box component="form" onSubmit={handleSubmit} sx={{ mt: 2 }}>
-          {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>} {/* Display error message */}
+          {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
           <Typography variant="body2" sx={{ mb: 1, color: 'white' }}>Email</Typography>
           <TextField
             fullWidth
@@ -116,30 +122,30 @@ const LoginForm = () => {
             size="small"
             sx={{
               mb: 3,
-              input: { color: 'white' }, // White text inside the field
+              input: { color: 'white' },
               '& .MuiOutlinedInput-root': {
-                '& fieldset': { borderColor: 'white' }, // White border
-                '&:hover fieldset': { borderColor: 'white' }, // White border on hover
-                '&.Mui-focused fieldset': { borderColor: 'white' }, // White border when focused
+                '& fieldset': { borderColor: 'white' },
+                '&:hover fieldset': { borderColor: 'white' },
+                '&.Mui-focused fieldset': { borderColor: 'white' },
               },
-              '& .MuiInputLabel-root': { color: 'white' }, // Label color
-              '& .MuiInputLabel-root.Mui-focused': { color: 'white' }, // Label color when focused
+              '& .MuiInputLabel-root': { color: 'white' },
+              '& .MuiInputLabel-root.Mui-focused': { color: 'white' },
             }}
           />
-          
+
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
             <Typography variant="body2" sx={{ color: 'white' }}>Password</Typography>
-            <Link 
-              component={RouterLink} 
-              to="/forgot-password" 
-              underline="none" 
-              color="primary" 
+            <Link
+              component={RouterLink}
+              to="/forgot-password"
+              underline="none"
+              color="primary"
               variant="body2"
             >
-              Forgot ?
+              Forgot?
             </Link>
           </Box>
-          
+
           <TextField
             fullWidth
             placeholder="Enter your password"
@@ -160,14 +166,14 @@ const LoginForm = () => {
             }}
             sx={{
               mb: 3,
-              input: { color: 'white' }, // White text inside the field
+              input: { color: 'white' },
               '& .MuiOutlinedInput-root': {
-                '& fieldset': { borderColor: 'white' }, // White border
-                '&:hover fieldset': { borderColor: 'white' }, // White border on hover
-                '&.Mui-focused fieldset': { borderColor: 'white' }, // White border when focused
+                '& fieldset': { borderColor: 'white' },
+                '&:hover fieldset': { borderColor: 'white' },
+                '&.Mui-focused fieldset': { borderColor: 'white' },
               },
-              '& .MuiInputLabel-root': { color: 'white' }, // Label color
-              '& .MuiInputLabel-root.Mui-focused': { color: 'white' }, // Label color when focused
+              '& .MuiInputLabel-root': { color: 'white' },
+              '& .MuiInputLabel-root.Mui-focused': { color: 'white' },
             }}
           />
 
@@ -186,16 +192,16 @@ const LoginForm = () => {
           >
             Login now
           </Button>
-          
+
           <Box sx={{ textAlign: 'center', mb: 10 }}>
             <Typography variant="body2" component="span" sx={{ mr: 1 }}>
-              Don't Have An Account ?
+              Don't Have An Account?
             </Typography>
-            <Link 
-              component={RouterLink} 
-              to="/register" 
-              underline="none" 
-              color="primary" 
+            <Link
+              component={RouterLink}
+              to="/register"
+              underline="none"
+              color="primary"
               variant="body2"
             >
               Sign Up

@@ -38,7 +38,7 @@ const HarmoniXNavbar = () => {
       {/* Copyright bar with light gray background */}
       <Box sx={{ bgcolor: '#DFDFDF', py: 0, px: 2, display: 'flex', justifyContent: 'space-between'}}>
         <Typography variant="caption" color="text.primary" sx={{ mt: 1 }}>
-          2024 MERASIC Entertainment Pvt. Ltd. All Rights Reserved.
+          2025 MERASIC Entertainment Pvt. Ltd. All Rights Reserved.
         </Typography>
         <Box>
           <IconButton size="small" color="inherit" aria-label="facebook">

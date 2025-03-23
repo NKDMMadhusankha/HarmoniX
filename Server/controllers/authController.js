@@ -1,44 +1,38 @@
-const User = require('../models/User'); // Import the User model
-const bcrypt = require('bcrypt'); // Import bcrypt for password hashing
-const jwt = require('jsonwebtoken'); // Import jwt for token generation
+const User = require('../models/User'); 
+const bcrypt = require('bcrypt'); 
+const jwt = require('jsonwebtoken'); 
 
 const register = async (req, res) => {
   try {
-    console.log('Register endpoint hit'); // Add logging
     const { fullName, email, password, confirmPassword } = req.body;
 
-    // Check if the user already exists
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.status(400).json({ success: false, message: 'User already exists' });
     }
 
-    // Check if passwords match
     if (password !== confirmPassword) {
       return res.status(400).json({ success: false, message: 'Passwords do not match' });
     }
 
-    // Hash the password before saving
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Create new user
     const newUser = new User({
       fullName,
       email,
-      password: hashedPassword, // Save the hashed password
+      password: hashedPassword,
     });
 
-    // Save the user to the database
     await newUser.save();
 
     res.status(201).json({ success: true, message: 'Registration successful!' });
   } catch (error) {
-    console.error('Error during registration:', error); // Add logging
+    console.error('Error during registration:', error);
     res.status(500).json({ success: false, message: 'Server error' });
   }
 };
 
-// Add login functionality
+// Login with JWT and Refresh Tokens
 const login = async (req, res) => {
   const { email, password } = req.body;
 
@@ -56,13 +50,38 @@ const login = async (req, res) => {
       return res.status(400).json({ error: 'Invalid credentials' });
     }
 
-    // Generate JWT token
+    // Generate JWT token (store user ID in token payload)
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
 
+    // Send the token in the response
     res.json({ token, user });
   } catch (error) {
     res.status(500).json({ error: 'Server error' });
   }
 };
 
-module.exports = { register, login };
+// Refresh token
+const refreshToken = async (req, res) => {
+  const { refreshToken } = req.body;
+
+  if (!refreshToken) {
+    return res.status(401).json({ msg: 'No refresh token, authorization denied' });
+  }
+
+  try {
+    const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
+    const user = await User.findById(decoded.id);
+
+    if (!user || user.refreshToken !== refreshToken) {
+      return res.status(403).json({ msg: 'Invalid refresh token' });
+    }
+
+    const newAccessToken = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET, { expiresIn: '1h' });
+
+    res.json({ accessToken: newAccessToken });
+  } catch (error) {
+    res.status(403).json({ msg: 'Invalid refresh token' });
+  }
+};
+
+module.exports = { register, login, refreshToken };
