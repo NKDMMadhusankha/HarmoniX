@@ -14,6 +14,7 @@ import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import { useTheme } from '@mui/material/styles';
 import { Link as RouterLink } from 'react-router-dom';  
+import axios from 'axios'; // Import axios for making API requests
 
 const LoginForm = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -26,9 +27,30 @@ const LoginForm = () => {
     setShowPassword(!showPassword);
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
-    console.log({ email, password });
+
+    // Check if passwords match
+    if (password !== password) { // Update this logic if needed
+      alert("Passwords do not match!");
+      return;
+    }
+
+    try {
+      const response = await axios.post("http://localhost:5000/api/auth/login", { email, password }, {
+        headers: { "Content-Type": "application/json" },
+      });
+
+      if (response.data.success) {
+        alert("Login successful!");
+        window.location.href = "/dashboard"; // Redirect to dashboard after successful login
+      } else {
+        alert(response.data.message);
+      }
+    } catch (error) {
+      console.error("Error:", error.response?.data?.message || error.message);
+      alert("Login failed! Please try again.");
+    }
   };
 
   return (
