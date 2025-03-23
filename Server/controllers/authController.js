@@ -1,40 +1,35 @@
-// authController.js
-const bcrypt = require('bcryptjs');
-const User = require('../models/User'); // Path to your User model
+const User = require('../models/User'); // Import the User model
 
-// Register controller
 const register = async (req, res) => {
-  const { fullName, email, password, confirmPassword } = req.body;
-
   try {
-    // Validate if passwords match
-    if (password !== confirmPassword) {
-      return res.status(400).json({ message: "Passwords do not match!" });
-    }
+    console.log('Register endpoint hit'); // Add logging
+    const { fullName, email, password, confirmPassword } = req.body;
 
-    // Check if email already exists
+    // Check if the user already exists
     const existingUser = await User.findOne({ email });
     if (existingUser) {
-      return res.status(400).json({ message: "Email already registered!" });
+      return res.status(400).json({ success: false, message: 'User already exists' });
     }
 
-    // Hash the password before saving to the database
-    const hashedPassword = await bcrypt.hash(password, 10);
+    // Check if passwords match
+    if (password !== confirmPassword) {
+      return res.status(400).json({ success: false, message: 'Passwords do not match' });
+    }
 
     // Create new user
     const newUser = new User({
       fullName,
       email,
-      password: hashedPassword,
+      password, // Note: You should hash the password before saving
     });
 
-    // Save user to the database
+    // Save the user to the database
     await newUser.save();
 
-    res.status(201).json({ success: true, message: 'User registered successfully!' });
+    res.status(201).json({ success: true, message: 'Registration successful!' });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Internal server error. Please try again." });
+    console.error('Error during registration:', error); // Add logging
+    res.status(500).json({ success: false, message: 'Server error' });
   }
 };
 

@@ -87,9 +87,21 @@ const Register = () => {
       } else {
         alert(response.data.message);
       }
+
+      // Log successful registration
+      console.log('Registration successful:', response);
+
     } catch (error) {
       console.error("Error:", error.response?.data?.message || error.message);
-      alert("Registration failed! Please try again.");
+      if (error.response && error.response.status === 403) {
+        alert("CORS error: Please check your server configuration.");
+      } else {
+        alert("Registration failed! Please try again.");
+      }
+
+      // Log error during registration
+      console.error('Error during registration:', error);
+
     } finally {
       setIsLoading(false); // Hide loading spinner
     }
