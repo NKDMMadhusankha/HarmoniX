@@ -8,7 +8,8 @@ import {
   InputAdornment, 
   IconButton, 
   Link,
-  useMediaQuery
+  useMediaQuery,
+  Alert // Import Alert component for error messages
 } from '@mui/material';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
@@ -20,6 +21,7 @@ const LoginForm = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [error, setError] = useState(''); // State to store error message
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down('sm'));
 
@@ -29,27 +31,21 @@ const LoginForm = () => {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
+    setError(''); // Clear previous error message
 
-    // Check if passwords match
-    if (password !== password) { // Update this logic if needed
-      alert("Passwords do not match!");
-      return;
-    }
+    const userData = {
+      email,  // Using the actual input value
+      password,
+    };
+
+    console.log("Sending Login Request:", userData);
 
     try {
-      const response = await axios.post("http://localhost:5000/api/auth/login", { email, password }, {
-        headers: { "Content-Type": "application/json" },
-      });
-
-      if (response.data.success) {
-        alert("Login successful!");
-        window.location.href = "/dashboard"; // Redirect to dashboard after successful login
-      } else {
-        alert(response.data.message);
-      }
+      const response = await axios.post("http://localhost:5000/api/auth/login", userData);
+      console.log("Login Success:", response.data);
     } catch (error) {
-      console.error("Error:", error.response?.data?.message || error.message);
-      alert("Login failed! Please try again.");
+      console.error("Login Error:", error.response ? error.response.data : error.message);
+      setError(error.response ? error.response.data.error : error.message); // Set error message
     }
   };
 
@@ -108,6 +104,7 @@ const LoginForm = () => {
         </Typography>
         
         <Box component="form" onSubmit={handleSubmit} sx={{ mt: 2 }}>
+          {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>} {/* Display error message */}
           <Typography variant="body2" sx={{ mb: 1, color: 'white' }}>Email</Typography>
           <TextField
             fullWidth
@@ -132,7 +129,13 @@ const LoginForm = () => {
           
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
             <Typography variant="body2" sx={{ color: 'white' }}>Password</Typography>
-            <Link href="#" underline="none" color="primary" variant="body2">
+            <Link 
+              component={RouterLink} 
+              to="/forgot-password" 
+              underline="none" 
+              color="primary" 
+              variant="body2"
+            >
               Forgot ?
             </Link>
           </Box>

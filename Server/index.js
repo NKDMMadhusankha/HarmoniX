@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const dotenv = require('dotenv');
 const cors = require('cors');
 const authController = require('./controllers/authController');
+const authRoutes = require('./routes/authRoutes'); // Make sure this path is correct
 
 // Load environment variables
 dotenv.config();
@@ -37,3 +38,6 @@ app.get('/', (req, res) => {
 
 // Registration route
 app.post('/api/auth/register', authController.register);
+
+// New auth routes
+app.use('/api/auth', authRoutes); // This must match your frontend request
