@@ -340,7 +340,7 @@ const HarmoniXNavbar = () => {
                       my: 2, 
                       color: 'white', 
                       display: 'flex',
-                      mx: 1
+                      mx: 1,
                     }}
                   >
                     Features

@@ -68,7 +68,7 @@ const HomeBanner = () => {
                     opacity: 1,
                   },
                   '100%': {
-                    transform: 'translateY(50%)', // Move the old text out of view (up)
+                    transform: 'translateY(-20%)', // Move the old text out of view (up)
                     opacity: 0,
                   },
                 },
