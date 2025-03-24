@@ -116,14 +116,15 @@ const HarmoniXNavbar = () => {
     <ThemeProvider theme={fullWidthTheme}>
       <CssBaseline />
       <Box sx={{ 
-        width: '100vw', 
+        width: '100%', 
         overflowX: 'hidden',
         margin: 0,
         padding: 0,
-        position: 'relative'
+        position: 'static',
+
       }}>
         {/* Copyright bar with light gray background */}
-        <FullWidthBox sx={{ 
+        {/* <FullWidthBox sx={{ 
           bgcolor: '#DFDFDF', 
           py: 0, 
           px: 2, 
@@ -147,7 +148,7 @@ const HarmoniXNavbar = () => {
               <EmailIcon fontSize="small" sx={{ color: 'text.primary' }} />
             </IconButton>
           </Box>
-        </FullWidthBox>
+        </FullWidthBox> */}
         
         {/* Fullscreen Mobile Menu */}
         {isMobile && mobileMenuOpen && (
