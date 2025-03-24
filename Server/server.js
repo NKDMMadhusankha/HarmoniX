@@ -13,10 +13,7 @@ app.use(cors());
 app.use(express.json());
 
 mongoose
-  .connect("your_mongo_db_connection_string", { // Updated connection string
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  })
+  .connect("your_mongo_db_connection_string") // Removed deprecated options
   .then(() => console.log("MongoDB Connected"))
   .catch((err) => console.log(err)); // Simplified error logging
 

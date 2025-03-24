@@ -12,6 +12,7 @@
   "dependencies": {
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.0",
+    "@fontsource/saira": "^5.2.6",
     "@mui/icons-material": "^6.4.7",
     "@mui/material": "^6.4.7",
     "@types/react-type-animation": "^1.1.4",

@@ -4,26 +4,38 @@ const jwt = require('jsonwebtoken');
 
 const register = async (req, res) => {
   try {
+    console.log('Register endpoint hit'); 
     const { fullName, email, password, confirmPassword } = req.body;
+    
+    console.log('Received data:', { fullName, email, password, confirmPassword });
 
+    // Check if user already exists
     const existingUser = await User.findOne({ email });
     if (existingUser) {
+      console.log('User already exists');
       return res.status(400).json({ success: false, message: 'User already exists' });
     }
 
+    // Check if passwords match
     if (password !== confirmPassword) {
+      console.log('Passwords do not match');
       return res.status(400).json({ success: false, message: 'Passwords do not match' });
     }
 
+    // Hash password before saving
     const hashedPassword = await bcrypt.hash(password, 10);
+    console.log('Password hashed successfully');
 
+    // Create new user
     const newUser = new User({
       fullName,
       email,
       password: hashedPassword,
     });
 
+    // Save user to database
     await newUser.save();
+    console.log('User saved successfully');
 
     res.status(201).json({ success: true, message: 'Registration successful!' });
   } catch (error) {
