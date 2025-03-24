@@ -6,10 +6,7 @@ const HomePage = () => {
   return (
     <>
       <Navbar />
-
       <HomeBanner />
-
-      
     </>
   );
 };

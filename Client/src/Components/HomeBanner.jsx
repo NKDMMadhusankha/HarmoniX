@@ -106,8 +106,6 @@ const HomeBanner = () => {
           </Button>
         </Container>
       </Box>
-
-      {/* Logos Section */}
     </>
   );
 };
