@@ -125,7 +125,7 @@ const MusicServices = () => {
       alignItems="stretch"
       sx={{ mb: isAdditional ? 0 : 15 }}
     >
-      {serviceList.map((service) => (
+      {serviceList.map((service, index) => (
         <Grid item xs={12} md={4} key={service.id} sx={{ display: 'flex' }}>
           <motion.div 
             variants={cardVariants} 
