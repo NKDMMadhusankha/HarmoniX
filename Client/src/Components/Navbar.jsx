@@ -159,7 +159,7 @@ const HarmoniXNavbar = () => {
                 </IconButton>
               </Box>
               
-              <List sx={{ flexGrow: 1 }}>
+              <List sx={{ flexGrow: 1}}>
                 {/* Features item with dropdown */}
                 <ListItem 
                   button 
@@ -375,7 +375,7 @@ const HarmoniXNavbar = () => {
                     onClick={handleProfileMenuOpen}
                     sx={{ color: 'white' }} // No size change here, just for the IconButton container
                   >
-                    <AccountCircleIcon sx={{ fontSize: '2.2rem', color: 'white' }} /> {/* Set the profile icon size */}
+                    <AccountCircleIcon sx={{ fontSize: '2.3rem', color: 'white' }} /> {/* Set the profile icon size */}
                     {/* <KeyboardArrowDownIcon sx={{ fontSize: '1rem', color: 'white' }} /> Keep the dropdown arrow smaller */}
                   </IconButton>
                   <Menu
