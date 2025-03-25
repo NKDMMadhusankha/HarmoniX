@@ -9,7 +9,7 @@ import logo from '../assets/logo.png';
 
 const Footer = () => {
   return (
-    <Box sx={{ bgcolor: 'black', color: 'white', py: 6 }}>
+    <Box  sx={{ bgcolor: 'black', color: 'white', py: 6, borderTop: '1px solid white' }}>
       <Container maxWidth="xl">
         <Grid container spacing={4} sx={{ flexWrap: 'nowrap' }}>
           

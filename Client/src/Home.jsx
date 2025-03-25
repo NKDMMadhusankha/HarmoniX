@@ -4,6 +4,9 @@ import Navbar from './Components/Navbar';
 import HomeBanner from './Components/HomeBanner';
 import Footer from './Components/Footer';
 import LogoScrollBar from './Components/LogoBar';
+import { Home } from '@mui/icons-material';
+import HomeCards from './Components/HomeCards';
+
 
 const HomePage = () => {
   return (
@@ -14,6 +17,7 @@ const HomePage = () => {
         overflowY: 'auto', // Ensure vertical scrolling
         display: 'flex', 
         flexDirection: 'column', 
+        backgroundColor: 'black'
       }}
     >
       <Navbar />
@@ -26,8 +30,9 @@ const HomePage = () => {
       >
         <HomeBanner />
         <LogoScrollBar />
+        <HomeCards />
       </Box>
-      {/* <Footer /> */}
+      <Footer />
     </Box>
   );
 };

@@ -25,7 +25,7 @@ const LogoTrack = styled(Box)({
   width: 'max-content',
   '@keyframes scrollLoop': {
     '0%': { transform: 'translateX(0)' },
-    '100%': { transform: 'translateX(-20%)' },
+    '100%': { transform: 'translateX(-10%)' },
   },
 });
 
