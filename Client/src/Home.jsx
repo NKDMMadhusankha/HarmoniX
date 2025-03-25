@@ -3,6 +3,7 @@ import { Box } from '@mui/material';
 import Navbar from './Components/Navbar';
 import HomeBanner from './Components/HomeBanner';
 import Footer from './Components/Footer';
+import LogoScrollBar from './Components/LogoBar';
 
 const HomePage = () => {
   return (
@@ -12,7 +13,7 @@ const HomePage = () => {
         minHeight: '100vh', 
         overflowY: 'auto', // Ensure vertical scrolling
         display: 'flex', 
-        flexDirection: 'column' 
+        flexDirection: 'column', 
       }}
     >
       <Navbar />
@@ -24,9 +25,9 @@ const HomePage = () => {
         }}
       >
         <HomeBanner />
-        {/* Add any other page content here */}
+        <LogoScrollBar />
       </Box>
-      <Footer />
+      {/* <Footer /> */}
     </Box>
   );
 };

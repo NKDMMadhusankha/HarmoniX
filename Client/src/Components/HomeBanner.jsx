@@ -26,7 +26,7 @@ const HomeBanner = () => {
       ref={bannerRef}
       sx={{
         width: '100%',
-        height: '100vh',
+        height: '82vh',
         minHeight: '600px',
         display: 'flex',
         flexDirection: 'column',
@@ -36,6 +36,7 @@ const HomeBanner = () => {
         overflow: 'hidden',
         pt: 8,
         cursor: 'default',
+        backgroundColor:'#0D0D0D'
       }}
     >
       {/* Video Background */}
@@ -56,12 +57,12 @@ const HomeBanner = () => {
           height: 'auto',
           transform: 'translate(-50%, -50%)',
           zIndex: 0,
-          filter: 'brightness(0.4)',
+          filter: 'brightness(0.5)',
           objectFit: 'cover',
         }}
       >
         <source 
-          src="https://videos.pexels.com/video-files/5657834/5657834-uhd_2732_1440_25fps.mp4" 
+          src="https://cdn.pixabay.com/video/2017/08/30/11720-231759062_large.mp4" 
           type="video/mp4" 
         />
         Your browser does not support the video tag.
@@ -148,9 +149,9 @@ const HomeBanner = () => {
           size="large"
           endIcon={<ArrowDownwardOutlined />}
           sx={{
-            borderRadius: '50px',
+            borderRadius: '20px',
             px: 4,
-            py: 1.5,
+            py: 1,
             borderColor: '#FFFFFF',
             color: '#FFFFFF',
             '&:hover': {
