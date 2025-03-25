@@ -20,12 +20,9 @@ import {
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import MenuIcon from '@mui/icons-material/Menu';
 import CloseIcon from '@mui/icons-material/Close';
-import FacebookIcon from '@mui/icons-material/Facebook';
-import LinkedInIcon from '@mui/icons-material/LinkedIn';
-import InstagramIcon from '@mui/icons-material/Instagram';
-import EmailIcon from '@mui/icons-material/Email';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
+import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 
 // Create a custom theme that removes all default margins and paddings
 const fullWidthTheme = createTheme({
@@ -91,8 +88,10 @@ const HarmoniXNavbar = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [featuresAnchorEl, setFeaturesAnchorEl] = useState(null);
   const [mobileFeatureOpen, setMobileFeatureOpen] = useState(false);
+  const [profileMenuAnchorEl, setProfileMenuAnchorEl] = useState(null);
   
   const featureOptions = ['Mixing Engineer', 'Mastering Engineer', 'Music Producer', 'Recording Studio'];
+  const navItemsWithoutFeatures = ['Resources', 'Support', 'About Us', 'Contact'];
   
   const toggleMobileMenu = () => {
     setMobileMenuOpen(!mobileMenuOpen);
@@ -110,7 +109,13 @@ const HarmoniXNavbar = () => {
     setMobileFeatureOpen(!mobileFeatureOpen);
   };
   
-  const navItemsWithoutFeatures = ['Resources', 'Support', 'About Us', 'Contact'];
+  const handleProfileMenuOpen = (event) => {
+    setProfileMenuAnchorEl(event.currentTarget);
+  };
+  
+  const handleProfileMenuClose = () => {
+    setProfileMenuAnchorEl(null);
+  };
 
   return (
     <ThemeProvider theme={fullWidthTheme}>
@@ -121,35 +126,7 @@ const HarmoniXNavbar = () => {
         margin: 0,
         padding: 0,
         position: 'static',
-
       }}>
-        {/* Copyright bar with light gray background */}
-        {/* <FullWidthBox sx={{ 
-          bgcolor: '#DFDFDF', 
-          py: 0, 
-          px: 2, 
-          display: 'flex', 
-          justifyContent: 'space-between',
-        }}>
-          <Typography variant="caption" color="text.primary" sx={{ mt: 1 }}>
-            2025 MERASIC Entertainment Pvt. Ltd. All Rights Reserved.
-          </Typography>
-          <Box>
-            <IconButton size="small" color="inherit" aria-label="facebook">
-              <FacebookIcon fontSize="small" sx={{ color: 'text.primary' }} />
-            </IconButton>
-            <IconButton size="small" color="inherit" aria-label="linkedin">
-              <LinkedInIcon fontSize="small" sx={{ color: 'text.primary' }} />
-            </IconButton>
-            <IconButton size="small" color="inherit" aria-label="instagram">
-              <InstagramIcon fontSize="small" sx={{ color: 'text.primary' }} />
-            </IconButton>
-            <IconButton size="small" color="inherit" aria-label="email">
-              <EmailIcon fontSize="small" sx={{ color: 'text.primary' }} />
-            </IconButton>
-          </Box>
-        </FullWidthBox> */}
-        
         {/* Fullscreen Mobile Menu */}
         {isMobile && mobileMenuOpen && (
           <Fade in={mobileMenuOpen}>
@@ -392,21 +369,31 @@ const HarmoniXNavbar = () => {
                   ))}
                 </Box>
 
-                {/* Login/Signup buttons */}
+                {/* Profile dropdown */}
                 <Box sx={{ flexGrow: 0 }}>
-                  <Button color="inherit" sx={{ mr: 1 }}>Login</Button>
-                  <Button 
-                    variant="contained" 
-                    sx={{ 
-                      backgroundColor: '#1976d2',
-                      '&:hover': {
-                        backgroundColor: '#1565c0',
-                      },
-                      borderRadius: 1
+                <IconButton
+                    onClick={handleProfileMenuOpen}
+                    sx={{ color: 'white' }} // No size change here, just for the IconButton container
+                  >
+                    <AccountCircleIcon sx={{ fontSize: '2.2rem', color: 'white' }} /> {/* Set the profile icon size */}
+                    {/* <KeyboardArrowDownIcon sx={{ fontSize: '1rem', color: 'white' }} /> Keep the dropdown arrow smaller */}
+                  </IconButton>
+                  <Menu
+                    anchorEl={profileMenuAnchorEl}
+                    open={Boolean(profileMenuAnchorEl)}
+                    onClose={handleProfileMenuClose}
+                    sx={{
+                      '& .MuiPaper-root': {
+                        backgroundColor: 'black',
+                        borderRadius: 1,
+                        minWidth: '200px'
+                      }
                     }}
                   >
-                    Sign Up
-                  </Button>
+                    <MenuItem onClick={handleProfileMenuClose} sx={{ color: 'white' }}>Login</MenuItem>
+                    <MenuItem onClick={handleProfileMenuClose} sx={{ color: 'white' }}>Sign Up</MenuItem>
+                    <MenuItem onClick={handleProfileMenuClose} sx={{ color: 'white' }}>Profile</MenuItem>
+                  </Menu>
                 </Box>
               </>
             )}
