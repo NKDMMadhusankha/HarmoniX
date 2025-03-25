@@ -6,6 +6,7 @@ import Footer from './Components/Footer';
 import LogoScrollBar from './Components/LogoBar';
 import { Home } from '@mui/icons-material';
 import HomeCards from './Components/HomeCards';
+import HomeStep from './Components/HomeStep';
 
 
 const HomePage = () => {
@@ -31,6 +32,7 @@ const HomePage = () => {
         <HomeBanner />
         <LogoScrollBar />
         <HomeCards />
+        <HomeStep />
       </Box>
       <Footer />
     </Box>
