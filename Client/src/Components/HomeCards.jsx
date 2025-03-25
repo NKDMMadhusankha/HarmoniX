@@ -309,13 +309,14 @@ const MusicServices = () => {
       >
         Explore More Services ...
       </Typography>
-
-      {/* Remove motion.div for the additional services section */}
-      <Box
-        sx={{ width: '100%' }}
-      >
+      <motion.div
+       initial='hidden'
+       whileInView="visible"
+       viewport={{ once: true, amount: 0.1 }}
+       variants={containerVariants}
+     >
         {renderServiceCards(additionalServices, true)}
-      </Box>
+      </motion.div>
     </Container>
   );
 };
