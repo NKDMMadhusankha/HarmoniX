@@ -7,24 +7,24 @@ import {
   Paper,
   InputAdornment, 
   IconButton, 
-  Link,
-  useMediaQuery,
-  Alert
+  Snackbar,
+  Alert 
 } from '@mui/material';
+import { motion } from "framer-motion";  
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
-import { useTheme } from '@mui/material/styles';
-import { Link as RouterLink, useNavigate } from 'react-router-dom';  // ✅ Import useNavigate
+import { Link as RouterLink, useNavigate } from 'react-router-dom';  
 import axios from 'axios';
+import Loader from './Loader';  // Importing the Loader component
 
 const LoginForm = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-  const theme = useTheme();
-  const isSmallScreen = useMediaQuery(theme.breakpoints.down('sm'));
-  const navigate = useNavigate();  // ✅ Initialize navigate
+  const [success, setSuccess] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
   const handleClickShowPassword = () => {
     setShowPassword(!showPassword);
@@ -32,22 +32,22 @@ const LoginForm = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError(''); // Clear previous errors
+    setError('');
+    setLoading(true);  
 
     try {
-      const response = await axios.post('http://localhost:5000/api/auth/login', { email, password }, {
-        headers: { 'Content-Type': 'application/json' },
-      });
+      const response = await axios.post('http://localhost:5000/api/auth/login', { email, password });
 
       localStorage.setItem('authToken', response.data.token);
-      console.log('Login success:', response.data);
+      setSuccess(true);
 
-      // ✅ Navigate to Home after successful login
-      navigate('/home');
+      setTimeout(() => {
+        navigate('/home');
+      }, 3000);
 
     } catch (error) {
-      console.error('Login Error:', error.response ? error.response.data : error.message);
       setError('Invalid email or password');
+      setLoading(false);
     }
   };
 
@@ -59,67 +59,123 @@ const LoginForm = () => {
         justifyContent: 'center',
         height: '100vh',
         background: "url('/src/assets/formbg.png') center/cover no-repeat",
+        position: 'relative'
       }}
     >
-      <Paper
-        elevation={3}
-        sx={{
-          width: { xs: '90%', sm: '70%', md: '50%', lg: '410px' },
-          p: 4,
-          borderRadius: 6,
-          backgroundColor: 'black',
-          color: 'white',
-        }}
+      {/* ✅ Success Message - Always Visible on Top */}
+      <Snackbar 
+        open={success} 
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+        sx={{ zIndex: 99999 }}  // ✅ This keeps it above the loader
       >
-        <Typography variant="h5" align="center" sx={{ mb: 3, fontWeight: 500 }}>
-          Login to your account
-        </Typography>
+        <Alert severity="success" variant="filled" sx={{ fontSize: '1rem', fontWeight: 'bold' , color: 'white', backgroundColor: 'green' }}>
+          ✅ Login successful! Redirecting...
+        </Alert>
+      </Snackbar>
 
-        {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
+      {/* ✅ Fullscreen Loader - Replaced with Loader Component */}
+      {loading ? (
+        <Loader /> 
+      ) : (
+        <Paper
+          elevation={3}
+          sx={{
+            width: '400px',
+            p: 4,
+            borderRadius: 6,
+            backgroundColor: 'black',
+            color: 'white',
+            textAlign: 'center'
+          }}
+        >
+          <Typography variant="h5" align="center" sx={{ mb: 3, fontWeight: 500 }}>
+            Login to your account
+          </Typography>
 
-        <Box component="form" onSubmit={handleSubmit} sx={{ mt: 2 }}>
-          <TextField
-            fullWidth
-            placeholder="harmonix@gmail.com"
-            name="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            variant="outlined"
-            size="small"
-            sx={{ mb: 3, input: { color: 'white' } }}
-          />
+          {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
 
-          <TextField
-            fullWidth
-            placeholder="Enter your password"
-            name="password"
-            type={showPassword ? 'text' : 'password'}
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            variant="outlined"
-            size="small"
-            InputProps={{
-              endAdornment: (
-                <InputAdornment position="end">
-                  <IconButton onClick={handleClickShowPassword} edge="end" size="small">
-                    {showPassword ? <VisibilityIcon /> : <VisibilityOffIcon />}
-                  </IconButton>
-                </InputAdornment>
-              ),
-            }}
-            sx={{ mb: 3, input: { color: 'white' } }}
-          />
+          <Box component="form" onSubmit={handleSubmit} sx={{ mt: 2  }}>
+            {/* Title for Email */}
+            <Typography variant="subtitle1" sx={{ textAlign: 'left', mb: 1,  }}>Email </Typography>
+            <TextField
+              fullWidth
+              placeholder="harmonix@gmail.com"
+              name="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              variant="outlined"
+              size="small"
+              sx={{
+                mb: 3,
+                input: { color: 'white' },
+                '& .MuiOutlinedInput-root': {
+                  '& fieldset': {
+                    borderColor: 'white', // Default border color
+                  },
+                  '&:hover fieldset': {
+                    borderColor: '#1976d2', // Border color on hover
+                  },
+                  '&.Mui-focused fieldset': {
+                    borderColor: '#1976d2', // Border color when focused
+                  },
+                },
+              }}
+            />
 
-          <Button type="submit" fullWidth variant="contained" sx={{ mt: 1, py: 1.2 }}>
-            Login now
-          </Button>
+            {/* Title for Password */}
+            <Typography variant="subtitle1" sx={{ textAlign: 'left', mb: 1 }}>Password</Typography>
+            <TextField
+              fullWidth
+              placeholder="Enter your password"
+              name="password"
+              type={showPassword ? 'text' : 'password'}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              variant="outlined"
+              size="small"
+              InputProps={{
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton onClick={handleClickShowPassword} edge="end" size="small">
+                      {showPassword ? <VisibilityIcon sx={{ color: 'white',fontSize: '18px' }}/> : <VisibilityOffIcon sx={{ color: 'white',fontSize: '18px' }} />}
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              }}
+              sx={{
+                mb: 3,
+                input: { color: 'white' },
+                '& .MuiOutlinedInput-root': {
+                  '& fieldset': {
+                    borderColor: 'white', // Default border color
+                  },
+                  '&:hover fieldset': {
+                    borderColor: '#1976d2', // Border color on hover
+                  },
+                  '&.Mui-focused fieldset': {
+                    borderColor: '#1976d2', // Border color when focused
+                  },
+                },
+              }}
+            />
 
-          <Box sx={{ textAlign: 'center', mt: 2 }}>
-            <Typography variant="body2" component="span">Don't have an account?</Typography>
-            <Link component={RouterLink} to="/register" sx={{ ml: 1 }}>Sign Up</Link>
+            {/* Forgot Password Link */}
+            <Box sx={{ textAlign: 'left', mb: 2 }}>
+              <RouterLink to="/forgot-password" style={{ color: '#1976d2', textDecoration: 'none', fontSize: '0.875rem' }}>
+                Forgot Password?
+              </RouterLink>
+            </Box>
+
+            <Button type="submit" fullWidth variant="contained" sx={{ mt: 1, py: 1.2 }} disabled={loading}>
+              Login now
+            </Button>
+
+            <Box sx={{ textAlign: 'center', mt: 2 }}>
+              <Typography variant="body2">Don't have an account? <RouterLink to="/register" style={{ color: '#1976d2', textDecoration: 'none' }}>Sign Up</RouterLink></Typography>
+            </Box>
           </Box>
-        </Box>
-      </Paper>
+        </Paper>
+      )}
     </Box>
   );
 };
