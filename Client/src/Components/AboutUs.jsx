@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Container, 
   Typography, 
@@ -9,6 +9,37 @@ import Navbar from './Navbar';
 import Footer from './Footer';
 
 const AboutUs = () => {
+  const [text, setText] = useState('');
+  const fullText = 'Have Any Questions ?';
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [typingSpeed, setTypingSpeed] = useState(100); // Increased speed
+
+  useEffect(() => {
+    const handleTyping = () => {
+      if (!isDeleting) {
+        // Typing
+        if (text.length < fullText.length) {
+          setText(fullText.slice(0, text.length + 1));
+        } else {
+          // Start deleting after a pause
+          setTimeout(() => setIsDeleting(true), 1500); // Reduced pause time
+        }
+      } else {
+        // Deleting
+        if (text.length > 0) {
+          setText(fullText.slice(0, text.length - 1));
+        } else {
+          // Reset to typing forward
+          setIsDeleting(false);
+        }
+      }
+    };
+
+    const typingTimer = setTimeout(handleTyping, typingSpeed);
+
+    return () => clearTimeout(typingTimer);
+  }, [text, isDeleting]);
+
   return (
     <Box 
       sx={{
@@ -48,7 +79,7 @@ const AboutUs = () => {
             fontFamily: 'Roboto Mono, monospace' // Set font family to Roboto Mono
           }}
         >
-          Developed by Merasic Entertainment, HarmoniX is a cutting-edge professional music collaboration platform designed to seamlessly connect artists, producers, engineers, and other music industry professionals. Whether you're just starting out or an established name in the industry, our mission is to provide you with the ideal space to bring your musical vision to life. HarmoniX empowers you to discover the perfect talent for your project—whether you need composers, sound engineers, vocalists, or mastering professionals—ensuring that you work with the right people to bring out the best in your music. Our platform facilitates easy collaboration, helping you to communicate effectively, share ideas, and refine your project from start to finish. With an intuitive interface and advanced tools, HarmoniX is designed to foster creativity, streamline workflows, and provide the support you need to create high-quality, impactful music. It’s not just about making music; it’s about making music together, effortlessly.
+          Developed by Merasic Entertainment, HarmoniX is a cutting-edge professional music collaboration platform designed to seamlessly connect artists, producers, engineers, and other music industry professionals. Whether you're just starting out or an established name in the industry, our mission is to provide you with the ideal space to bring your musical vision to life. HarmoniX empowers you to discover the perfect talent for your project—whether you need composers, sound engineers, vocalists, or mastering professionals—ensuring that you work with the right people to bring out the best in your music. Our platform facilitates easy collaboration, helping you to communicate effectively, share ideas, and refine your project from start to finish. With an intuitive interface and advanced tools, HarmoniX is designed to foster creativity, streamline workflows, and provide the support you need to create high-quality, impactful music. It's not just about making music; it's about making music together, effortlessly.
         </Typography>
         
         <Box sx={{ mb: 4 }}>
@@ -104,7 +135,7 @@ const AboutUs = () => {
             fontFamily: 'Roboto Mono, monospace' // Set font family to Roboto Mono
             }}
           >
-            At HarmoniX, we’re committed to fostering a dynamic and inclusive environment where artists can truly thrive. Our platform is designed to empower artists to collaborate with the right professionals, giving them the tools and resources to bring their creative visions to life in a way that is efficient, streamlined, and fully tailored to their needs. By offering a wide range of talented professionals—each with their unique expertise—artists can select the best fit for their project, ensuring a seamless creative process from start to finish. With ongoing support from Merasic Entertainment, we’re constantly improving and expanding HarmoniX to stay ahead of the curve and meet the demands of the rapidly evolving music industry. We are dedicated to creating a space where innovation, collaboration, and creativity flourish, ensuring that every artist has the best opportunity to succeed in today’s competitive and ever-changing musical landscape.
+            At HarmoniX, we're committed to fostering a dynamic and inclusive environment where artists can truly thrive. Our platform is designed to empower artists to collaborate with the right professionals, giving them the tools and resources to bring their creative visions to life in a way that is efficient, streamlined, and fully tailored to their needs. By offering a wide range of talented professionals—each with their unique expertise—artists can select the best fit for their project, ensuring a seamless creative process from start to finish. With ongoing support from Merasic Entertainment, we're constantly improving and expanding HarmoniX to stay ahead of the curve and meet the demands of the rapidly evolving music industry. We are dedicated to creating a space where innovation, collaboration, and creativity flourish, ensuring that every artist has the best opportunity to succeed in today's competitive and ever-changing musical landscape.
           </Typography>
         </Box>
         
@@ -137,7 +168,13 @@ const AboutUs = () => {
               mb: 5,
             }}
           >
-            Have Any Questions ?
+            {text}
+            <span style={{ 
+              borderLeft: '2px solid white', 
+              animation: 'blink 0.7s infinite' 
+            }}>
+              &nbsp;
+            </span>
           </Typography>
           
           <Button 
@@ -160,6 +197,16 @@ const AboutUs = () => {
           </Button>
         </Box>
       </Container>
+      
+      {/* Add global style for blinking cursor */}
+      <style jsx global>{`
+        @keyframes blink {
+          0% { opacity: 0; }
+          50% { opacity: 1; }
+          100% { opacity: 0; }
+        }
+      `}</style>
+      
       <Footer />
     </Box>
   );
