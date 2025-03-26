@@ -8,6 +8,7 @@ import { Home } from '@mui/icons-material';
 import HomeCards from './Components/HomeCards';
 import HomeStep from './Components/HomeStep';
 import HomeFAQ from './Components/HomeFAQ';
+import HomeFeedBack from './Components/HomeFeedBack'; 
 
 
 const HomePage = () => {
@@ -35,6 +36,7 @@ const HomePage = () => {
         <HomeCards />
         <HomeStep />
         <HomeFAQ />
+        <HomeFeedBack />
       </Box>
       <Footer />
     </Box>
