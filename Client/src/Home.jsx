@@ -20,7 +20,7 @@ const HomePage = () => {
         overflowY: 'auto', // Ensure vertical scrolling
         display: 'flex', 
         flexDirection: 'column', 
-        backgroundColor: 'black'
+        backgroundColor: '#0D0D0D'
       }}
     >
       <Navbar />

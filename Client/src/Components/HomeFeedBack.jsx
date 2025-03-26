@@ -22,7 +22,7 @@ import pro2 from '../assets/pro2.jpg';
 import pro3 from '../assets/pro3.jpg';
 import pro4 from '../assets/pro4.jpg';
 import pro5 from '../assets/pro4.jpg';
-import pro6 from '../assets/pro4.jpg';
+import pro6 from '../assets/pro2.jpg';
 
 const testimonials = [
   { name: 'MICHAEL TURNER', position: 'Product Manager at CloudDyne', quote: "Partnering with organization was one of the best decisions we've made for our success.", image: pro1 },
@@ -49,9 +49,9 @@ const CompactTestimonialCard = ({ testimonial }) => (
 
 const ClientTestimonials = () => {
   return (
-    <Box sx={{ backgroundColor: '#F2F5FE', py: 6, textAlign: 'center', position: 'relative' }}>
+    <Box sx={{ backgroundColor: '#F2F5FE', py: 6, textAlign: 'center', position: 'relative', clipPath: 'polygon(0 0, 100% 20%, 100% 100%, 0% 100%)' }}>
       <Container maxWidth="lg">
-        <Typography variant="h2" sx={{ mb: 4, fontWeight: 700, fontFamily: 'initial' }}>What Our Client Say !</Typography>
+        <Typography variant="h2" sx={{ mb: 4, fontWeight: 700, fontFamily: 'initial', mt: 10 }}>What Our Client Say !</Typography>
         
         <Box sx={{ position: 'relative', pb: 6 }}>
           <Swiper
@@ -77,10 +77,10 @@ const ClientTestimonials = () => {
           </Swiper>
           
           {/* Navigation Buttons */}
-          <Box className="custom-swiper-prev" sx={{ position: 'absolute', left: '-50px', top: '40%', transform: 'translateY(-50%)', zIndex: 10, cursor: 'pointer' }}>
+          <Box className="custom-swiper-prev" sx={{ position: 'absolute', left: '-50px', top: '50%', transform: 'translateY(-50%)', zIndex: 10, cursor: 'pointer' }}>
             <ArrowBackIosIcon sx={{ fontSize: 40, color: '#007bff' }} />
           </Box>
-          <Box className="custom-swiper-next" sx={{ position: 'absolute', right: '-50px', top: '40%', transform: 'translateY(-50%)', zIndex: 10, cursor: 'pointer' }}>
+          <Box className="custom-swiper-next" sx={{ position: 'absolute', right: '-50px', top: '50%', transform: 'translateY(-50%)', zIndex: 10, cursor: 'pointer' }}>
             <ArrowForwardIosIcon sx={{ fontSize: 40, color: '#007bff' }} />
           </Box>
         </Box>

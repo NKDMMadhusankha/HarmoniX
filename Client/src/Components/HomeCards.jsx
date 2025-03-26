@@ -8,7 +8,8 @@ import {
   Box, 
   Container, 
   Grid,
-  CardMedia
+  CardMedia,
+  CssBaseline
 } from '@mui/material';
 import { Link, useNavigate } from 'react-router-dom';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
@@ -120,16 +121,30 @@ const MusicServices = () => {
   const renderServiceCards = (serviceList, isAdditional = false) => (
     <Grid 
       container 
-      spacing={isAdditional ? 5 : 10}
+      spacing={-5}
+      rowSpacing={isAdditional ? 5 : 3} // Add row spacing specifically for additional services
       justifyContent="center" 
       alignItems="stretch"
-      sx={{ mb: isAdditional ? 0 : 15 }}
+      sx={{ mb: isAdditional ? 0 : 10 }}
     >
       {serviceList.map((service, index) => (
-        <Grid item xs={12} md={4} key={service.id} sx={{ display: 'flex' }}>
+        <Grid 
+          item 
+          xs={12} 
+          sm={6} 
+          md={isAdditional ? 4 : 4} 
+          key={service.id} 
+          sx={{ 
+            display: 'flex',
+            justifyContent: 'center'
+          }}
+        >
           <motion.div 
             variants={cardVariants} 
-            style={{ width: '100%' }}
+            style={{ 
+              width: '100%', 
+              maxWidth: '380px' // Limit max width of cards
+            }}
             key={service.id}
           >
             {isAdditional ? (
@@ -137,9 +152,14 @@ const MusicServices = () => {
                 sx={{
                   position: 'relative',
                   height: '100%',
+                  maxHeight: '400px',
                   overflow: 'hidden',
                   cursor: 'pointer',
+                  borderRadius: 3,
+                  boxShadow: '0 8px 16px rgba(0,0,0,0.2)',
+                  transition: 'transform 0.3s ease',
                   '&:hover': {
+                    transform: 'scale(1.05)',
                     '& .overlay': {
                       opacity: 1,
                     },
@@ -153,13 +173,13 @@ const MusicServices = () => {
               >
                 <CardMedia
                   component="img"
-                  height="200"
+                  height="250"
                   image={service.image}
                   alt={service.title}
                   className="card-image"
                   sx={{ 
                     objectFit: 'cover',
-                    transition: 'transform 0.3s ease-in-out',
+                    transition: 'transform 0.3s ease-in-out, filter 0.3s ease-in-out',
                   }}
                 />
                 <Box
@@ -174,14 +194,14 @@ const MusicServices = () => {
                     display: 'flex',
                     flexDirection: 'column',
                     justifyContent: 'flex-end',
-                    padding: 3,
+                    padding: 2,
                     color: 'white',
                     opacity: 0,
                     transition: 'opacity 0.3s ease-in-out',
                   }}
                 >
                   <Typography 
-                    variant="h5" 
+                    variant="h6" 
                     sx={{ 
                       fontWeight: 'bold', 
                       mb: 1 
@@ -208,11 +228,13 @@ const MusicServices = () => {
                   height: '100%', 
                   display: 'flex',
                   flexDirection: 'column',
-                  border: '1px solid rgba(255,255,255,0.2)',
-                  boxShadow: 'none',
+                  border: '1px solid rgba(255,255,255,0.1)',
+                  borderRadius: 1,
+                  boxShadow: '0 8px 16px rgba(0,0,0,0.1)',
                   transition: '0.3s ease-in-out',
                   '&:hover': {
-                    boxShadow: '0px 10px 20px rgba(255,255,255,0.2)'
+                    backgroundColor: 'rgba(255,255,255,0.1)',
+                    boxShadow: '0 12px 20px rgba(255,255,255,0.1)'
                   }
                 }}
               >
@@ -221,7 +243,8 @@ const MusicServices = () => {
                     flexGrow: 1, 
                     display: 'flex', 
                     flexDirection: 'column',
-                    justifyContent: 'space-between' 
+                    justifyContent: 'space-between',
+                    p: 3
                   }}
                 >
                   <Typography 
@@ -230,16 +253,18 @@ const MusicServices = () => {
                     sx={{ 
                       mb: 2, 
                       fontWeight: 'bold', 
-                      textAlign: 'center'
+                      textAlign: 'center',
+                      color: 'white'
                     }}
                   >
                     {service.title}
                   </Typography>
                   <Typography 
-                    variant="body2" 
+                    variant="body1" 
                     sx={{ 
                       color: 'rgba(255,255,255,0.7)', 
-                      flexGrow: 1 
+                      flexGrow: 1,
+                      textAlign: 'center'
                     }}
                   >
                     {service.description}
@@ -247,7 +272,7 @@ const MusicServices = () => {
                 </CardContent>
                 <Box sx={{ 
                   p: 2, 
-                  borderTop: '1px solid rgba(255,255,255,0.2)', 
+                  borderTop: '1px solid rgba(255,255,255,0.1)', 
                   display: 'flex', 
                   justifyContent: 'center',
                   alignItems: 'center',
@@ -258,6 +283,7 @@ const MusicServices = () => {
                     sx={{
                       color: 'white',
                       textTransform: 'none',
+                      border: '1px solid rgba(255,255,255,0.2)',
                       '&:hover': {
                         backgroundColor: 'rgba(255,255,255,0.1)'
                       }
@@ -275,49 +301,59 @@ const MusicServices = () => {
   );
 
   return (
-    <Container 
+    <Box 
       sx={{ 
-        minHeight: '100vh',
-        display: 'flex', 
-        flexDirection: 'column',
-        alignItems: 'center', 
-        justifyContent: 'center',
+        backgroundColor: 'black',
         width: '100%',
-        py: 10 
+        minHeight: '100vh',
+        position: 'relative',
+        overflow: 'hidden'
       }}
     >
-      {/* First Services Section */}
-      <motion.div
-        initial="hidden"
-        whileInView="visible"
-        viewport={{ once: true, amount: 0.1 }}
-        variants={containerVariants}
-      >
-        {renderServiceCards(services)}
-      </motion.div>
-
-      {/* Additional Services Section */}
-      <Typography 
-        variant="h4" 
-        component="h2" 
+      <CssBaseline />
+      <Container 
+        maxWidth={false}
         sx={{ 
-          color: 'white', 
-          mb: 10, 
-          fontWeight: 'bold',
-          fontFamily: '"Saira", sans-serif'
+          maxWidth: '1440px', // Reduced max width
+          px: { xs: 2, sm: 3, md: 4 }, 
+          py: 10,
+          margin: '0 auto' 
         }}
       >
-        Explore More Services ...
-      </Typography>
-      <motion.div
-       initial='hidden'
-       whileInView="visible"
-       viewport={{ once: true, amount: 0.1 }}
-       variants={containerVariants}
-     >
-        {renderServiceCards(additionalServices, true)}
-      </motion.div>
-    </Container>
+        {/* First Services Section */}
+        <motion.div
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, amount: 0.1 }}
+          variants={containerVariants}
+        >
+          {renderServiceCards(services)}
+        </motion.div>
+
+        {/* Additional Services Section */}
+        <Typography 
+          variant="h4" 
+          component="h2" 
+          sx={{ 
+            color: 'white', 
+            mb: 6, 
+            fontWeight: 'bold',
+            fontFamily: '"Saira", sans-serif',
+            textAlign: 'center'
+          }}
+        >
+          Explore More Services ...
+        </Typography>
+        <motion.div
+         initial='hidden'
+         whileInView="visible"
+         viewport={{ once: true, amount: 0.1 }}
+         variants={containerVariants}
+       >
+          {renderServiceCards(additionalServices, true)}
+        </motion.div>
+      </Container>
+    </Box>
   );
 };
 

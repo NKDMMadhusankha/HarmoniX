@@ -39,7 +39,7 @@ const MusicCollaborationFAQs = () => {
   ];
 
   return (
-    <Box sx={{ width: '100%', backgroundColor: '#0D0D0D', py: 15 }}>
+    <Box sx={{ width: '100%', backgroundColor: '#0D0D0D', py: 15,clipPath: 'polygon(0 0, 100% 0, 100% 100%, 0 80%)', }}>
       <Container maxWidth="lg">
         <Grid container spacing={9}>
           {/* Right Side - FAQ Header and Buttons */}
