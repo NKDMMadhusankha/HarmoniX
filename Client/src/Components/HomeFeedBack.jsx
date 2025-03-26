@@ -58,7 +58,7 @@ const ClientTestimonials = () => {
             modules={[Navigation, Pagination, Keyboard]}
             spaceBetween={20}
             slidesPerView={1}
-            navigation={{ nextEl: '.swiper-button-next', prevEl: '.swiper-button-prev' }}
+            navigation={{ nextEl: '.custom-swiper-next', prevEl: '.custom-swiper-prev' }}
             pagination={{ clickable: true }}
             keyboard={{ enabled: true }}
             style={{ paddingBottom: '50px' }}
@@ -77,10 +77,10 @@ const ClientTestimonials = () => {
           </Swiper>
           
           {/* Navigation Buttons */}
-          <Box className="swiper-button-prev" sx={{ position: 'absolute', left: '-50px', top: '50%', transform: 'translateY(-50%)', zIndex: 10, cursor: 'pointer' }}>
+          <Box className="custom-swiper-prev" sx={{ position: 'absolute', left: '-50px', top: '40%', transform: 'translateY(-50%)', zIndex: 10, cursor: 'pointer' }}>
             <ArrowBackIosIcon sx={{ fontSize: 40, color: '#007bff' }} />
           </Box>
-          <Box className="swiper-button-next" sx={{ position: 'absolute', right: '-50px', top: '50%', transform: 'translateY(-50%)', zIndex: 10, cursor: 'pointer' }}>
+          <Box className="custom-swiper-next" sx={{ position: 'absolute', right: '-50px', top: '40%', transform: 'translateY(-50%)', zIndex: 10, cursor: 'pointer' }}>
             <ArrowForwardIosIcon sx={{ fontSize: 40, color: '#007bff' }} />
           </Box>
         </Box>
