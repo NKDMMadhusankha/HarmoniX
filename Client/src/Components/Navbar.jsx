@@ -230,6 +230,7 @@ const HarmoniXNavbar = () => {
                     key={item} 
                     onClick={() => handleMobileNavigation(
                       item === 'About Us' ? '/about' : 
+                      item === 'Contact' ? '/contact' :
                       item.toLowerCase().replace(' ', '-')
                     )}
                     sx={{ 
@@ -326,6 +327,7 @@ const HarmoniXNavbar = () => {
                 fontWeight: 700,
                 color: 'white',
                 textDecoration: 'none',
+                cursor: 'pointer'
               }}
             >
               HarmoniX
@@ -397,7 +399,13 @@ const HarmoniXNavbar = () => {
                   
                   {/* Other navigation items */}
                   {navItemsWithoutFeatures.map((item) => (
-                    item === 'About Us' ? (
+                    item === 'Contact' ? (
+                      <Link to="/contact" style={{ textDecoration: 'none' }} key={item}>
+                        <Button sx={{ my: 2, color: 'white', display: 'block', mx: 1 }}>
+                          {item}
+                        </Button>
+                      </Link>
+                    ) : item === 'About Us' ? (
                       <Link to="/about" style={{ textDecoration: 'none' }} key={item}>
                         <Button sx={{ my: 2, color: 'white', display: 'block', mx: 1 }}>
                           {item}

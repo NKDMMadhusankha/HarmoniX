@@ -37,7 +37,7 @@ const HarmoniXProcess = () => {
         "Browse Through Talent Profiles: Explore a variety of professionals showcasing their expertise, experience, and style.",
         "Listen To Various Voices: Hear samples of their previous work to help you choose the right fit for your project.",
         "Connect Directly With Professionals: Reach out and discuss your project directly with the selected professionals to start the collaboration."
-  ]
+      ]
     },
     {
       title: "Collaborative Music Production",
@@ -46,7 +46,7 @@ const HarmoniXProcess = () => {
         "Start Your Music Project: Begin your journey by setting up the project with your chosen professional.",
         "Collaborate With Your Chosen Professional: Work together, share ideas, and refine your sound throughout the production process.",
         "Bring Your Sound To Life: Transform your vision into a final track, blending creativity, expertise, and technology."
-  ]
+      ]
     }
   ];
 
@@ -72,7 +72,7 @@ const HarmoniXProcess = () => {
         color: 'white',
         minHeight: '100vh',
         position: 'relative',
-        overflowY: 'scroll',
+        overflow: 'hidden', // Preventing unnecessary overflow
         py: 4
       }}
     >
@@ -98,7 +98,7 @@ const HarmoniXProcess = () => {
                 color: 'rgba(255,255,255,0.8)',
                 fontFamily: 'Montserrat'
             }}
-            >
+        >
             Our process guarantees that we connect artists and professionals to create music that meets your unique vision.
         </Typography>
 
