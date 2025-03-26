@@ -233,7 +233,6 @@ const MusicServices = () => {
                   boxShadow: '0 8px 16px rgba(0,0,0,0.1)',
                   transition: '0.3s ease-in-out',
                   '&:hover': {
-                    backgroundColor: 'rgba(255,255,255,0.1)',
                     boxShadow: '0 12px 20px rgba(255,255,255,0.1)'
                   }
                 }}

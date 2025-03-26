@@ -77,10 +77,10 @@ const ClientTestimonials = () => {
           </Swiper>
           
           {/* Navigation Buttons */}
-          <Box className="custom-swiper-prev" sx={{ position: 'absolute', left: '-50px', top: '50%', transform: 'translateY(-50%)', zIndex: 10, cursor: 'pointer' }}>
+          <Box className="custom-swiper-prev" sx={{ position: 'absolute', left: '-50px', top: '38%', transform: 'translateY(-50%)', zIndex: 10, cursor: 'pointer' }}>
             <ArrowBackIosIcon sx={{ fontSize: 40, color: '#007bff' }} />
           </Box>
-          <Box className="custom-swiper-next" sx={{ position: 'absolute', right: '-50px', top: '50%', transform: 'translateY(-50%)', zIndex: 10, cursor: 'pointer' }}>
+          <Box className="custom-swiper-next" sx={{ position: 'absolute', right: '-50px', top: '38%', transform: 'translateY(-50%)', zIndex: 10, cursor: 'pointer' }}>
             <ArrowForwardIosIcon sx={{ fontSize: 40, color: '#007bff' }} />
           </Box>
         </Box>
