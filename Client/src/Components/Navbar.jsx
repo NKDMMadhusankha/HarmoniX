@@ -25,7 +25,7 @@ import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 
 // Import React Router components
-import { Link, useNavigate } from 'react-router-dom';  // Added useNavigate
+import { Link, useNavigate } from 'react-router-dom';
 
 // Create a custom theme that removes all default margins and paddings
 const fullWidthTheme = createTheme({
@@ -71,7 +71,7 @@ const fullWidthTheme = createTheme({
 
 const HarmoniXNavbar = () => {
   const theme = useTheme();
-  const navigate = useNavigate(); // Add navigation hook
+  const navigate = useNavigate();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [featuresAnchorEl, setFeaturesAnchorEl] = useState(null);
@@ -82,7 +82,8 @@ const HarmoniXNavbar = () => {
   const navItemsWithoutFeatures = ['Resources', 'Support', 'About Us', 'Contact'];
   
   const toggleMobileMenu = () => {
-    setMobileMenuOpen(!mobileMenuOpen);
+    console.log('Toggle Mobile Menu', !mobileMenuOpen);
+    setMobileMenuOpen(prevState => !prevState);
   };
   
   const handleFeaturesClick = (event) => {
@@ -94,7 +95,7 @@ const HarmoniXNavbar = () => {
   };
   
   const toggleMobileFeatures = () => {
-    setMobileFeatureOpen(!mobileFeatureOpen);
+    setMobileFeatureOpen(prev => !prev);
   };
   
   const handleProfileMenuOpen = (event) => {
@@ -121,6 +122,11 @@ const HarmoniXNavbar = () => {
     handleProfileMenuClose();
   };
 
+  const handleMobileNavigation = (path) => {
+    navigate(path);
+    toggleMobileMenu();
+  };
+
   return (
     <ThemeProvider theme={fullWidthTheme}>
       <CssBaseline />
@@ -131,7 +137,169 @@ const HarmoniXNavbar = () => {
         padding: 0,
         position: 'static',
       }}>
-        {/* Mobile Menu and Rest of the existing code remains the same */}
+        {/* Fullscreen Mobile Menu */}
+        {isMobile && mobileMenuOpen && (
+          <Fade in={mobileMenuOpen}>
+            <Box
+              sx={{
+                position: 'fixed',
+                top: 0,
+                left: 0,
+                width: '100vw',
+                height: '100vh',
+                bgcolor: 'black',
+                zIndex: 1300,
+                display: 'flex',
+                flexDirection: 'column',
+                p: 2,
+                overflowY: 'auto'
+              }}
+            >
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
+                <Typography
+                  variant="h5"
+                  sx={{
+                    fontWeight: 700,
+                    color: 'white',
+                  }}
+                >
+                  HarmoniX
+                </Typography>
+                <IconButton 
+                  onClick={toggleMobileMenu} 
+                  sx={{ color: 'white' }}
+                  aria-label="close menu"
+                >
+                  <CloseIcon />
+                </IconButton>
+              </Box>
+              
+              <List sx={{ flexGrow: 1}}>
+                {/* Features item with dropdown */}
+                <ListItem 
+                  button 
+                  onClick={toggleMobileFeatures}
+                  sx={{ 
+                    py: 2,
+                    borderBottom: '1px solid rgba(255,255,255,0.1)',
+                    display: 'flex',
+                    justifyContent: 'space-between'
+                  }}
+                >
+                  <ListItemText 
+                    primary="Features" 
+                    primaryTypographyProps={{ 
+                      variant: 'h6', 
+                      sx: { color: 'white' } 
+                    }} 
+                  />
+                  {mobileFeatureOpen ? 
+                    <KeyboardArrowUpIcon sx={{ color: 'white' }} /> : 
+                    <KeyboardArrowDownIcon sx={{ color: 'white' }} />
+                  }
+                </ListItem>
+                
+                {/* Features submenu */}
+                <Collapse in={mobileFeatureOpen} timeout="auto" unmountOnExit>
+                  <List component="div" disablePadding>
+                    {featureOptions.map((option) => (
+                      <ListItem 
+                        button 
+                        key={option}
+                        sx={{ 
+                          py: 1.5, 
+                          pl: 4,
+                          borderBottom: '1px solid rgba(255,255,255,0.05)'
+                        }}
+                      >
+                        <ListItemText 
+                          primary={option} 
+                          primaryTypographyProps={{ 
+                            sx: { color: 'white', fontSize: '1rem' } 
+                          }} 
+                        />
+                      </ListItem>
+                    ))}
+                  </List>
+                </Collapse>
+                
+                {/* Other navigation items */}
+                {navItemsWithoutFeatures.map((item) => (
+                  <ListItem 
+                    button 
+                    key={item} 
+                    onClick={() => handleMobileNavigation(
+                      item === 'About Us' ? '/about' : 
+                      item.toLowerCase().replace(' ', '-')
+                    )}
+                    sx={{ 
+                      py: 2,
+                      borderBottom: '1px solid rgba(255,255,255,0.1)'
+                    }}
+                  >
+                    <ListItemText 
+                      primary={item} 
+                      primaryTypographyProps={{ 
+                        variant: 'h6', 
+                        sx: { color: 'white' } 
+                      }} 
+                    />
+                  </ListItem>
+                ))}
+
+                {/* Mobile Profile Menu Items */}
+                <ListItem 
+                  button 
+                  onClick={handleLoginClick}
+                  sx={{ 
+                    py: 2,
+                    borderBottom: '1px solid rgba(255,255,255,0.1)'
+                  }}
+                >
+                  <ListItemText 
+                    primary="Login" 
+                    primaryTypographyProps={{ 
+                      variant: 'h6', 
+                      sx: { color: 'white' } 
+                    }} 
+                  />
+                </ListItem>
+                <ListItem 
+                  button 
+                  onClick={handleSignUpClick}
+                  sx={{ 
+                    py: 2,
+                    borderBottom: '1px solid rgba(255,255,255,0.1)'
+                  }}
+                >
+                  <ListItemText 
+                    primary="Sign Up" 
+                    primaryTypographyProps={{ 
+                      variant: 'h6', 
+                      sx: { color: 'white' } 
+                    }} 
+                  />
+                </ListItem>
+                <ListItem 
+                  button 
+                  onClick={handleProfileClick}
+                  sx={{ 
+                    py: 2,
+                    borderBottom: '1px solid rgba(255,255,255,0.1)'
+                  }}
+                >
+                  <ListItemText 
+                    primary="Profile" 
+                    primaryTypographyProps={{ 
+                      variant: 'h6', 
+                      sx: { color: 'white' } 
+                    }} 
+                  />
+                </ListItem>
+              </List>
+            </Box>
+          </Fade>
+        )}
         
         {/* Main navbar */}
         <AppBar 
@@ -179,8 +347,8 @@ const HarmoniXNavbar = () => {
                 </IconButton>
               </>
             ) : (
+              // Desktop navigation (remains the same as previous code)
               <>
-                {/* Desktop navigation */}
                 <Box sx={{ flexGrow: 1, display: 'flex', justifyContent: 'center' }}>
                   {/* Features dropdown */}
                   <Button
