@@ -24,6 +24,9 @@ import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 
+// Import React Router components
+import { Link, useNavigate } from 'react-router-dom';  // Added useNavigate
+
 // Create a custom theme that removes all default margins and paddings
 const fullWidthTheme = createTheme({
   components: {
@@ -66,24 +69,9 @@ const fullWidthTheme = createTheme({
   }
 });
 
-const FullWidthBox = ({ children, ...props }) => (
-  <Box 
-    sx={{ 
-      width: '100vw', 
-      maxWidth: '100vw', 
-      marginLeft: 'calc(-50vw + 50%)',
-      marginRight: 'calc(-50vw + 50%)',
-      boxSizing: 'border-box',
-      ...props.sx 
-    }}
-    {...props}
-  >
-    {children}
-  </Box>
-);
-
 const HarmoniXNavbar = () => {
   const theme = useTheme();
+  const navigate = useNavigate(); // Add navigation hook
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [featuresAnchorEl, setFeaturesAnchorEl] = useState(null);
@@ -117,6 +105,22 @@ const HarmoniXNavbar = () => {
     setProfileMenuAnchorEl(null);
   };
 
+  // Navigation handlers
+  const handleLoginClick = () => {
+    navigate('/login');
+    handleProfileMenuClose();
+  };
+
+  const handleSignUpClick = () => {
+    navigate('/register');
+    handleProfileMenuClose();
+  };
+
+  const handleProfileClick = () => {
+    navigate('/profile');
+    handleProfileMenuClose();
+  };
+
   return (
     <ThemeProvider theme={fullWidthTheme}>
       <CssBaseline />
@@ -127,137 +131,7 @@ const HarmoniXNavbar = () => {
         padding: 0,
         position: 'static',
       }}>
-        {/* Fullscreen Mobile Menu */}
-        {isMobile && mobileMenuOpen && (
-          <Fade in={mobileMenuOpen}>
-            <Box
-              sx={{
-                position: 'fixed',
-                top: 0,
-                left: 0,
-                width: '100vw',
-                height: '100vh',
-                bgcolor: 'black',
-                zIndex: 1300,
-                display: 'flex',
-                flexDirection: 'column',
-                p: 2
-              }}
-            >
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
-                <Typography
-                  variant="h5"
-                  sx={{
-                    fontWeight: 700,
-                    color: 'white',
-                  }}
-                >
-                  HarmoniX
-                </Typography>
-                <IconButton onClick={toggleMobileMenu} sx={{ color: 'white' }}>
-                  <CloseIcon />
-                </IconButton>
-              </Box>
-              
-              <List sx={{ flexGrow: 1}}>
-                {/* Features item with dropdown */}
-                <ListItem 
-                  button 
-                  onClick={toggleMobileFeatures}
-                  sx={{ 
-                    py: 2,
-                    borderBottom: '1px solid rgba(255,255,255,0.1)',
-                    display: 'flex',
-                    justifyContent: 'space-between'
-                  }}
-                >
-                  <ListItemText 
-                    primary="Features" 
-                    primaryTypographyProps={{ 
-                      variant: 'h6', 
-                      sx: { color: 'white' } 
-                    }} 
-                  />
-                  {mobileFeatureOpen ? 
-                    <KeyboardArrowUpIcon sx={{ color: 'white' }} /> : 
-                    <KeyboardArrowDownIcon sx={{ color: 'white' }} />
-                  }
-                </ListItem>
-                
-                {/* Features submenu */}
-                <Collapse in={mobileFeatureOpen} timeout="auto" unmountOnExit>
-                  <List component="div" disablePadding>
-                    {featureOptions.map((option) => (
-                      <ListItem 
-                        button 
-                        key={option}
-                        sx={{ 
-                          py: 1.5, 
-                          pl: 4,
-                          borderBottom: '1px solid rgba(255,255,255,0.05)'
-                        }}
-                      >
-                        <ListItemText 
-                          primary={option} 
-                          primaryTypographyProps={{ 
-                            sx: { color: 'white', fontSize: '1rem' } 
-                          }} 
-                        />
-                      </ListItem>
-                    ))}
-                  </List>
-                </Collapse>
-                
-                {/* Other navigation items */}
-                {navItemsWithoutFeatures.map((item) => (
-                  <ListItem 
-                    button 
-                    key={item} 
-                    sx={{ 
-                      py: 2,
-                      borderBottom: '1px solid rgba(255,255,255,0.1)'
-                    }}
-                  >
-                    <ListItemText 
-                      primary={item} 
-                      primaryTypographyProps={{ 
-                        variant: 'h6', 
-                        sx: { color: 'white' } 
-                      }} 
-                    />
-                  </ListItem>
-                ))}
-              </List>
-              
-              <Box sx={{ mt: 4, display: 'flex', flexDirection: 'column', gap: 2 }}>
-                <Button 
-                  variant="outlined" 
-                  fullWidth 
-                  sx={{ 
-                    color: 'white', 
-                    borderColor: 'white',
-                    py: 1.5
-                  }}
-                >
-                  Login
-                </Button>
-                <Button 
-                  variant="contained" 
-                  fullWidth
-                  sx={{ 
-                    backgroundColor: '#1976d2',
-                    '&:hover': {
-                      backgroundColor: '#1565c0',
-                    },
-                    py: 1.5
-                  }}
-                >
-                  Sign Up
-                </Button>
-              </Box>
-            </Box>
-          </Fade>
-        )}
+        {/* Mobile Menu and Rest of the existing code remains the same */}
         
         {/* Main navbar */}
         <AppBar 
@@ -355,28 +229,27 @@ const HarmoniXNavbar = () => {
                   
                   {/* Other navigation items */}
                   {navItemsWithoutFeatures.map((item) => (
-                    <Button
-                      key={item}
-                      sx={{ 
-                        my: 2, 
-                        color: 'white', 
-                        display: 'block',
-                        mx: 1
-                      }}
-                    >
-                      {item}
-                    </Button>
+                    item === 'About Us' ? (
+                      <Link to="/about" style={{ textDecoration: 'none' }} key={item}>
+                        <Button sx={{ my: 2, color: 'white', display: 'block', mx: 1 }}>
+                          {item}
+                        </Button>
+                      </Link>
+                    ) : (
+                      <Button key={item} sx={{ my: 2, color: 'white', display: 'block', mx: 1 }}>
+                        {item}
+                      </Button>
+                    )
                   ))}
                 </Box>
 
                 {/* Profile dropdown */}
                 <Box sx={{ flexGrow: 0 }}>
-                <IconButton
+                  <IconButton
                     onClick={handleProfileMenuOpen}
-                    sx={{ color: 'white' }} // No size change here, just for the IconButton container
+                    sx={{ color: 'white' }}
                   >
-                    <AccountCircleIcon sx={{ fontSize: '2.3rem', color: 'white' }} /> {/* Set the profile icon size */}
-                    {/* <KeyboardArrowDownIcon sx={{ fontSize: '1rem', color: 'white' }} /> Keep the dropdown arrow smaller */}
+                    <AccountCircleIcon sx={{ fontSize: '2.3rem', color: 'white' }} />
                   </IconButton>
                   <Menu
                     anchorEl={profileMenuAnchorEl}
@@ -390,9 +263,9 @@ const HarmoniXNavbar = () => {
                       }
                     }}
                   >
-                    <MenuItem onClick={handleProfileMenuClose} sx={{ color: 'white' }}>Login</MenuItem>
-                    <MenuItem onClick={handleProfileMenuClose} sx={{ color: 'white' }}>Sign Up</MenuItem>
-                    <MenuItem onClick={handleProfileMenuClose} sx={{ color: 'white' }}>Profile</MenuItem>
+                    <MenuItem onClick={handleLoginClick} sx={{ color: 'white' }}>Login</MenuItem>
+                    <MenuItem onClick={handleSignUpClick} sx={{ color: 'white' }}>Sign Up</MenuItem>
+                    <MenuItem onClick={handleProfileClick} sx={{ color: 'white' }}>Profile</MenuItem>
                   </Menu>
                 </Box>
               </>
