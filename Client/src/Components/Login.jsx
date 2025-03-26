@@ -14,7 +14,7 @@ import {
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import { useTheme } from '@mui/material/styles';
-import { Link as RouterLink } from 'react-router-dom';  
+import { Link as RouterLink, useNavigate } from 'react-router-dom';  // ✅ Import useNavigate
 import axios from 'axios';
 
 const LoginForm = () => {
@@ -24,7 +24,7 @@ const LoginForm = () => {
   const [error, setError] = useState('');
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down('sm'));
-  const isXsScreen = useMediaQuery(theme.breakpoints.down('xs'));
+  const navigate = useNavigate();  // ✅ Initialize navigate
 
   const handleClickShowPassword = () => {
     setShowPassword(!showPassword);
@@ -32,86 +32,52 @@ const LoginForm = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    const payload = {
-      email: email,   // Value from email input
-      password: password,   // Value from password input
-    };
+    setError(''); // Clear previous errors
 
     try {
-      const response = await axios.post('http://localhost:5000/api/auth/login', payload, {
-        headers: {
-          'Content-Type': 'application/json',
-        },
+      const response = await axios.post('http://localhost:5000/api/auth/login', { email, password }, {
+        headers: { 'Content-Type': 'application/json' },
       });
 
-      // Store the token in localStorage or sessionStorage
       localStorage.setItem('authToken', response.data.token);
-
       console.log('Login success:', response.data);
-      // Optionally, redirect the user to another page (e.g., user dashboard)
+
+      // ✅ Navigate to Home after successful login
+      navigate('/home');
+
     } catch (error) {
       console.error('Login Error:', error.response ? error.response.data : error.message);
-      setError('Invalid email or password');  // You can customize the error message here
+      setError('Invalid email or password');
     }
   };
 
   return (
     <Box
       sx={{
-        margin: 0,
-        padding: 0,
-        top: 0,
-        left: 0,
-        height: '100%',
-        width: '100%',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
+        height: '100vh',
         background: "url('/src/assets/formbg.png') center/cover no-repeat",
-        backgroundSize: '105%',
-        overflow: 'hidden',
-        position: 'fixed',
       }}
     >
-      <Box sx={{
-        position: 'absolute',
-        top: isSmallScreen ? 20 : -80,
-        left: isSmallScreen ? 20 : 0,
-      }}>
-        <img
-          src="/src/assets/logo.png"
-          alt="HarmoniX Logo"
-          style={{
-            width: isSmallScreen ? '30vw' : '15vw',
-            maxWidth: '270px',
-            height: 'auto',
-          }}
-        />
-      </Box>
-
       <Paper
         elevation={3}
         sx={{
           width: { xs: '90%', sm: '70%', md: '50%', lg: '410px' },
-          p: { xs: 3, sm: 4 },
+          p: 4,
           borderRadius: 6,
-          boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
           backgroundColor: 'black',
           color: 'white',
         }}
       >
-        <Typography
-          variant={isSmallScreen ? 'h6' : 'h5'}
-          align="center"
-          sx={{ mb: 3, fontWeight: 500, color: 'white', mt: isSmallScreen ? 6 : 10 }}
-        >
+        <Typography variant="h5" align="center" sx={{ mb: 3, fontWeight: 500 }}>
           Login to your account
         </Typography>
 
+        {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
+
         <Box component="form" onSubmit={handleSubmit} sx={{ mt: 2 }}>
-          {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
-          <Typography variant="body2" sx={{ mb: 1, color: 'white' }}>Email</Typography>
           <TextField
             fullWidth
             placeholder="harmonix@gmail.com"
@@ -120,31 +86,8 @@ const LoginForm = () => {
             onChange={(e) => setEmail(e.target.value)}
             variant="outlined"
             size="small"
-            sx={{
-              mb: 3,
-              input: { color: 'white' },
-              '& .MuiOutlinedInput-root': {
-                '& fieldset': { borderColor: 'white' },
-                '&:hover fieldset': { borderColor: 'white' },
-                '&.Mui-focused fieldset': { borderColor: 'white' },
-              },
-              '& .MuiInputLabel-root': { color: 'white' },
-              '& .MuiInputLabel-root.Mui-focused': { color: 'white' },
-            }}
+            sx={{ mb: 3, input: { color: 'white' } }}
           />
-
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
-            <Typography variant="body2" sx={{ color: 'white' }}>Password</Typography>
-            <Link
-              component={RouterLink}
-              to="/forgot-password"
-              underline="none"
-              color="primary"
-              variant="body2"
-            >
-              Forgot?
-            </Link>
-          </Box>
 
           <TextField
             fullWidth
@@ -164,48 +107,16 @@ const LoginForm = () => {
                 </InputAdornment>
               ),
             }}
-            sx={{
-              mb: 3,
-              input: { color: 'white' },
-              '& .MuiOutlinedInput-root': {
-                '& fieldset': { borderColor: 'white' },
-                '&:hover fieldset': { borderColor: 'white' },
-                '&.Mui-focused fieldset': { borderColor: 'white' },
-              },
-              '& .MuiInputLabel-root': { color: 'white' },
-              '& .MuiInputLabel-root.Mui-focused': { color: 'white' },
-            }}
+            sx={{ mb: 3, input: { color: 'white' } }}
           />
 
-          <Button
-            type="submit"
-            fullWidth
-            variant="contained"
-            sx={{
-              mt: 1,
-              mb: 3,
-              py: 1.2,
-              textTransform: 'none',
-              borderRadius: 1,
-              backgroundColor: '#1976d2',
-            }}
-          >
+          <Button type="submit" fullWidth variant="contained" sx={{ mt: 1, py: 1.2 }}>
             Login now
           </Button>
 
-          <Box sx={{ textAlign: 'center', mb: 10 }}>
-            <Typography variant="body2" component="span" sx={{ mr: 1 }}>
-              Don't Have An Account?
-            </Typography>
-            <Link
-              component={RouterLink}
-              to="/register"
-              underline="none"
-              color="primary"
-              variant="body2"
-            >
-              Sign Up
-            </Link>
+          <Box sx={{ textAlign: 'center', mt: 2 }}>
+            <Typography variant="body2" component="span">Don't have an account?</Typography>
+            <Link component={RouterLink} to="/register" sx={{ ml: 1 }}>Sign Up</Link>
           </Box>
         </Box>
       </Paper>
