@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { 
   Card, 
@@ -24,6 +24,43 @@ import ArtistBrandingImg from '../assets/card6.jpg';
 
 const MusicServices = () => {
   const navigate = useNavigate();
+
+  // Add intersection observer for smooth animations
+  useEffect(() => {
+    // Create intersection observer with optimized options
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        // Add animation class when element becomes visible
+        if (entry.isIntersecting) {
+          // Use requestAnimationFrame for smoother animations
+          requestAnimationFrame(() => {
+            entry.target.style.opacity = '1';
+            entry.target.style.transform = 'translateY(0)';
+          });
+          observer.unobserve(entry.target);
+        }
+      });
+    }, {
+      threshold: 0.1,
+      rootMargin: '0px 0px -20px 0px' // Reduced margin for earlier triggering
+    });
+
+    // Observe all service cards with improved initial styling
+    document.querySelectorAll('.service-card').forEach((card, index) => {
+      // Set initial styles directly instead of using CSS animations
+      card.style.opacity = '0';
+      card.style.transform = 'translateY(15px)';
+      card.style.transition = `opacity 0.4s ease, transform 0.4s ease`;
+      card.style.transitionDelay = `${index * 70}ms`; // Slightly longer delay between cards
+      card.style.willChange = 'opacity, transform'; // Hint to browser for optimization
+      
+      observer.observe(card);
+    });
+
+    return () => {
+      observer.disconnect();
+    };
+  }, []);
 
   const services = useMemo(() => [
     {
@@ -91,19 +128,6 @@ const MusicServices = () => {
     }
   ], []);
 
-  // Modified for better performance - no staggering for image cards
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        duration: 0.3,
-        ease: "easeOut"
-      }
-    }
-  };
-
-  // Separate variants for first section that can use staggering
   const firstSectionContainerVariants = {
     hidden: { opacity: 0 },
     visible: {
@@ -118,13 +142,13 @@ const MusicServices = () => {
   const cardVariants = {
     hidden: { 
       opacity: 0, 
-      y: 15  // Reduced movement for smoother animation
+      y: 15
     },
     visible: { 
       opacity: 1, 
       y: 0,
       transition: {
-        duration: 0.3,  // Faster animation
+        duration: 0.3,
         ease: "easeOut"
       }
     }
@@ -153,26 +177,12 @@ const MusicServices = () => {
           }}
         >
           {isAdditional ? (
-            // For additional services, apply animation to individual cards instead of container
-            <motion.div 
-              initial={{ opacity: 0, y: 15 }}
-              whileInView={{ 
-                opacity: 1, 
-                y: 0,
-                transition: {
-                  duration: 0.3,
-                  ease: "easeOut"
-                }
-              }}
-              viewport={{ 
-                once: true, 
-                amount: 0.1,
-                margin: "-50px 0px" 
-              }}
+            // Optimized additional service cards with proper hover effect
+            <div 
+              className="service-card"
               style={{ 
                 width: '100%', 
                 maxWidth: '380px',
-                willChange: 'transform, opacity'
               }}
             >
               <Card 
@@ -184,17 +194,7 @@ const MusicServices = () => {
                   cursor: 'pointer',
                   borderRadius: 3,
                   boxShadow: '0 8px 16px rgba(0,0,0,0.2)',
-                  transition: 'transform 0.3s ease',
-                  '&:hover': {
-                    transform: 'scale(1.05)',
-                    '& .overlay': {
-                      opacity: 1,
-                    },
-                    '& .card-image': {
-                      transform: 'scale(1.1)',
-                      filter: 'brightness(0.5)',
-                    }
-                  }
+                  transform: 'translateZ(100)', // Force GPU acceleration
                 }}
                 onClick={() => navigate(service.link)}
               >
@@ -203,36 +203,69 @@ const MusicServices = () => {
                   height="250"
                   image={service.image}
                   alt={service.title}
-                  className="card-image"
-                  loading="lazy" // Add lazy loading for images
+                  loading="lazy" 
                   sx={{ 
                     objectFit: 'cover',
-                    transition: 'transform 0.3s ease-in-out, filter 0.3s ease-in-out',
+                    transform: 'translateZ(0)', // Force GPU acceleration
+                    transition: 'filter 0.3s ease',
+                    '&:hover': {
+                      filter: 'brightness(0.6)'
+                    }
                   }}
                 />
+                {/* Always visible title (but will hide on hover) */}
                 <Box
-                  className="overlay"
                   sx={{
                     position: 'absolute',
-                    top: 0,
+                    bottom: 0,
                     left: 0,
                     width: '100%',
-                    height: '100%',
-                    background: 'linear-gradient(to bottom, transparent 50%, rgba(0,0,0,0.8) 100%)',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    justifyContent: 'flex-end',
-                    padding: 2,
-                    color: 'white',
-                    opacity: 0,
-                    transition: 'opacity 0.3s ease-in-out',
+                    padding: '12px 16px',
+                    background: 'linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.6) 80%, rgba(0,0,0,0) 100%)',
+                    transform: 'translateZ(0)', // Force GPU acceleration
+                    transition: 'opacity 0.3s ease', // Add transition for smooth fade
+                    opacity: 1, // Visible by default
+                    '.MuiCard-root:hover &': {
+                      opacity: 0, // Hide on hover
+                    }
                   }}
                 >
                   <Typography 
                     variant="h6" 
                     sx={{ 
-                      fontWeight: 'bold', 
-                      mb: 1 
+                      fontWeight: 'bold',
+                      color: 'white',
+                      fontSize: '1.1rem',
+                      position: 'relative',
+                      zIndex: 2,
+                    }}
+                  >
+                    {service.title}
+                  </Typography>
+                </Box>
+                
+                {/* Description overlay that appears on hover */}
+                <Box
+                  sx={{
+                    position: 'absolute',
+                    bottom: '-100%', // Start below the card
+                    left: 0,
+                    width: '100%',
+                    padding: '16px',
+                    background: 'rgba(0,0,0,0.8)',
+                    transition: 'bottom 0.3s ease',
+                    '.MuiCard-root:hover &': {
+                      bottom: 0, // Slide up on hover
+                    }
+                  }}
+                >
+                  <Typography 
+                    variant="h6" 
+                    sx={{ 
+                      fontWeight: 'bold',
+                      color: 'white',
+                      mb: 1,
+                      fontSize: '1.1rem'
                     }}
                   >
                     {service.title}
@@ -240,15 +273,14 @@ const MusicServices = () => {
                   <Typography 
                     variant="body2" 
                     sx={{ 
-                      color: 'rgba(255,255,255,0.8)',
-                      mb: 2 
+                      color: 'rgba(255,255,255,0.9)',
                     }}
                   >
                     {service.description}
                   </Typography>
                 </Box>
               </Card>
-            </motion.div>
+            </div>
           ) : (
             // Keep original animation for first section
             <motion.div 
@@ -383,7 +415,7 @@ const MusicServices = () => {
           Explore More Services ...
         </Typography>
         
-        {/* For additional services, we don't use the staggered container animation */}
+        {/* For additional services, we use Intersection Observer for better performance */}
         <Box>
           {renderServiceCards(additionalServices, true)}
         </Box>
