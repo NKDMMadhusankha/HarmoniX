@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { 
   AppBar, 
   Toolbar, 
@@ -78,6 +78,11 @@ const HarmoniXNavbar = () => {
   const [mobileFeatureOpen, setMobileFeatureOpen] = useState(false);
   const [profileMenuAnchorEl, setProfileMenuAnchorEl] = useState(null);
   
+  // Ref for the features menu container
+  const featuresMenuRef = useRef(null);
+  const featuresButtonRef = useRef(null);
+  const menuTimeoutRef = useRef(null);
+  
   const featureOptions = ['Mixing Engineer', 'Mastering Engineer', 'Music Producer', 'Recording Studio'];
   const navItemsWithoutFeatures = ['Resources', 'Support', 'About Us', 'Contact'];
   
@@ -86,12 +91,35 @@ const HarmoniXNavbar = () => {
     setMobileMenuOpen(prevState => !prevState);
   };
   
-  const handleFeaturesClick = (event) => {
+  // Improved hover handling for Features dropdown
+  const handleFeaturesMouseEnter = (event) => {
+    if (menuTimeoutRef.current) {
+      clearTimeout(menuTimeoutRef.current);
+      menuTimeoutRef.current = null;
+    }
     setFeaturesAnchorEl(event.currentTarget);
   };
   
-  const handleFeaturesClose = () => {
-    setFeaturesAnchorEl(null);
+  const handleFeaturesMouseLeave = () => {
+    // Use a ref for timeout to be able to clear it
+    menuTimeoutRef.current = setTimeout(() => {
+      setFeaturesAnchorEl(null);
+    }, 300); // Increased delay for better UX
+  };
+  
+  // Handler for when mouse enters the menu itself
+  const handleMenuMouseEnter = () => {
+    if (menuTimeoutRef.current) {
+      clearTimeout(menuTimeoutRef.current);
+      menuTimeoutRef.current = null;
+    }
+  };
+  
+  // Handler for when mouse leaves the menu
+  const handleMenuMouseLeave = () => {
+    menuTimeoutRef.current = setTimeout(() => {
+      setFeaturesAnchorEl(null);
+    }, 300);
   };
   
   const toggleMobileFeatures = () => {
@@ -349,53 +377,75 @@ const HarmoniXNavbar = () => {
                 </IconButton>
               </>
             ) : (
-              // Desktop navigation (remains the same as previous code)
+              // Desktop navigation
               <>
                 <Box sx={{ flexGrow: 1, display: 'flex', justifyContent: 'center' }}>
-                  {/* Features dropdown */}
-                  <Button
-                    aria-controls="features-menu"
-                    aria-haspopup="true"
-                    onClick={handleFeaturesClick}
-                    endIcon={<KeyboardArrowDownIcon />}
-                    sx={{ 
-                      my: 2, 
-                      color: 'white', 
-                      display: 'flex',
-                      mx: 1,
-                    }}
+                  {/* Features dropdown with improved hover */}
+                  <Box 
+                    ref={featuresMenuRef}
+                    sx={{ display: 'inline-flex', position: 'relative' }}
                   >
-                    Features
-                  </Button>
-                  <Menu
-                    id="features-menu"
-                    anchorEl={featuresAnchorEl}
-                    keepMounted
-                    open={Boolean(featuresAnchorEl)}
-                    onClose={handleFeaturesClose}
-                    sx={{
-                      '& .MuiPaper-root': {
-                        backgroundColor: 'black',
-                        borderRadius: 1,
-                        minWidth: '200px'
-                      }
-                    }}
-                  >
-                    {featureOptions.map((option) => (
-                      <MenuItem 
-                        key={option} 
-                        onClick={handleFeaturesClose}
-                        sx={{
-                          color: 'white',
-                          '&:hover': {
-                            backgroundColor: 'rgba(255, 255, 255, 0.1)'
-                          }
-                        }}
-                      >
-                        {option}
-                      </MenuItem>
-                    ))}
-                  </Menu>
+                    <Button
+                      ref={featuresButtonRef}
+                      aria-controls="features-menu"
+                      aria-haspopup="true"
+                      endIcon={<KeyboardArrowDownIcon />}
+                      onMouseEnter={handleFeaturesMouseEnter}
+                      onMouseLeave={handleFeaturesMouseLeave}
+                      sx={{ 
+                        my: 2, 
+                        color: 'white', 
+                        display: 'flex',
+                        mx: 1,
+                      }}
+                    >
+                      Features
+                    </Button>
+                    <Menu
+                      id="features-menu"
+                      anchorEl={featuresAnchorEl}
+                      keepMounted
+                      open={Boolean(featuresAnchorEl)}
+                      onClose={() => setFeaturesAnchorEl(null)}
+                      anchorOrigin={{
+                        vertical: 'bottom',
+                        horizontal: 'left',
+                      }}
+                      transformOrigin={{
+                        vertical: 'top',
+                        horizontal: 'left',
+                      }}
+                      MenuListProps={{ 
+                        onMouseEnter: handleMenuMouseEnter,
+                        onMouseLeave: handleMenuMouseLeave,
+                        style: { pointerEvents: 'auto' }
+                      }}
+                      disableRestoreFocus
+                      sx={{
+                        '& .MuiPaper-root': {
+                          backgroundColor: 'black',
+                          borderRadius: 1,
+                          minWidth: '200px',
+                          mt: 0.5
+                        },
+                        pointerEvents: 'none'
+                      }}
+                    >
+                      {featureOptions.map((option) => (
+                        <MenuItem 
+                          key={option} 
+                          sx={{
+                            color: 'white',
+                            '&:hover': {
+                              backgroundColor: 'rgba(255, 255, 255, 0.1)'
+                            }
+                          }}
+                        >
+                          {option}
+                        </MenuItem>
+                      ))}
+                    </Menu>
+                  </Box>
                   
                   {/* Other navigation items */}
                   {navItemsWithoutFeatures.map((item) => (
