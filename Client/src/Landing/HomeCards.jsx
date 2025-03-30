@@ -91,13 +91,26 @@ const MusicServices = () => {
     }
   ], []);
 
+  // Modified for better performance - no staggering for image cards
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
       opacity: 1,
       transition: {
-        delayChildren: 0.3,
-        staggerChildren: 0.2
+        duration: 0.3,
+        ease: "easeOut"
+      }
+    }
+  };
+
+  // Separate variants for first section that can use staggering
+  const firstSectionContainerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        delayChildren: 0.1,
+        staggerChildren: 0.1
       }
     }
   };
@@ -105,13 +118,13 @@ const MusicServices = () => {
   const cardVariants = {
     hidden: { 
       opacity: 0, 
-      y: 50 
+      y: 15  // Reduced movement for smoother animation
     },
     visible: { 
       opacity: 1, 
       y: 0,
       transition: {
-        duration: 0.6,
+        duration: 0.3,  // Faster animation
         ease: "easeOut"
       }
     }
@@ -121,8 +134,8 @@ const MusicServices = () => {
   const renderServiceCards = (serviceList, isAdditional = false) => (
     <Grid 
       container 
-      spacing={-5}
-      rowSpacing={isAdditional ? 5 : 3} // Add row spacing specifically for additional services
+      spacing={isAdditional ? 4 : -5}
+      rowSpacing={isAdditional ? 5 : 3}
       justifyContent="center" 
       alignItems="stretch"
       sx={{ mb: isAdditional ? 0 : 10 }}
@@ -139,15 +152,29 @@ const MusicServices = () => {
             justifyContent: 'center'
           }}
         >
-          <motion.div 
-            variants={cardVariants} 
-            style={{ 
-              width: '100%', 
-              maxWidth: '380px' // Limit max width of cards
-            }}
-            key={service.id}
-          >
-            {isAdditional ? (
+          {isAdditional ? (
+            // For additional services, apply animation to individual cards instead of container
+            <motion.div 
+              initial={{ opacity: 0, y: 15 }}
+              whileInView={{ 
+                opacity: 1, 
+                y: 0,
+                transition: {
+                  duration: 0.3,
+                  ease: "easeOut"
+                }
+              }}
+              viewport={{ 
+                once: true, 
+                amount: 0.1,
+                margin: "-50px 0px" 
+              }}
+              style={{ 
+                width: '100%', 
+                maxWidth: '380px',
+                willChange: 'transform, opacity'
+              }}
+            >
               <Card 
                 sx={{
                   position: 'relative',
@@ -177,6 +204,7 @@ const MusicServices = () => {
                   image={service.image}
                   alt={service.title}
                   className="card-image"
+                  loading="lazy" // Add lazy loading for images
                   sx={{ 
                     objectFit: 'cover',
                     transition: 'transform 0.3s ease-in-out, filter 0.3s ease-in-out',
@@ -220,7 +248,17 @@ const MusicServices = () => {
                   </Typography>
                 </Box>
               </Card>
-            ) : (
+            </motion.div>
+          ) : (
+            // Keep original animation for first section
+            <motion.div 
+              variants={cardVariants} 
+              style={{ 
+                width: '100%', 
+                maxWidth: '380px',
+              }}
+              key={service.id}
+            >
               <Card 
                 sx={{
                   backgroundColor: 'transparent',
@@ -292,8 +330,8 @@ const MusicServices = () => {
                   </Button>
                 </Box>
               </Card>
-            )}
-          </motion.div>
+            </motion.div>
+          )}
         </Grid>
       ))}
     </Grid>
@@ -313,7 +351,7 @@ const MusicServices = () => {
       <Container 
         maxWidth={false}
         sx={{ 
-          maxWidth: '1440px', // Reduced max width
+          maxWidth: '1440px',
           px: { xs: 2, sm: 3, md: 4 }, 
           py: 10,
           margin: '0 auto' 
@@ -324,7 +362,7 @@ const MusicServices = () => {
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true, amount: 0.1 }}
-          variants={containerVariants}
+          variants={firstSectionContainerVariants}
         >
           {renderServiceCards(services)}
         </motion.div>
@@ -340,17 +378,15 @@ const MusicServices = () => {
             fontFamily: '"Saira", sans-serif',
             textAlign: 'center'
           }}
+          id="additionalServicesSection"
         >
           Explore More Services ...
         </Typography>
-        <motion.div
-         initial='hidden'
-         whileInView="visible"
-         viewport={{ once: true, amount: 0.1 }}
-         variants={containerVariants}
-       >
+        
+        {/* For additional services, we don't use the staggered container animation */}
+        <Box>
           {renderServiceCards(additionalServices, true)}
-        </motion.div>
+        </Box>
       </Container>
     </Box>
   );
