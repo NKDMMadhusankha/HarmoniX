@@ -1,14 +1,14 @@
 import React from 'react';
 import { Box } from '@mui/material';
 import Navbar from './Components/Navbar';
-import HomeBanner from './Components/HomeBanner';
+import HomeBanner from './Landing/HomeBanner';
 import Footer from './Components/Footer';
 import LogoScrollBar from './Components/LogoBar';
 import { Home } from '@mui/icons-material';
-import HomeCards from './Components/HomeCards';
-import HomeStep from './Components/HomeStep';
-import HomeFAQ from './Components/HomeFAQ';
-import HomeFeedBack from './Components/HomeFeedBack'; 
+import HomeCards from './Landing/HomeCards';
+import HomeStep from './Landing/HomeStep';
+import HomeFAQ from './Landing/HomeFAQ';
+import HomeFeedBack from './Landing/HomeFeedBack'; 
 
 
 const HomePage = () => {
