@@ -67,7 +67,8 @@ const ContactPage = () => {
       sx={{ 
         backgroundColor: 'black', 
         color: 'white', 
-        minHeight: '100vh' 
+        minHeight: '100vh', 
+        py: 10,
       }}
     >
       <Navbar />

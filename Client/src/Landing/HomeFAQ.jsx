@@ -89,8 +89,11 @@ const MusicCollaborationFAQs = () => {
                   backgroundColor: 'transparent',
                   color: 'white',
                   boxShadow: 'none',
-                  border: '3px solid rgba(56, 56, 57, 0.12)',
+                  border: '3px solid rgba(56, 56, 57, 0.33)',
+                  borderLeft: expanded === `panel${index}` ? '4px solid #1976d2' : '3px solid rgba(56, 56, 57, 0.33)',
                   borderRadius: 3,
+                  transition: 'border-left 0.3s ease-in-out',
+                  '&:hover': expanded === `panel${index}` ? { borderLeft: '4px solid #1976d2' } : {}, // Apply hover effect only when expanded
                   '&:before': {
                     display: 'none',
                   }

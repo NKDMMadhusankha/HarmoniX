@@ -332,7 +332,7 @@ const HarmoniXNavbar = () => {
         
         {/* Main navbar */}
         <AppBar 
-          position="fixed" 
+          position="static" 
           sx={{ 
             bgcolor: '#000000', 
             boxShadow: 'none', 

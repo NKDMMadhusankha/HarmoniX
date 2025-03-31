@@ -53,7 +53,7 @@ const AboutUs = () => {
       <Container 
         maxWidth="lg"
         sx={{
-          py: 4,
+          py: 15,
           textAlign: 'center' // Center the text in the container
         }}
       >

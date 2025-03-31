@@ -5,6 +5,7 @@ import Login from "./Components/Login";
 import Home from "./Home";
 import AboutUs from "./Components/AboutUs";
 import ContactUs from "./Components/ContactUs";
+import MusicPro from "./Profiles/MusicPro";
 
 
 const App = () => {
@@ -17,6 +18,7 @@ const App = () => {
         <Route path="/login" element={<Login />} />
         <Route path="/about" element={<AboutUs />} />
         <Route path="/contact" element={<ContactUs />} />
+        <Route path="/musicpro" element={<MusicPro />} />
         
       </Routes>
     </Router>
