@@ -158,6 +158,7 @@ const HarmoniXNavbar = () => {
 
   const handleSignUpClick = () => {
     navigate('/register');
+    // navigate('/catogary');
     handleProfileMenuClose();
   };
 
