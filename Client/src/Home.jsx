@@ -9,7 +9,6 @@ import HomeCards from './Landing/HomeCards';
 import HomeStep from './Landing/HomeStep';
 import HomeFAQ from './Landing/HomeFAQ';
 import HomeFeedBack from './Landing/HomeFeedBack'; 
-import ToggleBtn from './Landing/ToggleBtn';
 
 
 
@@ -41,7 +40,6 @@ const HomePage = () => {
         <HomeFeedBack />
       </Box>
       <Footer />
-      <ToggleBtn />
     </Box>
   );
 };
