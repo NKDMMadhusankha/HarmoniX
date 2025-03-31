@@ -209,7 +209,7 @@ const MusicServices = () => {
                     transform: 'translateZ(0)', // Force GPU acceleration
                     transition: 'filter 0.3s ease',
                     '&:hover': {
-                      filter: 'brightness(0.6)'
+                      filter: 'brightness(0.8)'
                     }
                   }}
                 />
@@ -354,7 +354,7 @@ const MusicServices = () => {
                       textTransform: 'none',
                       border: '1px solid rgba(255,255,255,0.2)',
                       '&:hover': {
-                        backgroundColor: 'rgba(255,255,255,0.1)'
+                        backgroundColor: 'rgba(255, 255, 255, 0.34)'
                       }
                     }}
                   >
