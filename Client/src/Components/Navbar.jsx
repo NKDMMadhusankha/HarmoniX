@@ -15,7 +15,8 @@ import {
   CssBaseline,
   Menu,
   MenuItem,
-  Collapse
+  Collapse,
+  ListItemIcon
 } from '@mui/material';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import MenuIcon from '@mui/icons-material/Menu';
@@ -23,6 +24,18 @@ import CloseIcon from '@mui/icons-material/Close';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
+import GraphicEqIcon from '@mui/icons-material/GraphicEq';
+import TuneIcon from '@mui/icons-material/Tune';
+import LyricsIcon from '@mui/icons-material/Lyrics';
+import QueueMusicIcon from '@mui/icons-material/QueueMusic';
+import HomeWorkIcon from '@mui/icons-material/HomeWork';
+import MenuBookIcon from '@mui/icons-material/MenuBook';
+import SupportAgentIcon from '@mui/icons-material/SupportAgent';
+import InfoIcon from '@mui/icons-material/Info';
+import ContactMailIcon from '@mui/icons-material/ContactMail';
+import LoginIcon from '@mui/icons-material/Login';
+import PersonAddIcon from '@mui/icons-material/PersonAdd';
+import PersonIcon from '@mui/icons-material/Person';
 
 // Import React Router components
 import { Link, useNavigate } from 'react-router-dom';
@@ -83,8 +96,11 @@ const HarmoniXNavbar = () => {
   const featuresButtonRef = useRef(null);
   const menuTimeoutRef = useRef(null);
   
-  const featureOptions = ['Mixing Engineer', 'Mastering Engineer', 'Music Producer', 'Recording Studio'];
+  const featureOptions = ['Mixing Engineer', 'Mastering Engineer', 'Music Producer', 'Recording Studio','lyricist'];
+  const featureIcons = [<TuneIcon />, <GraphicEqIcon />, <QueueMusicIcon />, <HomeWorkIcon /> , <LyricsIcon />];
+  
   const navItemsWithoutFeatures = ['Resources', 'Support', 'About Us', 'Contact'];
+  const navItemIcons = [<MenuBookIcon />, <SupportAgentIcon />, <InfoIcon />, <ContactMailIcon />];
   
   const toggleMobileMenu = () => {
     console.log('Toggle Mobile Menu', !mobileMenuOpen);
@@ -230,7 +246,7 @@ const HarmoniXNavbar = () => {
                 {/* Features submenu */}
                 <Collapse in={mobileFeatureOpen} timeout="auto" unmountOnExit>
                   <List component="div" disablePadding>
-                    {featureOptions.map((option) => (
+                    {featureOptions.map((option, index) => (
                       <ListItem 
                         button 
                         key={option}
@@ -240,6 +256,9 @@ const HarmoniXNavbar = () => {
                           borderBottom: '1px solid rgba(255,255,255,0.05)'
                         }}
                       >
+                        <ListItemIcon sx={{ color: 'white', minWidth: '40px' }}>
+                          {featureIcons[index]}
+                        </ListItemIcon>
                         <ListItemText 
                           primary={option} 
                           primaryTypographyProps={{ 
@@ -252,7 +271,7 @@ const HarmoniXNavbar = () => {
                 </Collapse>
                 
                 {/* Other navigation items */}
-                {navItemsWithoutFeatures.map((item) => (
+                {navItemsWithoutFeatures.map((item, index) => (
                   <ListItem 
                     button 
                     key={item} 
@@ -266,6 +285,9 @@ const HarmoniXNavbar = () => {
                       borderBottom: '1px solid rgba(255,255,255,0.1)'
                     }}
                   >
+                    <ListItemIcon sx={{ color: 'white', minWidth: '40px' }}>
+                      {navItemIcons[index]}
+                    </ListItemIcon>
                     <ListItemText 
                       primary={item} 
                       primaryTypographyProps={{ 
@@ -285,6 +307,9 @@ const HarmoniXNavbar = () => {
                     borderBottom: '1px solid rgba(255,255,255,0.1)'
                   }}
                 >
+                  <ListItemIcon sx={{ color: 'white', minWidth: '40px' }}>
+                    <LoginIcon />
+                  </ListItemIcon>
                   <ListItemText 
                     primary="Login" 
                     primaryTypographyProps={{ 
@@ -301,6 +326,9 @@ const HarmoniXNavbar = () => {
                     borderBottom: '1px solid rgba(255,255,255,0.1)'
                   }}
                 >
+                  <ListItemIcon sx={{ color: 'white', minWidth: '40px' }}>
+                    <PersonAddIcon />
+                  </ListItemIcon>
                   <ListItemText 
                     primary="Sign Up" 
                     primaryTypographyProps={{ 
@@ -317,6 +345,9 @@ const HarmoniXNavbar = () => {
                     borderBottom: '1px solid rgba(255,255,255,0.1)'
                   }}
                 >
+                  <ListItemIcon sx={{ color: 'white', minWidth: '40px' }}>
+                    <PersonIcon />
+                  </ListItemIcon>
                   <ListItemText 
                     primary="Profile" 
                     primaryTypographyProps={{ 
@@ -431,7 +462,7 @@ const HarmoniXNavbar = () => {
                         pointerEvents: 'none'
                       }}
                     >
-                      {featureOptions.map((option) => (
+                      {featureOptions.map((option, index) => (
                         <MenuItem 
                           key={option} 
                           sx={{
@@ -441,6 +472,9 @@ const HarmoniXNavbar = () => {
                             }
                           }}
                         >
+                          <ListItemIcon sx={{ color: 'white', minWidth: '36px' }}>
+                            {featureIcons[index]}
+                          </ListItemIcon>
                           {option}
                         </MenuItem>
                       ))}
@@ -489,9 +523,24 @@ const HarmoniXNavbar = () => {
                       }
                     }}
                   >
-                    <MenuItem onClick={handleLoginClick} sx={{ color: 'white' }}>Login</MenuItem>
-                    <MenuItem onClick={handleSignUpClick} sx={{ color: 'white' }}>Sign Up</MenuItem>
-                    <MenuItem onClick={handleProfileClick} sx={{ color: 'white' }}>Profile</MenuItem>
+                    <MenuItem onClick={handleLoginClick} sx={{ color: 'white' }}>
+                      <ListItemIcon sx={{ color: 'white' }}>
+                        <LoginIcon />
+                      </ListItemIcon>
+                      Login
+                    </MenuItem>
+                    <MenuItem onClick={handleSignUpClick} sx={{ color: 'white' }}>
+                      <ListItemIcon sx={{ color: 'white' }}>
+                        <PersonAddIcon />
+                      </ListItemIcon>
+                      Sign Up
+                    </MenuItem>
+                    <MenuItem onClick={handleProfileClick} sx={{ color: 'white' }}>
+                      <ListItemIcon sx={{ color: 'white' }}>
+                        <PersonIcon />
+                      </ListItemIcon>
+                      Profile
+                    </MenuItem>
                   </Menu>
                 </Box>
               </>

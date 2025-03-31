@@ -63,12 +63,13 @@ const ContactPage = () => {
   ];
 
   return (
+    
     <Box 
       sx={{ 
         backgroundColor: 'black', 
         color: 'white', 
         minHeight: '100vh', 
-        py: 10,
+        py: 0,
       }}
     >
       <Navbar />
