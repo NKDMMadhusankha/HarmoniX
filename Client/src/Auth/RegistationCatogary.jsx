@@ -36,7 +36,7 @@ const GradientBackground = styled(Box)(({ theme }) => ({
   justifyContent: 'center',
   padding: theme.spacing(2),
   position: 'relative',
-  overflowX: 'hidden',
+  overflow: 'hidden', // Fixed: Changed from 'auto' to 'hidden' to prevent extra scrollbar
 }));
 
 const BackButton = styled(Button)(({ theme }) => ({
@@ -58,8 +58,8 @@ const CategoryCard = styled(Paper)(({ theme, animate }) => ({
   boxShadow: '0 10px 30px rgba(0, 0, 0, 0.5)',
   border: '1px solid rgba(60, 60, 60, 0.8)',
   position: 'relative',
-  overflow: 'hidden',
-  height: '100%',
+  overflow: 'hidden', // Ensure content doesn't overflow
+  height: '90%',
   display: 'flex',
   flexDirection: 'column',
   transition: 'transform 0.3s, border-color 0.3s, opacity 0.8s, transform 0.8s',
@@ -116,6 +116,7 @@ const FeatureList = styled(List)(({ theme }) => ({
   marginBottom: theme.spacing(4),
   flexGrow: 1,
   padding: 0,
+  overflow: 'visible', // Prevent scrollbar on feature list
 }));
 
 const FeatureItem = styled(ListItem)(({ theme }) => ({
@@ -233,85 +234,37 @@ const RegistrationCategory = () => {
     navigate('/');
   };
 
-  // Card data for all 6 cards
+  // Updated card data for just 2 cards
   const cardData = [
     {
-      id: 'stakeholder',
-      path: '/client-registration',
+      id: 'client',
+      path: '/register',
       icon: <People sx={{ fontSize: 36, color: 'white' }} />,
-      title: 'Stakeholder',
+      title: 'Client',
       description: 'Perfect for artists, labels, and clients looking to find reliable music professionals and manage recording projects.',
       features: [
         "Connect with verified music professionals",
         "Manage multiple recording projects",
-        "Track project progress in real-time"
+        "Track project progress in real-time",
+        "Access top talent across all music roles",
+        "Streamline your music production workflow"
       ],
-      buttonText: 'REGISTER AS STAKEHOLDER'
+      buttonText: 'REGISTER AS CLIENT'
     },
     {
-      id: 'music-producer',
-      path: '/music-producer-registration',
+      id: 'musician',
+      path: '/musician-registration',
       icon: <MusicNote sx={{ fontSize: 36, color: 'white' }} />,
-      title: 'Music Producer',
-      description: 'Ideal for producers looking to showcase their creativity, connect with artists, and manage production projects effectively.',
+      title: 'Musician',
+      description: 'Sign up as a producer, engineer, or session musician and start connecting with clients today.',
       features: [
-        "Showcase your portfolio and production style",
-        "Receive production opportunities",
-        "Streamline your project workflow"
+        "Create a professional profile to showcase your skills",
+        "Receive custom project offers based on your expertise",
+        "Build your reputation with verified reviews and ratings",
+        "Collaborate with artists and industry professionals",
+        "Access specialized tools and opportunities for growth"
       ],
-      buttonText: 'REGISTER AS MUSIC PRODUCER'
-    },
-    {
-      id: 'mixing-engineer',
-      path: '/mixing-engineer-registration',
-      icon: <Equalizer sx={{ fontSize: 36, color: 'white' }} />,
-      title: 'Mixing Engineer',
-      description: 'For mixing engineers looking to work with artists and producers to create balanced, polished mixes that stand out.',
-      features: [
-        "Share your mixing portfolio",
-        "Collaborate with artists and producers",
-        "Access specialized mixing tools"
-      ],
-      buttonText: 'REGISTER AS MIXING ENGINEER'
-    },
-    {
-      id: 'mastering-engineer',
-      path: '/mastering-engineer-registration',
-      icon: <GraphicEq sx={{ fontSize: 36, color: 'white' }} />,
-      title: 'Mastering Engineer',
-      description: 'For mastering professionals looking to apply their finishing touch to tracks and prepare them for commercial release.',
-      features: [
-        "Offer professional mastering services",
-        "Manage your mastering schedule",
-        "Build a verified reputation"
-      ],
-      buttonText: 'REGISTER AS MASTERING ENGINEER'
-    },
-    {
-      id: 'recording-engineer',
-      path: '/recording-engineer-registration',
-      icon: <Mic sx={{ fontSize: 36, color: 'white' }} />,
-      title: 'Recording Engineer',
-      description: 'For studio engineers who specialize in capturing high-quality audio recordings for music productions.',
-      features: [
-        "Promote your recording services",
-        "Connect with artists and producers",
-        "Showcase your studio capabilities"
-      ],
-      buttonText: 'REGISTER AS RECORDING ENGINEER'
-    },
-    {
-      id: 'lyricist',
-      path: '/lyricist-registration',
-      icon: <Edit sx={{ fontSize: 36, color: 'white' }} />,
-      title: 'Lyricist',
-      description: 'For songwriters and lyricists who craft compelling words and stories for music across all genres.',
-      features: [
-        "Share your writing portfolio",
-        "Collaborate on songwriting projects",
-        "Connect with artists and composers"
-      ],
-      buttonText: 'REGISTER AS LYRICIST'
+      buttonText: 'REGISTER AS MUSICIAN'
     }
   ];
 
@@ -328,7 +281,7 @@ const RegistrationCategory = () => {
       </BackButton>
 
       {/* Header */}
-      <Container maxWidth="md" sx={{ textAlign: 'center', mb: 10 }}>
+      <Container maxWidth="md" sx={{ textAlign: 'center', mb: 8, overflow: 'visible' }}>
         <HeaderText 
           variant="h3" 
           animate={animate}
@@ -338,23 +291,21 @@ const RegistrationCategory = () => {
             fontSize: { xs: '2.25rem', md: '3rem' },
           }}
         >
-          Join MusicSync Platform
+          Join HarmoniX – Connect & Create
         </HeaderText>
-        <SubHeaderText sx={{ mt:-4 }} 
-          variant="h5" 
+        <SubHeaderText sx={{ mt:-7, maxWidth: '3500px'}} 
+          variant="h6" 
           animate={animate}
         >
-          Connect with verified music professionals and streamline your music production
-          with our AI-powered platform. Choose how you want to get started.
+          Find verified music professionals and streamline your production with HarmoniX. Let AI match you with the right talent. Get started now.
         </SubHeaderText>
       </Container>
 
-      {/* Registration Options */}
-      <Container maxWidth="xl" sx={{ mb: 6 }}>
-        <Grid container spacing={4} sx={{ mb: 15 }}>
-          {/* First row - 3 cards */}
-          {cardData.slice(0, 3).map((card, index) => (
-            <Grid item xs={12} md={4} key={card.id}>
+      {/* Registration Options - Just 2 cards */}
+      <Container maxWidth="lg" sx={{ mb: 4, overflow: 'visible' }}>
+        <Grid container spacing={6} sx={{ overflow: 'visible' }}>
+          {cardData.map((card, index) => (
+            <Grid item xs={12} md={6} key={card.id} sx={{ overflow: 'visible' }}>
               <CategoryCard animate={animate} style={{ transitionDelay: `${0.1 + index * 0.1}s` }}>
                 <DecorativeBackground />
                 
@@ -410,72 +361,21 @@ const RegistrationCategory = () => {
             </Grid>
           ))}
         </Grid>
-
-        <Grid container spacing={4}>
-          {/* Second row - 3 cards */}
-          {cardData.slice(3, 6).map((card, index) => (
-            <Grid item xs={12} md={4} key={card.id}>
-              <CategoryCard animate={animate} style={{ transitionDelay: `${0.4 + index * 0.1}s` }}>
-                <DecorativeBackground />
-                
-                <Box sx={{ position: 'relative', zIndex: 10, display: 'flex', flexDirection: 'column', height: '100%'}}>
-                  {/* Icon */}
-                  <IconCircle className="icon-circle">
-                    <IconCircleGlow className="icon-circle-glow" />
-                    <IconWrapper>
-                      {card.icon}
-                    </IconWrapper>
-                  </IconCircle>
-
-                  {/* Title */}
-                  <CardTitle variant="h5">
-                    {card.title}
-                  </CardTitle>
-                  
-                  {/* Description */}
-                  <Typography variant="body2" color="#A0A0A0" mb={3} sx={{ fontSize: '0.9rem', lineHeight: 1.6 }}>
-                    {card.description}
-                  </Typography>
-
-                  {/* Features */}
-                  <FeatureList>
-                    {card.features.map((feature, index) => (
-                      <FeatureItem key={index} disableGutters>
-                        <ListItemIcon sx={{ minWidth: 'auto', mr: 1.5 }}>
-                          <CheckCircle sx={{ fontSize: 20, color: '#0B62F8' }} />
-                        </ListItemIcon>
-                        <ListItemText 
-                          primary={feature}
-                          primaryTypographyProps={{ 
-                            color: '#FFFFFF', 
-                            variant: 'body2',
-                            fontSize: '0.9rem'
-                          }}
-                        />
-                      </FeatureItem>
-                    ))}
-                  </FeatureList>
-
-                  {/* Registration Button */}
-                  <RegisterButton
-                    onClick={() => handleNavigation(card.path)}
-                    variant="contained"
-                    disableElevation
-                    className="register-button"
-                  >
-                    {card.buttonText}
-                  </RegisterButton>
-                </Box>
-              </CategoryCard>
-            </Grid>
-          ))}
-        </Grid>
       </Container>
 
-      {/* Already have an account? */}
-      <Box sx={{ mt: 8, textAlign: 'center', opacity: animate ? 1 : 0, transform: animate ? 'translateY(0)' : 'translateY(20px)', transition: 'opacity 0.8s, transform 0.8s', transitionDelay: '0.7s' }}>
+      {/* Already have an account? - Kept below cards but moved up with adjusted margins */}
+      <Box sx={{ 
+        mt: 4, // Reduced from mt: 8 to move it up
+        textAlign: 'center', 
+        opacity: animate ? 1 : 0, 
+        transform: animate ? 'translateY(0)' : 'translateY(20px)', 
+        transition: 'opacity 0.8s, transform 0.8s', 
+        transitionDelay: '0.7s',
+        zIndex: 10, // Ensure it's above background effects
+        position: 'relative'
+      }}>
         <Typography variant="body1" color="#737373">
-          Already have an account?{" "}
+          Already have an account ?{" "}
           <Link 
             href="/login" 
             sx={{ 

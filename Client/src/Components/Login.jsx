@@ -8,7 +8,8 @@ import {
   InputAdornment, 
   IconButton, 
   Snackbar,
-  Alert 
+  Alert,
+  styled
 } from '@mui/material';
 import { motion } from "framer-motion";  
 import VisibilityIcon from '@mui/icons-material/Visibility';
@@ -16,6 +17,38 @@ import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import { Link as RouterLink, useNavigate } from 'react-router-dom';  
 import axios from 'axios';
 import Loader from './Loader';  // Importing the Loader component
+
+// Add the background styling from the first code
+const GradientBackground = styled(Box)(({ theme }) => ({
+  minHeight: '100vh',
+  background: 'linear-gradient(to bottom right, #000000, black)',
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'center',
+  justifyContent: 'center',
+  padding: theme.spacing(2),
+  position: 'relative',
+  overflow: 'hidden',
+}));
+
+const BackgroundEffect = styled(Box)({
+  position: 'absolute',
+  width: '500px',
+  height: '500px',
+  background: 'radial-gradient(circle, #0F3754, rgba(0, 0, 0, 0))',
+  borderRadius: '50%',
+  filter: 'blur(40px)',
+  opacity: 0.7,
+  animation: 'float 8s infinite ease-in-out',
+  '@keyframes float': {
+    '0%, 100%': {
+      transform: 'translateY(0) scale(1)',
+    },
+    '50%': {
+      transform: 'translateY(-30px) scale(1.1)',
+    },
+  },
+});
 
 const LoginForm = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -52,16 +85,14 @@ const LoginForm = () => {
   };
 
   return (
-    <Box
-      sx={{
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        height: '100vh',
-        background: "url('/src/assets/formbg.png') center/cover no-repeat",
-        position: 'relative'
-      }}
-    >
+    <GradientBackground>
+      {/* Background Effects */}
+      <Box sx={{ position: 'absolute', inset: 0, overflow: 'hidden', pointerEvents: 'none' }}>
+        <BackgroundEffect sx={{ top: -100, right: -100, opacity: 0.7 }} />
+        <BackgroundEffect sx={{ bottom: -150, left: -150, animationDelay: '2s', opacity: 0.7 }} />
+        <BackgroundEffect sx={{ top: '50%', left: '50%', marginLeft: -250, marginTop: -250, animationDelay: '4s', opacity: 0.7 }} />
+      </Box>
+
       {/* ✅ Success Message - Always Visible on Top */}
       <Snackbar 
         open={success} 
@@ -176,7 +207,7 @@ const LoginForm = () => {
           </Box>
         </Paper>
       )}
-    </Box>
+    </GradientBackground>
   );
 };
 
