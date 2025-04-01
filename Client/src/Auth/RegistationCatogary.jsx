@@ -318,7 +318,7 @@ const RegistrationCategory = () => {
   return (
     <GradientBackground>
       {/* Back Button */}
-      <BackButton
+      <BackButton sx={{ mt: -1 }} 
         onClick={handleBack}
         startIcon={<ArrowBack sx={{ fontSize: 24 }} />}
       >
@@ -340,8 +340,8 @@ const RegistrationCategory = () => {
         >
           Join MusicSync Platform
         </HeaderText>
-        <SubHeaderText 
-          variant="h6" 
+        <SubHeaderText sx={{ mt:-4 }} 
+          variant="h5" 
           animate={animate}
         >
           Connect with verified music professionals and streamline your music production
