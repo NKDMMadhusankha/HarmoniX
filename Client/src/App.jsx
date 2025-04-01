@@ -7,6 +7,8 @@ import AboutUs from "./Components/AboutUs";
 import ContactUs from "./Components/ContactUs";
 import MusicPro from "./Profiles/MusicPro";
 import RegistationCatogary from "./Auth/RegistationCatogary";
+import MusicianRegistrationForm from "./Auth/MusicianRegister";
+
 
 
 const App = () => {
@@ -21,6 +23,7 @@ const App = () => {
         <Route path="/contact" element={<ContactUs />} />
         <Route path="/musicpro" element={<MusicPro />} />
         <Route path="/catogary" element={<RegistationCatogary />} />
+        <Route path="/musician/register" element={<MusicianRegistrationForm />} />
         
       </Routes>
     </Router>
