@@ -157,7 +157,7 @@ const HarmoniXNavbar = () => {
   };
 
   const handleSignUpClick = () => {
-    navigate('/register');
+    navigate('/catogary');
     // navigate('/catogary');
     handleProfileMenuClose();
   };

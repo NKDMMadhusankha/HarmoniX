@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   ArrowBack,
@@ -45,13 +45,13 @@ const BackButton = styled(Button)(({ theme }) => ({
   left: theme.spacing(8),
   color: '#737373',
   '&:hover': {
-    color: '#EA540C',
+    color: '#0B62F8',
     background: 'transparent',
   },
   transition: 'color 0.3s',
 }));
 
-const CategoryCard = styled(Paper)(({ theme }) => ({
+const CategoryCard = styled(Paper)(({ theme, animate }) => ({
   background: 'rgba(40, 40, 40, 0.6)',
   padding: theme.spacing(4),
   borderRadius: theme.spacing(2),
@@ -62,21 +62,23 @@ const CategoryCard = styled(Paper)(({ theme }) => ({
   height: '100%',
   display: 'flex',
   flexDirection: 'column',
-  transition: 'transform 0.3s, border-color 0.3s',
+  transition: 'transform 0.3s, border-color 0.3s, opacity 0.8s, transform 0.8s',
+  opacity: animate ? 1 : 0,
+  transform: animate ? 'translateY(0)' : 'translateY(40px)',
   '&:hover': {
     transform: 'translateY(-8px)',
-    borderColor: 'rgba(234, 84, 12, 0.6)',
+    borderColor: 'rgb(58, 58, 58)',
     '& .icon-circle': {
-      transform: 'scale(1.1)',
-      backgroundColor: 'rgba(234, 84, 12, 0.3)',
+      transform: 'scale(1.0)',
+      backgroundColor: 'rgb(11, 98, 248)',
     },
     '& .icon-circle-glow': {
       opacity: 0.8,
     },
     '& .register-button': {
-      backgroundColor: '#EA540C',
+      backgroundColor: 'black',
       transform: 'translateY(-2px)',
-      boxShadow: '0 6px 20px rgba(234, 84, 12, 0.4)',
+      boxShadow: '0 5px 20px rgb(0, 0, 0)',
     }
   },
 }));
@@ -88,7 +90,7 @@ const IconCircle = styled(Box)(({ theme }) => ({
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
-  backgroundColor: 'rgba(234, 84, 12, 0.2)',
+  backgroundColor: 'rgb(11, 98, 248)',
   marginBottom: theme.spacing(2),
   position: 'relative',
   transition: 'all 0.3s ease',
@@ -99,7 +101,7 @@ const IconCircleGlow = styled(Box)(({ theme }) => ({
   width: '100%',
   height: '100%',
   borderRadius: '50%',
-  backgroundColor: '#EA540C',
+  backgroundColor: 'rgb(11, 98, 248)',
   filter: 'blur(15px)',
   opacity: 0.3,
   transition: 'opacity 0.3s ease',
@@ -121,24 +123,24 @@ const FeatureItem = styled(ListItem)(({ theme }) => ({
 }));
 
 const RegisterButton = styled(Button)(({ theme }) => ({
-  background: 'rgba(234, 84, 12, 0.9)',
+  background: 'black',
   color: 'white',
   padding: '12px 32px',
   borderRadius: '9999px',
   fontWeight: 'bold',
   transition: 'all 0.3s',
   width: '100%',
-  boxShadow: '0 4px 15px rgba(234, 84, 12, 0.3)',
+  boxShadow: '0 4px 15px rgba(11, 98, 248, 0.3)',
   '&:hover': {
-    background: '#EA540C',
-    boxShadow: '0 6px 20px rgba(234, 84, 12, 0.5)',
+    background: '#0B62F8',
+    boxShadow: '0 6px 20px rgba(11, 98, 248, 0.5)',
   },
 }));
 
 const DecorativeBackground = styled(Box)({
   position: 'absolute',
   inset: 0,
-  background: 'linear-gradient(to bottom right, rgba(40, 40, 40, 0.6), rgba(20, 20, 20, 0.8))',
+  background: 'linear-gradient(to bottom right,rgba(15, 55, 84, 0.47), black)',
   zIndex: 0,
   overflow: 'hidden',
   '&::after': {
@@ -148,7 +150,7 @@ const DecorativeBackground = styled(Box)({
     left: 0,
     right: 0,
     height: '30%',
-    background: 'linear-gradient(to top, rgba(234, 84, 12, 0.1), rgba(0, 0, 0, 0))',
+    background: 'linear-gradient(to top, #0F3754, rgba(0, 0, 0, 0))',
     borderRadius: '0 0 16px 16px',
   }
 });
@@ -157,7 +159,7 @@ const BackgroundEffect = styled(Box)({
   position: 'absolute',
   width: '500px',
   height: '500px',
-  background: 'radial-gradient(circle, rgba(234, 84, 12, 0.15), rgba(0, 0, 0, 0))',
+  background: 'radial-gradient(circle,#0F3754, rgba(0, 0, 0, 0))',
   borderRadius: '50%',
   filter: 'blur(40px)',
   opacity: 0.7,
@@ -185,13 +187,43 @@ const CardTitle = styled(Typography)(({ theme }) => ({
     left: 0,
     width: 40,
     height: 3,
-    background: '#EA540C',
+    background: 'rgb(11, 98, 248)',
     borderRadius: 4,
   }
 }));
 
+const HeaderText = styled(Typography)(({ theme, animate }) => ({
+  fontWeight: 'bold',
+  color: '#FFFFFF',
+  textShadow: '0 4px 12px rgba(0,0,0,0.4)',
+  opacity: animate ? 1 : 0,
+  transform: animate ? 'translateY(0)' : 'translateY(-30px)',
+  transition: 'opacity 0.8s, transform 0.8s',
+}));
+
+const SubHeaderText = styled(Typography)(({ theme, animate }) => ({
+  color: '#737373',
+  maxWidth: '42rem',
+  margin: '0 auto',
+  lineHeight: 1.6,
+  opacity: animate ? 1 : 0,
+  transform: animate ? 'translateY(0)' : 'translateY(30px)',
+  transition: 'opacity 0.8s, transform 0.8s',
+  transitionDelay: '0.2s',
+}));
+
 const RegistrationCategory = () => {
   const navigate = useNavigate();
+  const [animate, setAnimate] = useState(false);
+
+  useEffect(() => {
+    // Trigger animations when component mounts
+    const timer = setTimeout(() => {
+      setAnimate(true);
+    }, 100);
+    
+    return () => clearTimeout(timer);
+  }, []);
 
   const handleNavigation = (path) => {
     navigate(path);
@@ -206,7 +238,7 @@ const RegistrationCategory = () => {
     {
       id: 'stakeholder',
       path: '/client-registration',
-      icon: <People sx={{ fontSize: 36, color: '#EA540C' }} />,
+      icon: <People sx={{ fontSize: 36, color: 'white' }} />,
       title: 'Stakeholder',
       description: 'Perfect for artists, labels, and clients looking to find reliable music professionals and manage recording projects.',
       features: [
@@ -219,7 +251,7 @@ const RegistrationCategory = () => {
     {
       id: 'music-producer',
       path: '/music-producer-registration',
-      icon: <MusicNote sx={{ fontSize: 36, color: '#EA540C' }} />,
+      icon: <MusicNote sx={{ fontSize: 36, color: 'white' }} />,
       title: 'Music Producer',
       description: 'Ideal for producers looking to showcase their creativity, connect with artists, and manage production projects effectively.',
       features: [
@@ -232,7 +264,7 @@ const RegistrationCategory = () => {
     {
       id: 'mixing-engineer',
       path: '/mixing-engineer-registration',
-      icon: <Equalizer sx={{ fontSize: 36, color: '#EA540C' }} />,
+      icon: <Equalizer sx={{ fontSize: 36, color: 'white' }} />,
       title: 'Mixing Engineer',
       description: 'For mixing engineers looking to work with artists and producers to create balanced, polished mixes that stand out.',
       features: [
@@ -245,7 +277,7 @@ const RegistrationCategory = () => {
     {
       id: 'mastering-engineer',
       path: '/mastering-engineer-registration',
-      icon: <GraphicEq sx={{ fontSize: 36, color: '#EA540C' }} />,
+      icon: <GraphicEq sx={{ fontSize: 36, color: 'white' }} />,
       title: 'Mastering Engineer',
       description: 'For mastering professionals looking to apply their finishing touch to tracks and prepare them for commercial release.',
       features: [
@@ -258,7 +290,7 @@ const RegistrationCategory = () => {
     {
       id: 'recording-engineer',
       path: '/recording-engineer-registration',
-      icon: <Mic sx={{ fontSize: 36, color: '#EA540C' }} />,
+      icon: <Mic sx={{ fontSize: 36, color: 'white' }} />,
       title: 'Recording Engineer',
       description: 'For studio engineers who specialize in capturing high-quality audio recordings for music productions.',
       features: [
@@ -271,7 +303,7 @@ const RegistrationCategory = () => {
     {
       id: 'lyricist',
       path: '/lyricist-registration',
-      icon: <Edit sx={{ fontSize: 36, color: '#EA540C' }} />,
+      icon: <Edit sx={{ fontSize: 36, color: 'white' }} />,
       title: 'Lyricist',
       description: 'For songwriters and lyricists who craft compelling words and stories for music across all genres.',
       features: [
@@ -297,39 +329,33 @@ const RegistrationCategory = () => {
 
       {/* Header */}
       <Container maxWidth="md" sx={{ textAlign: 'center', mb: 10 }}>
-        <Typography 
+        <HeaderText 
           variant="h3" 
-          fontWeight="bold" 
-          color="#FFFFFF" 
+          animate={animate}
           mb={4} 
-          sx={{ 
+          sx={{
+            py: 5, 
             fontSize: { xs: '2.25rem', md: '3rem' },
-            textShadow: '0 4px 12px rgba(0,0,0,0.4)'
           }}
         >
           Join MusicSync Platform
-        </Typography>
-        <Typography 
+        </HeaderText>
+        <SubHeaderText 
           variant="h6" 
-          color="#737373" 
-          sx={{ 
-            maxWidth: '42rem', 
-            mx: 'auto',
-            lineHeight: 1.6
-          }}
+          animate={animate}
         >
           Connect with verified music professionals and streamline your music production
           with our AI-powered platform. Choose how you want to get started.
-        </Typography>
+        </SubHeaderText>
       </Container>
 
       {/* Registration Options */}
       <Container maxWidth="xl" sx={{ mb: 6 }}>
         <Grid container spacing={4} sx={{ mb: 15 }}>
           {/* First row - 3 cards */}
-          {cardData.slice(0, 3).map((card) => (
+          {cardData.slice(0, 3).map((card, index) => (
             <Grid item xs={12} md={4} key={card.id}>
-              <CategoryCard>
+              <CategoryCard animate={animate} style={{ transitionDelay: `${0.1 + index * 0.1}s` }}>
                 <DecorativeBackground />
                 
                 <Box sx={{ position: 'relative', zIndex: 10, display: 'flex', flexDirection: 'column', height: '100%' }}>
@@ -356,7 +382,7 @@ const RegistrationCategory = () => {
                     {card.features.map((feature, index) => (
                       <FeatureItem key={index} disableGutters>
                         <ListItemIcon sx={{ minWidth: 'auto', mr: 1.5 }}>
-                          <CheckCircle sx={{ fontSize: 20, color: '#EA540C' }} />
+                          <CheckCircle sx={{ fontSize: 20, color: '#0B62F8' }} />
                         </ListItemIcon>
                         <ListItemText 
                           primary={feature}
@@ -387,9 +413,9 @@ const RegistrationCategory = () => {
 
         <Grid container spacing={4}>
           {/* Second row - 3 cards */}
-          {cardData.slice(3, 6).map((card) => (
+          {cardData.slice(3, 6).map((card, index) => (
             <Grid item xs={12} md={4} key={card.id}>
-              <CategoryCard>
+              <CategoryCard animate={animate} style={{ transitionDelay: `${0.4 + index * 0.1}s` }}>
                 <DecorativeBackground />
                 
                 <Box sx={{ position: 'relative', zIndex: 10, display: 'flex', flexDirection: 'column', height: '100%'}}>
@@ -416,7 +442,7 @@ const RegistrationCategory = () => {
                     {card.features.map((feature, index) => (
                       <FeatureItem key={index} disableGutters>
                         <ListItemIcon sx={{ minWidth: 'auto', mr: 1.5 }}>
-                          <CheckCircle sx={{ fontSize: 20, color: '#EA540C' }} />
+                          <CheckCircle sx={{ fontSize: 20, color: '#0B62F8' }} />
                         </ListItemIcon>
                         <ListItemText 
                           primary={feature}
@@ -447,13 +473,13 @@ const RegistrationCategory = () => {
       </Container>
 
       {/* Already have an account? */}
-      <Box sx={{ mt: 8, textAlign: 'center' }}>
+      <Box sx={{ mt: 8, textAlign: 'center', opacity: animate ? 1 : 0, transform: animate ? 'translateY(0)' : 'translateY(20px)', transition: 'opacity 0.8s, transform 0.8s', transitionDelay: '0.7s' }}>
         <Typography variant="body1" color="#737373">
           Already have an account?{" "}
           <Link 
             href="/login" 
             sx={{ 
-              color: '#EA540C', 
+              color: '#1976d2', 
               fontWeight: 600,
               textDecoration: 'none',
               '&:hover': { textDecoration: 'underline' } 
@@ -466,9 +492,9 @@ const RegistrationCategory = () => {
 
       {/* Background Effects */}
       <Box sx={{ position: 'absolute', inset: 0, overflow: 'hidden', pointerEvents: 'none' }}>
-        <BackgroundEffect sx={{ top: -100, right: -100 }} />
-        <BackgroundEffect sx={{ bottom: -150, left: -150, animationDelay: '2s' }} />
-        <BackgroundEffect sx={{ top: '50%', left: '50%', marginLeft: -250, marginTop: -250, animationDelay: '4s' }} />
+        <BackgroundEffect sx={{ top: -100, right: -100, opacity: animate ? 0.7 : 0, transition: 'opacity 1.2s' }} />
+        <BackgroundEffect sx={{ bottom: -150, left: -150, animationDelay: '2s', opacity: animate ? 0.7 : 0, transition: 'opacity 1.2s', transitionDelay: '0.3s' }} />
+        <BackgroundEffect sx={{ top: '50%', left: '50%', marginLeft: -250, marginTop: -250, animationDelay: '4s', opacity: animate ? 0.7 : 0, transition: 'opacity 1.2s', transitionDelay: '0.6s' }} />
       </Box>
     </GradientBackground>
   );
