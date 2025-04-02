@@ -84,7 +84,7 @@ const experienceLevels = [
 ];
 
 // List of countries (simplified for example)
-const countries = ['United States', 'United Kingdom', 'Canada', 'Australia', 'France', 'Germany', 'Japan', 'Brazil', 'India', 'Nigeria'];
+const countries = ['Sri Lanka','United States', 'United Kingdom', 'Canada', 'Australia', 'France', 'Germany', 'Japan', 'Brazil', 'India', 'Nigeria'];
 
 // Cities based on country (simplified for example)
 const citiesByCountry = {

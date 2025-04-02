@@ -192,7 +192,7 @@ const HeaderText = styled(Typography)(({ theme, animate }) => ({
   opacity: animate ? 1 : 0,
   transform: animate ? 'translateY(0)' : 'translateY(-30px)',
   transition: 'opacity 0.8s, transform 0.8s',
-  padding: theme.spacing(0, 0, 1, 0), // Reduced padding here
+  padding: theme.spacing(3, 0, 2, 0), // Reduced padding here
   [theme.breakpoints.up('md')]: {
     padding: theme.spacing(1, 0), // Reduced padding for larger screens
   },
@@ -262,7 +262,7 @@ const RegistrationCategory = () => {
     },
     {
       id: 'musician',
-      path: '/musician-registration',
+      path: '/musician/register',
       icon: <MusicNote sx={{ fontSize: 28, color: 'white' }} />,
       title: 'Musician',
       description: 'Sign up as a producer, engineer, or session musician and start connecting with clients today.',
@@ -328,7 +328,7 @@ const RegistrationCategory = () => {
 
       {/* Registration Options */}
       <Container maxWidth="lg" sx={{ mb: { xs: 2, md: 3 }, overflow: 'visible', px: { xs: 2, sm: 3, md: 4 } }}>
-        <Grid container spacing={{ xs: 3, sm: 4, md: 6 }} sx={{ overflow: 'visible' }}>
+        <Grid container spacing={{ xs: 10, sm: 10, md: 6 }} sx={{ overflow: 'visible' }}>
           {cardData.map((card, index) => (
             <Grid item xs={12} md={6} key={card.id} sx={{ overflow: 'visible' }}>
               <CategoryCard animate={animate} style={{ transitionDelay: `${0.1 + index * 0.1}s` }}>
@@ -396,7 +396,7 @@ const RegistrationCategory = () => {
 
       {/* Already have an account? - MOVED FURTHER DOWN */}
       <Box sx={{ 
-        mt: { xs: 6, sm: 8, md: 10 }, // Increased top margin to move it down further from cards
+        mt: { xs: 10, sm: 10, md: 10 }, // Increased top margin to move it down further from cards
         mb: { xs: 6, sm: 8, md: 10 }, // Increased bottom margin for additional space at the bottom
         textAlign: 'center', 
         opacity: animate ? 1 : 0, 
