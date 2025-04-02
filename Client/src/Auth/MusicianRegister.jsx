@@ -206,8 +206,7 @@ const MusicianRegistrationForm = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [stepsCompleted, setStepsCompleted] = useState([false, false, false]);
   const [formData, setFormData] = useState({
-    firstName: '',
-    lastName: '',
+    fullName: '',
     countryCode: '',
     phoneNumber: '',
     email: '',
@@ -248,8 +247,7 @@ const MusicianRegistrationForm = () => {
     
     if (activeStep === 0) {
       if (
-        formData.firstName && 
-        formData.lastName && 
+        formData.fullName && 
         formData.email && 
         formData.country && 
         formData.phoneNumber && 
@@ -370,8 +368,7 @@ const MusicianRegistrationForm = () => {
     const newErrors = {};
 
     if (activeStep === 0) {
-      if (!formData.firstName) newErrors.firstName = 'First name is required';
-      if (!formData.lastName) newErrors.lastName = 'Last name is required';
+      if (!formData.fullName) newErrors.fullName = 'Full name is required';
       if (!formData.countryCode) newErrors.countryCode = 'Country code is required';
       if (!formData.phoneNumber) newErrors.phoneNumber = 'Phone number is required';
       if (!formData.email) newErrors.email = 'Email is required';
@@ -462,25 +459,14 @@ const MusicianRegistrationForm = () => {
               Enter your personal information to get closer to companies.
             </Typography>
             <Grid container spacing={3}>
-              <Grid item xs={12} sm={6}>
+              <Grid item xs={12}>
                 <TextField
                   fullWidth
-                  label="First Name"
-                  value={formData.firstName}
-                  onChange={handleChange('firstName')}
-                  error={!!errors.firstName}
-                  helperText={errors.firstName}
-                  variant="outlined"
-                />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  fullWidth
-                  label="Last Name"
-                  value={formData.lastName}
-                  onChange={handleChange('lastName')}
-                  error={!!errors.lastName}
-                  helperText={errors.lastName}
+                  label="Full Name"
+                  value={formData.fullName}
+                  onChange={handleChange('fullName')}
+                  error={!!errors.fullName}
+                  helperText={errors.fullName}
                   variant="outlined"
                 />
               </Grid>
@@ -558,7 +544,7 @@ const MusicianRegistrationForm = () => {
                   }}
                 />
               </Grid>
-              <Grid item xs={12} sm={6}>
+              <Grid item xs={12}>
                 <TextField
                   fullWidth
                   label="Email Address"
@@ -914,8 +900,7 @@ const MusicianRegistrationForm = () => {
                           border: `1px solid ${alpha(theme.palette.primary.main, 0.5)}`,
                           '& .MuiChip-deleteIcon': {
                             color: theme.palette.primary.main,
-                            '&:hover': { color: theme.palette.primary.
-                              light }
+                            '&:hover': { color: theme.palette.primary.light }
                           }
                         }}
                       />
@@ -1043,45 +1028,29 @@ const MusicianRegistrationForm = () => {
           />
         </Box>
 
-        {/* Fixed Progress Bar - Improved position and style */}
+        {/* Modern Progress Bar */}
         <Box sx={{ 
           width: '100%', 
-          position: 'sticky', 
+          position: 'static', 
           top: 0, 
           zIndex: 9999,
           backgroundColor: 'rgba(18, 30, 43, 0.95)',
           borderBottom: `1px solid ${alpha(theme.palette.primary.main, 0.2)}`,
-          backdropFilter: 'blur(5px)',
-          mb: 4
+          backdropFilter: 'blur(10px)',
+          mb: 2
         }}>
-          <LinearProgress 
-            variant="determinate" 
-            value={progressPercentage} 
-            sx={{ 
-              height: 6,
-              backgroundColor: alpha(theme.palette.primary.main, 0.15),
-              '& .MuiLinearProgress-bar': {
-                background: `linear-gradient(90deg, ${theme.palette.primary.main} 0%, ${theme.palette.secondary.main} 100%)`,
-                transition: 'transform 0.5s ease'
-              }
-            }}
-          />
-          <Box sx={{ p: 1, display: 'flex', justifyContent: 'center' }}>
-            <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-              Step {activeStep + 1} of {steps.length} - {steps[activeStep]}
-            </Typography>
-          </Box>
-          
-          {/* Back Button moved below progress bar */}
-          <Box sx={{ px: 2, pb: 1 }}>
+          <Box sx={{ 
+            display: 'flex', 
+            alignItems: 'center', 
+            justifyContent: 'space-between',
+            p: 2
+          }}>
             <Button
               onClick={navigateBack}
               startIcon={<ArrowBackIcon sx={{ fontSize: 20 }} />}
               sx={{ 
                 color: '#737373',
                 textTransform: 'uppercase',
-                justifyContent: 'flex-start',
-                pl: 1,
                 '&:hover': {
                   color: '#0B62F8',
                   background: 'transparent',
@@ -1090,6 +1059,50 @@ const MusicianRegistrationForm = () => {
             >
               Back
             </Button>
+            
+            <Box sx={{ 
+              flex: 1, 
+              mx: 2,
+              position: 'relative',
+              height: 8,
+              borderRadius: 4,
+              backgroundColor: alpha(theme.palette.primary.main, 0.15)
+            }}>
+              <Box
+                sx={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  height: '100%',
+                  width: `${progressPercentage}%`,
+                  borderRadius: 4,
+                  background: `linear-gradient(90deg, ${theme.palette.primary.main} 0%, ${theme.palette.secondary.main} 100%)`,
+                  transition: 'width 0.5s ease',
+                  boxShadow: `0 0 8px ${alpha(theme.palette.primary.main, 0.5)}`
+                }}
+              >
+                <Box sx={{
+                  position: 'absolute',
+                  right: -8,
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  width: 16,
+                  height: 16,
+                  borderRadius: '50%',
+                  backgroundColor: theme.palette.primary.main,
+                  border: `2px solid ${theme.palette.background.paper}`,
+                  boxShadow: `0 0 8px ${alpha(theme.palette.primary.main, 0.8)}`
+                }} />
+              </Box>
+            </Box>
+            
+            <Typography variant="caption" sx={{ 
+              color: 'text.secondary',
+              minWidth: 80,
+              textAlign: 'right'
+            }}>
+              {Math.round(progressPercentage)}% Complete
+            </Typography>
           </Box>
         </Box>
       
@@ -1192,7 +1205,7 @@ const MusicianRegistrationForm = () => {
           
           {/* Already have an account? */}
           <Box sx={{ 
-            mt: 3,
+            mt: 5,
             textAlign: 'center', 
             opacity: animate ? 1 : 0, 
             transform: animate ? 'translateY(0)' : 'translateY(20px)', 
