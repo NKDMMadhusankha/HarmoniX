@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Box,
   Button,
@@ -22,14 +22,11 @@ import {
   createTheme,
   IconButton,
   Chip,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Card,
-  CardContent,
-  CardMedia,
-  Link
+  Link,
+  LinearProgress,
+  alpha,
+  InputAdornment,
+  Avatar
 } from '@mui/material';
 import {
   CloudUpload as CloudUploadIcon,
@@ -38,22 +35,65 @@ import {
   Instagram as InstagramIcon,
   Twitter as TwitterIcon,
   LinkedIn as LinkedInIcon,
-  Preview as PreviewIcon,
-  Check as CheckIcon
+  Check as CheckIcon,
+  Visibility as VisibilityIcon,
+  VisibilityOff as VisibilityOffIcon
 } from '@mui/icons-material';
+import { styled } from '@mui/material/styles';
 
-// Create a custom theme with black and blue colors
+// Custom styled components for background
+const GradientBackground = styled(Box)(({ theme }) => ({
+  minHeight: '100vh',
+  background: 'linear-gradient(to bottom right, #000000, #0F1824)',
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'center',
+  justifyContent: 'flex-start',
+  padding: theme.spacing(2),
+  position: 'relative',
+  overflow: 'hidden',
+}));
+
+const BackgroundEffect = styled(Box)(({ theme }) => ({
+  position: 'absolute',
+  width: '300px',
+  height: '300px',
+  [theme.breakpoints.up('md')]: {
+    width: '500px',
+    height: '500px',
+  },
+  background: 'radial-gradient(circle, rgba(15, 55, 84, 0.6), rgba(0, 0, 0, 0))',
+  borderRadius: '50%',
+  filter: 'blur(80px)',
+  opacity: 0.4,
+  animation: 'float 12s infinite ease-in-out',
+  '@keyframes float': {
+    '0%, 100%': {
+      transform: 'translateY(0) scale(1)',
+    },
+    '50%': {
+      transform: 'translateY(-50px) scale(1.1)',
+    },
+  },
+}));
+
+// Create a custom dark theme with black and dark blue colors
 const theme = createTheme({
   palette: {
+    mode: 'dark',
     primary: {
-      main: '#1976d2', // Blue
+      main: '#0B62F8', // Bright blue
     },
     secondary: {
-      main: '#212121', // Black
+      main: '#90caf9', // Lighter blue for secondary elements
     },
     background: {
-      default: '#f5f5f5',
-      paper: '#ffffff',
+      default: '#121212', // Dark background
+      paper: 'rgba(18, 30, 43, 0.8)', // Match the background
+    },
+    text: {
+      primary: '#ffffff',
+      secondary: '#888888',
     },
   },
   typography: {
@@ -62,6 +102,67 @@ const theme = createTheme({
     },
     h5: {
       fontWeight: 500,
+    },
+  },
+  components: {
+    MuiPaper: {
+      styleOverrides: {
+        root: {
+          backgroundImage: 'none',
+          borderRadius: 12,
+          border: '1px solid rgba(40, 40, 40, 0.8)',
+        },
+      },
+    },
+    MuiButton: {
+      styleOverrides: {
+        root: {
+          borderRadius: 8,
+          textTransform: 'none',
+          fontWeight: 500,
+          padding: '10px 20px',
+        },
+        contained: {
+          boxShadow: 'none',
+        },
+      },
+    },
+    MuiTextField: {
+      styleOverrides: {
+        root: {
+          '& .MuiOutlinedInput-root': {
+            borderRadius: 8,
+          },
+        },
+      },
+    },
+    MuiOutlinedInput: {
+      styleOverrides: {
+        root: {
+          borderRadius: 8,
+        },
+      },
+    },
+    MuiChip: {
+      styleOverrides: {
+        root: {
+          borderRadius: 6,
+        },
+      },
+    },
+    MuiStepLabel: {
+      styleOverrides: {
+        label: {
+          fontSize: '0.875rem',
+        },
+      },
+    },
+    MuiSelect: {
+      styleOverrides: {
+        select: {
+          backdropFilter: 'blur(10px)', // More blur when dropdown is open
+        },
+      },
     },
   },
 });
@@ -83,32 +184,36 @@ const experienceLevels = [
   '1-2 years', '3-5 years', '6+ years'
 ];
 
-// List of countries (simplified for example)
-const countries = ['Sri Lanka','United States', 'United Kingdom', 'Canada', 'Australia', 'France', 'Germany', 'Japan', 'Brazil', 'India', 'Nigeria'];
-
-// Cities based on country (simplified for example)
-const citiesByCountry = {
-  'United States': ['New York', 'Los Angeles', 'Chicago', 'Miami', 'Nashville'],
-  'United Kingdom': ['London', 'Manchester', 'Liverpool', 'Glasgow', 'Birmingham'],
-  'Canada': ['Toronto', 'Montreal', 'Vancouver', 'Calgary', 'Ottawa'],
-  'Australia': ['Sydney', 'Melbourne', 'Brisbane', 'Perth', 'Adelaide'],
-  'France': ['Paris', 'Lyon', 'Marseille', 'Toulouse', 'Nice'],
-  'Germany': ['Berlin', 'Munich', 'Hamburg', 'Frankfurt', 'Cologne'],
-  'Japan': ['Tokyo', 'Osaka', 'Kyoto', 'Yokohama', 'Sapporo'],
-  'Brazil': ['São Paulo', 'Rio de Janeiro', 'Brasília', 'Salvador', 'Fortaleza'],
-  'India': ['Mumbai', 'Delhi', 'Bangalore', 'Chennai', 'Kolkata'],
-  'Nigeria': ['Lagos', 'Abuja', 'Kano', 'Ibadan', 'Port Harcourt']
-};
+// List of countries with their dial codes and flag codes
+const countries = [
+  { name: 'Sri Lanka', code: '+94', flag: 'lk' },
+  { name: 'United States', code: '+1', flag: 'us' },
+  { name: 'United Kingdom', code: '+44', flag: 'gb' },
+  { name: 'Canada', code: '+1', flag: 'ca' },
+  { name: 'Australia', code: '+61', flag: 'au' },
+  { name: 'France', code: '+33', flag: 'fr' },
+  { name: 'Germany', code: '+49', flag: 'de' },
+  { name: 'Japan', code: '+81', flag: 'jp' },
+  { name: 'Brazil', code: '+55', flag: 'br' },
+  { name: 'India', code: '+91', flag: 'in' },
+  { name: 'Nigeria', code: '+234', flag: 'ng' }
+];
 
 const MusicianRegistrationForm = () => {
   const [activeStep, setActiveStep] = useState(0);
+  const [animate, setAnimate] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [stepsCompleted, setStepsCompleted] = useState([false, false, false]);
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
+    countryCode: '',
     phoneNumber: '',
     email: '',
+    password: '',
+    confirmPassword: '',
     country: '',
-    city: '',
     role: '',
     genres: [],
     audioSamples: [],
@@ -118,8 +223,6 @@ const MusicianRegistrationForm = () => {
       youtube: '',
       appleMusic: ''
     },
-    profileImage: null,
-    coverImage: null,
     experience: '',
     socialMedia: {
       instagram: '',
@@ -129,10 +232,63 @@ const MusicianRegistrationForm = () => {
     termsAgreed: false
   });
   const [errors, setErrors] = useState({});
-  const [previewOpen, setPreviewOpen] = useState(false);
 
-  // Handle city options based on selected country
-  const cityOptions = formData.country ? citiesByCountry[formData.country] || [] : [];
+  useEffect(() => {
+    // Trigger animations when component mounts
+    const timer = setTimeout(() => {
+      setAnimate(true);
+    }, 100);
+    
+    return () => clearTimeout(timer);
+  }, []);
+
+  // Update progress bar when steps are completed
+  useEffect(() => {
+    const newStepsCompleted = [...stepsCompleted];
+    
+    if (activeStep === 0) {
+      if (
+        formData.firstName && 
+        formData.lastName && 
+        formData.email && 
+        formData.country && 
+        formData.phoneNumber && 
+        formData.password && 
+        formData.confirmPassword &&
+        formData.password === formData.confirmPassword
+      ) {
+        newStepsCompleted[0] = true;
+      } else {
+        newStepsCompleted[0] = false;
+      }
+    }
+    
+    if (activeStep === 1) {
+      if (
+        formData.role && 
+        formData.experience && 
+        (formData.role !== 'Music Producer' || formData.genres.length >= 2)
+      ) {
+        newStepsCompleted[1] = true;
+      } else {
+        newStepsCompleted[1] = false;
+      }
+    }
+    
+    if (activeStep === 2) {
+      if (formData.audioSamples.length > 0) {
+        newStepsCompleted[2] = true;
+      } else {
+        newStepsCompleted[2] = false;
+      }
+    }
+    
+    setStepsCompleted(newStepsCompleted);
+  }, [formData, activeStep]);
+
+  // Calculate progress percentage for the progress bar
+  const steps = ['Personal Information', 'Your Role', 'Portfolio'];
+  const progressPercentage = (stepsCompleted.filter(Boolean).length / steps.length) * 100;
 
   // Handle file uploads for audio samples
   const handleAudioUpload = (event) => {
@@ -143,23 +299,12 @@ const MusicianRegistrationForm = () => {
     });
   };
 
-  // Handle image uploads
-  const handleImageUpload = (type) => (event) => {
-    if (event.target.files && event.target.files[0]) {
-      const file = event.target.files[0];
-      setFormData({
-        ...formData,
-        [type]: file
-      });
-    }
-  };
-
   // Handle genre selection
   const handleGenreChange = (event) => {
     const { value } = event.target;
     setFormData({
       ...formData,
-      genres: value.slice(0, 2) // Max 2 genres
+      genres: value
     });
   };
 
@@ -191,6 +336,35 @@ const MusicianRegistrationForm = () => {
     }
   };
 
+  // Handle country selection and update country code
+  const handleCountryChange = (event) => {
+    const countryName = event.target.value;
+    const selectedCountry = countries.find(country => country.name === countryName);
+    
+    setFormData({
+      ...formData,
+      country: countryName,
+      countryCode: selectedCountry ? selectedCountry.code : '',
+    });
+    
+    if (errors.country) {
+      setErrors({
+        ...errors,
+        country: ''
+      });
+    }
+  };
+
+  // Toggle password visibility
+  const handleTogglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
+  };
+
+  // Toggle confirm password visibility
+  const handleToggleConfirmPasswordVisibility = () => {
+    setShowConfirmPassword(!showConfirmPassword);
+  };
+
   // Validate current step
   const validateStep = () => {
     const newErrors = {};
@@ -198,24 +372,27 @@ const MusicianRegistrationForm = () => {
     if (activeStep === 0) {
       if (!formData.firstName) newErrors.firstName = 'First name is required';
       if (!formData.lastName) newErrors.lastName = 'Last name is required';
+      if (!formData.countryCode) newErrors.countryCode = 'Country code is required';
       if (!formData.phoneNumber) newErrors.phoneNumber = 'Phone number is required';
       if (!formData.email) newErrors.email = 'Email is required';
       else if (!/\S+@\S+\.\S+/.test(formData.email)) newErrors.email = 'Email is invalid';
       if (!formData.country) newErrors.country = 'Country is required';
-      if (!formData.city) newErrors.city = 'City is required';
+      if (!formData.password) newErrors.password = 'Password is required';
+      else if (formData.password.length < 8) newErrors.password = 'Password must be at least 8 characters';
+      if (!formData.confirmPassword) newErrors.confirmPassword = 'Please confirm your password';
+      else if (formData.password !== formData.confirmPassword) newErrors.confirmPassword = 'Passwords do not match';
     } else if (activeStep === 1) {
       if (!formData.role) newErrors.role = 'Role is required';
-      if (formData.role === 'Music Producer' && formData.genres.length === 0) {
-        newErrors.genres = 'Please select at least one genre';
+      if (formData.role === 'Music Producer' && formData.genres.length < 2) {
+        newErrors.genres = 'Please select at least 2 genres';
       }
       if (!formData.experience) newErrors.experience = 'Experience level is required';
     } else if (activeStep === 2) {
       if (formData.audioSamples.length === 0) {
         newErrors.audioSamples = 'Please upload at least one audio sample';
       }
-    } else if (activeStep === 3) {
-      if (!formData.profileImage) {
-        newErrors.profileImage = 'Profile image is required';
+      if (!formData.termsAgreed) {
+        newErrors.termsAgreed = 'You must agree to the terms';
       }
     }
 
@@ -226,9 +403,9 @@ const MusicianRegistrationForm = () => {
   // Handle next button click
   const handleNext = () => {
     if (validateStep()) {
-      if (activeStep === 3) {
-        // Show preview before final submission
-        setPreviewOpen(true);
+      if (activeStep === 2) {
+        // Submit form if on last step
+        handleSubmit();
       } else {
         setActiveStep((prevStep) => prevStep + 1);
       }
@@ -244,10 +421,13 @@ const MusicianRegistrationForm = () => {
   const handleSubmit = () => {
     // Here you would normally send the data to your backend
     console.log('Form submitted:', formData);
-    // Close the preview and reset form or redirect
-    setPreviewOpen(false);
     alert('Registration successful!');
     // Reset form or redirect
+  };
+
+  // Go back to registration category
+  const navigateBack = () => {
+    window.history.back();
   };
 
   // Render the steps content
@@ -256,10 +436,29 @@ const MusicianRegistrationForm = () => {
       case 0:
         return (
           <Box sx={{ mt: 3 }}>
-            <Typography variant="h5" sx={{ mb: 3 }}>
+            <Typography 
+              variant="h5" 
+              sx={{ 
+                mb: 3, 
+                color: 'primary.main',
+                fontWeight: 'bold',
+                position: 'relative',
+                display: 'inline-block',
+                '&::after': {
+                  content: '""',
+                  position: 'absolute',
+                  bottom: -8,
+                  left: 0,
+                  width: 40,
+                  height: 3,
+                  background: 'rgb(11, 98, 248)',
+                  borderRadius: 4,
+                }
+              }}
+            >
               Your Personal Information
             </Typography>
-            <Typography variant="body1" sx={{ mb: 4 }}>
+            <Typography variant="body1" sx={{ mb: 4, color: 'text.secondary' }}>
               Enter your personal information to get closer to companies.
             </Typography>
             <Grid container spacing={3}>
@@ -271,6 +470,7 @@ const MusicianRegistrationForm = () => {
                   onChange={handleChange('firstName')}
                   error={!!errors.firstName}
                   helperText={errors.firstName}
+                  variant="outlined"
                 />
               </Grid>
               <Grid item xs={12} sm={6}>
@@ -281,7 +481,48 @@ const MusicianRegistrationForm = () => {
                   onChange={handleChange('lastName')}
                   error={!!errors.lastName}
                   helperText={errors.lastName}
+                  variant="outlined"
                 />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <FormControl fullWidth error={!!errors.country} variant="outlined">
+                  <InputLabel>Select Country</InputLabel>
+                  <Select
+                    value={formData.country}
+                    onChange={handleCountryChange}
+                    label="Select Country"
+                    MenuProps={{
+                      PaperProps: {
+                        sx: {
+                          backdropFilter: 'blur(15px) !important',
+                          backgroundColor: 'rgba(18, 30, 43, 0.95) !important',
+                        }
+                      }
+                    }}
+                  >
+                    {countries.map((country) => (
+                      <MenuItem key={country.name} value={country.name}>
+                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                          <Box component="span" sx={{ mr: 1, display: 'inline-flex' }}>
+                            <img 
+                              loading="lazy"
+                              width="20"
+                              height="14"
+                              src={`https://flagcdn.com/w20/${country.flag}.png`}
+                              srcSet={`https://flagcdn.com/w40/${country.flag}.png 2x`}
+                              alt={`Flag of ${country.name}`}
+                            />
+                          </Box>
+                          <Box component="span" sx={{ mr: 1 }}>
+                            {country.code}
+                          </Box>
+                          {country.name}
+                        </Box>
+                      </MenuItem>
+                    ))}
+                  </Select>
+                  {errors.country && <FormHelperText>{errors.country}</FormHelperText>}
+                </FormControl>
               </Grid>
               <Grid item xs={12} sm={6}>
                 <TextField
@@ -291,6 +532,30 @@ const MusicianRegistrationForm = () => {
                   onChange={handleChange('phoneNumber')}
                   error={!!errors.phoneNumber}
                   helperText={errors.phoneNumber}
+                  variant="outlined"
+                  InputProps={{
+                    startAdornment: formData.country ? (
+                      <InputAdornment position="start">
+                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                          {formData.country && (
+                            <Box component="span" sx={{ mr: 1, display: 'inline-flex' }}>
+                              <img 
+                                loading="lazy"
+                                width="20"
+                                height="14"
+                                src={`https://flagcdn.com/w20/${countries.find(c => c.name === formData.country)?.flag}.png`}
+                                srcSet={`https://flagcdn.com/w40/${countries.find(c => c.name === formData.country)?.flag}.png 2x`}
+                                alt={`Flag of ${formData.country}`}
+                              />
+                            </Box>
+                          )}
+                          <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                            {formData.countryCode}
+                          </Typography>
+                        </Box>
+                      </InputAdornment>
+                    ) : null
+                  }}
                 />
               </Grid>
               <Grid item xs={12} sm={6}>
@@ -302,41 +567,56 @@ const MusicianRegistrationForm = () => {
                   onChange={handleChange('email')}
                   error={!!errors.email}
                   helperText={errors.email}
+                  variant="outlined"
                 />
               </Grid>
               <Grid item xs={12} sm={6}>
-                <FormControl fullWidth error={!!errors.country}>
-                  <InputLabel>Select Country</InputLabel>
-                  <Select
-                    value={formData.country}
-                    onChange={handleChange('country')}
-                    label="Select Country"
-                  >
-                    {countries.map((country) => (
-                      <MenuItem key={country} value={country}>
-                        {country}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                  {errors.country && <FormHelperText>{errors.country}</FormHelperText>}
-                </FormControl>
+                <TextField
+                  fullWidth
+                  label="Password"
+                  type={showPassword ? 'text' : 'password'}
+                  value={formData.password}
+                  onChange={handleChange('password')}
+                  error={!!errors.password}
+                  helperText={errors.password}
+                  variant="outlined"
+                  InputProps={{
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        <IconButton
+                          onClick={handleTogglePasswordVisibility}
+                          edge="end"
+                        >
+                          {showPassword ? <VisibilityOffIcon /> : <VisibilityIcon />}
+                        </IconButton>
+                      </InputAdornment>
+                    ),
+                  }}
+                />
               </Grid>
               <Grid item xs={12} sm={6}>
-                <FormControl fullWidth disabled={!formData.country} error={!!errors.city}>
-                  <InputLabel>Select City</InputLabel>
-                  <Select
-                    value={formData.city}
-                    onChange={handleChange('city')}
-                    label="Select City"
-                  >
-                    {cityOptions.map((city) => (
-                      <MenuItem key={city} value={city}>
-                        {city}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                  {errors.city && <FormHelperText>{errors.city}</FormHelperText>}
-                </FormControl>
+                <TextField
+                  fullWidth
+                  label="Confirm Password"
+                  type={showConfirmPassword ? 'text' : 'password'}
+                  value={formData.confirmPassword}
+                  onChange={handleChange('confirmPassword')}
+                  error={!!errors.confirmPassword}
+                  helperText={errors.confirmPassword}
+                  variant="outlined"
+                  InputProps={{
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        <IconButton
+                          onClick={handleToggleConfirmPasswordVisibility}
+                          edge="end"
+                        >
+                          {showConfirmPassword ? <VisibilityOffIcon /> : <VisibilityIcon />}
+                        </IconButton>
+                      </InputAdornment>
+                    ),
+                  }}
+                />
               </Grid>
             </Grid>
           </Box>
@@ -344,17 +624,44 @@ const MusicianRegistrationForm = () => {
       case 1:
         return (
           <Box sx={{ mt: 3 }}>
-            <Typography variant="h5" sx={{ mb: 3 }}>
+            <Typography 
+              variant="h5" 
+              sx={{ 
+                mb: 3, 
+                color: 'primary.main',
+                fontWeight: 'bold',
+                position: 'relative',
+                display: 'inline-block',
+                '&::after': {
+                  content: '""',
+                  position: 'absolute',
+                  bottom: -8,
+                  left: 0,
+                  width: 40,
+                  height: 3,
+                  background: 'rgb(11, 98, 248)',
+                  borderRadius: 4,
+                }
+              }}
+            >
               Select Your Role
             </Typography>
             <Grid container spacing={3}>
               <Grid item xs={12}>
-                <FormControl fullWidth error={!!errors.role}>
+                <FormControl fullWidth error={!!errors.role} variant="outlined">
                   <InputLabel>Your Role</InputLabel>
                   <Select
                     value={formData.role}
                     onChange={handleChange('role')}
                     label="Your Role"
+                    MenuProps={{
+                      PaperProps: {
+                        sx: {
+                          backdropFilter: 'blur(15px) !important',
+                          backgroundColor: 'rgba(18, 30, 43, 0.95) !important',
+                        }
+                      }
+                    }}
                   >
                     {roles.map((role) => (
                       <MenuItem key={role} value={role}>
@@ -368,43 +675,77 @@ const MusicianRegistrationForm = () => {
               
               {formData.role === 'Music Producer' && (
                 <Grid item xs={12}>
-                  <FormControl fullWidth error={!!errors.genres}>
-                    <InputLabel>Select Genres (Max 2)</InputLabel>
+                  <FormControl fullWidth error={!!errors.genres} variant="outlined">
+                    <InputLabel>Select Genres (Minimum 2)</InputLabel>
                     <Select
                       multiple
                       value={formData.genres}
                       onChange={handleGenreChange}
-                      label="Select Genres (Max 2)"
+                      label="Select Genres (Minimum 2)"
+                      MenuProps={{
+                        PaperProps: {
+                          sx: {
+                            backdropFilter: 'blur(15px) !important',
+                            backgroundColor: 'rgba(18, 30, 43, 0.95) !important',
+                          }
+                        }
+                      }}
                       renderValue={(selected) => (
                         <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
                           {selected.map((value) => (
-                            <Chip key={value} label={value} />
+                            <Chip 
+                              key={value} 
+                              label={value} 
+                              sx={{ 
+                                backgroundColor: 'primary.dark',
+                                '& .MuiChip-deleteIcon': {
+                                  color: 'white',
+                                  '&:hover': { color: 'rgba(255, 255, 255, 0.7)' }
+                                }
+                              }}
+                            />
                           ))}
                         </Box>
                       )}
                     >
                       {genres.map((genre) => (
-                        <MenuItem
-                          key={genre}
-                          value={genre}
-                          disabled={formData.genres.length >= 2 && !formData.genres.includes(genre)}
-                        >
+                        <MenuItem key={genre} value={genre}>
                           {genre}
                         </MenuItem>
                       ))}
                     </Select>
                     {errors.genres && <FormHelperText>{errors.genres}</FormHelperText>}
                   </FormControl>
+                  {formData.genres.length >= 2 && (
+                    <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 1 }}>
+                      <Button
+                        variant="contained"
+                        color="success"
+                        size="small"
+                        startIcon={<CheckIcon />}
+                      >
+                        Done
+                      </Button>
+                    </Box>
+                  )}
                 </Grid>
               )}
               
               <Grid item xs={12}>
-                <FormControl fullWidth error={!!errors.experience}>
+                <FormControl fullWidth error={!!errors.experience} variant="outlined">
                   <InputLabel>Years of Experience</InputLabel>
                   <Select
                     value={formData.experience}
                     onChange={handleChange('experience')}
                     label="Years of Experience"
+                    MenuProps={{
+                      PaperProps: {
+                        sx: {
+                          backdropFilter: 'blur(15px) !important',
+                          backgroundColor: 'rgba(18, 30, 43, 0.95) !important',
+                        }
+                      }
+                    }}
                   >
                     {experienceLevels.map((level) => (
                       <MenuItem key={level} value={level}>
@@ -417,7 +758,15 @@ const MusicianRegistrationForm = () => {
               </Grid>
 
               <Grid item xs={12}>
-                <Typography variant="h6" sx={{ mb: 2, mt: 2 }}>
+                <Typography 
+                  variant="h6" 
+                  sx={{ 
+                    mb: 2, 
+                    mt: 2, 
+                    color: 'secondary.main',
+                    fontWeight: 'bold'
+                  }}
+                >
                   Social Media (Optional)
                 </Typography>
                 <Grid container spacing={2}>
@@ -430,6 +779,7 @@ const MusicianRegistrationForm = () => {
                       InputProps={{
                         startAdornment: <InstagramIcon color="primary" sx={{ mr: 1 }} />
                       }}
+                      variant="outlined"
                     />
                   </Grid>
                   <Grid item xs={12} sm={4}>
@@ -441,6 +791,7 @@ const MusicianRegistrationForm = () => {
                       InputProps={{
                         startAdornment: <TwitterIcon color="primary" sx={{ mr: 1 }} />
                       }}
+                      variant="outlined"
                     />
                   </Grid>
                   <Grid item xs={12} sm={4}>
@@ -452,6 +803,7 @@ const MusicianRegistrationForm = () => {
                       InputProps={{
                         startAdornment: <LinkedInIcon color="primary" sx={{ mr: 1 }} />
                       }}
+                      variant="outlined"
                     />
                   </Grid>
                 </Grid>
@@ -462,7 +814,26 @@ const MusicianRegistrationForm = () => {
       case 2:
         return (
           <Box sx={{ mt: 3 }}>
-            <Typography variant="h5" sx={{ mb: 3 }}>
+            <Typography 
+              variant="h5" 
+              sx={{ 
+                mb: 3, 
+                color: 'primary.main',
+                fontWeight: 'bold',
+                position: 'relative',
+                display: 'inline-block',
+                '&::after': {
+                  content: '""',
+                  position: 'absolute',
+                  bottom: -8,
+                  left: 0,
+                  width: 40,
+                  height: 3,
+                  background: 'rgb(11, 98, 248)',
+                  borderRadius: 4,
+                }
+              }}
+            >
               Upload Audio Samples & Portfolio Links
             </Typography>
             <Grid container spacing={3}>
@@ -473,8 +844,9 @@ const MusicianRegistrationForm = () => {
                     p: 3, 
                     textAlign: 'center',
                     borderStyle: 'dashed',
-                    borderColor: errors.audioSamples ? 'error.main' : 'divider',
-                    backgroundColor: 'background.paper'
+                    borderColor: errors.audioSamples ? 'error.main' : alpha(theme.palette.primary.main, 0.5),
+                    backgroundColor: alpha(theme.palette.primary.main, 0.05),
+                    transition: 'all 0.3s ease'
                   }}
                 >
                   <input
@@ -490,7 +862,13 @@ const MusicianRegistrationForm = () => {
                       variant="contained"
                       component="span"
                       startIcon={<CloudUploadIcon />}
-                      sx={{ mb: 2 }}
+                      sx={{ 
+                        mb: 2,
+                        background: 'linear-gradient(45deg, #0B62F8 30%, #21CBF3 90%)',
+                        '&:hover': {
+                          background: 'linear-gradient(45deg, #0B52D8 30%, #0BA3D1 90%)',
+                        }
+                      }}
                     >
                       Upload Audio (MP3, WAV)
                     </Button>
@@ -508,7 +886,14 @@ const MusicianRegistrationForm = () => {
               
               {formData.audioSamples.length > 0 && (
                 <Grid item xs={12}>
-                  <Typography variant="h6" sx={{ mb: 2 }}>
+                  <Typography 
+                    variant="h6" 
+                    sx={{ 
+                      mb: 2, 
+                      color: 'secondary.main',
+                      fontWeight: 'bold'
+                    }}
+                  >
                     Uploaded Samples ({formData.audioSamples.length})
                   </Typography>
                   <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
@@ -524,6 +909,15 @@ const MusicianRegistrationForm = () => {
                             audioSamples: newSamples
                           });
                         }}
+                        sx={{ 
+                          backgroundColor: 'background.paper',
+                          border: `1px solid ${alpha(theme.palette.primary.main, 0.5)}`,
+                          '& .MuiChip-deleteIcon': {
+                            color: theme.palette.primary.main,
+                            '&:hover': { color: theme.palette.primary.
+                              light }
+                          }
+                        }}
                       />
                     ))}
                   </Box>
@@ -531,7 +925,15 @@ const MusicianRegistrationForm = () => {
               )}
               
               <Grid item xs={12}>
-                <Typography variant="h6" sx={{ mb: 2, mt: 2 }}>
+                <Typography 
+                  variant="h6" 
+                  sx={{ 
+                    mb: 2, 
+                    mt: 2, 
+                    color: 'secondary.main',
+                    fontWeight: 'bold'
+                  }}
+                >
                   Portfolio Links (Optional)
                 </Typography>
                 <Grid container spacing={2}>
@@ -542,6 +944,8 @@ const MusicianRegistrationForm = () => {
                       placeholder="https://open.spotify.com/artist/..."
                       value={formData.portfolioLinks.spotify}
                       onChange={handleChange('portfolioLinks', 'spotify')}
+                      variant="outlined"
+                      sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
                     />
                   </Grid>
                   <Grid item xs={12} sm={6}>
@@ -551,6 +955,8 @@ const MusicianRegistrationForm = () => {
                       placeholder="https://soundcloud.com/..."
                       value={formData.portfolioLinks.soundcloud}
                       onChange={handleChange('portfolioLinks', 'soundcloud')}
+                      variant="outlined"
+                      sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
                     />
                   </Grid>
                   <Grid item xs={12} sm={6}>
@@ -560,6 +966,8 @@ const MusicianRegistrationForm = () => {
                       placeholder="https://youtube.com/..."
                       value={formData.portfolioLinks.youtube}
                       onChange={handleChange('portfolioLinks', 'youtube')}
+                      variant="outlined"
+                      sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
                     />
                   </Grid>
                   <Grid item xs={12} sm={6}>
@@ -569,184 +977,38 @@ const MusicianRegistrationForm = () => {
                       placeholder="https://music.apple.com/..."
                       value={formData.portfolioLinks.appleMusic}
                       onChange={handleChange('portfolioLinks', 'appleMusic')}
+                      variant="outlined"
+                      sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
                     />
                   </Grid>
                 </Grid>
               </Grid>
-            </Grid>
-          </Box>
-        );
-      case 3:
-        return (
-          <Box sx={{ mt: 3 }}>
-            <Typography variant="h5" sx={{ mb: 3 }}>
-              Profile & Cover Images
-            </Typography>
-            <Grid container spacing={4}>
-              <Grid item xs={12} md={6}>
-                <Typography variant="h6" sx={{ mb: 2 }}>
-                  Profile Image (Required)
-                </Typography>
-                <Paper 
-                  variant="outlined" 
-                  sx={{ 
-                    p: 3, 
-                    textAlign: 'center',
-                    height: 240,
-                    display: 'flex',
-                    flexDirection: 'column',
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    borderStyle: formData.profileImage ? 'solid' : 'dashed',
-                    borderColor: errors.profileImage ? 'error.main' : 'divider',
-                    backgroundColor: 'background.paper',
-                    backgroundSize: 'cover',
-                    backgroundPosition: 'center',
-                    ...(formData.profileImage && {
-                      backgroundImage: `url(${URL.createObjectURL(formData.profileImage)})`
-                    })
-                  }}
-                >
-                  {!formData.profileImage && (
-                    <>
-                      <input
-                        accept="image/*"
-                        id="profile-image-upload"
-                        type="file"
-                        onChange={handleImageUpload('profileImage')}
-                        style={{ display: 'none' }}
-                      />
-                      <label htmlFor="profile-image-upload">
-                        <Button
-                          variant="contained"
-                          component="span"
-                          startIcon={<CloudUploadIcon />}
-                          sx={{ mb: 2 }}
-                        >
-                          Upload Profile Image
-                        </Button>
-                      </label>
-                      <Typography variant="body2" color="textSecondary">
-                        Square format recommended
-                      </Typography>
-                    </>
-                  )}
-                  
-                  {formData.profileImage && (
-                    <Box sx={{ position: 'absolute', right: 16, bottom: 16 }}>
-                      <input
-                        accept="image/*"
-                        id="profile-image-change"
-                        type="file"
-                        onChange={handleImageUpload('profileImage')}
-                        style={{ display: 'none' }}
-                      />
-                      <label htmlFor="profile-image-change">
-                        <Button
-                          variant="contained"
-                          component="span"
-                          size="small"
-                        >
-                          Change
-                        </Button>
-                      </label>
-                    </Box>
-                  )}
-                </Paper>
-                {errors.profileImage && (
-                  <Typography color="error" variant="body2" sx={{ mt: 1 }}>
-                    {errors.profileImage}
-                  </Typography>
-                )}
-              </Grid>
-              
-              <Grid item xs={12} md={6}>
-                <Typography variant="h6" sx={{ mb: 2 }}>
-                  Cover Image (Optional)
-                </Typography>
-                <Paper 
-                  variant="outlined" 
-                  sx={{ 
-                    p: 3, 
-                    textAlign: 'center',
-                    height: 240,
-                    display: 'flex',
-                    flexDirection: 'column',
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    borderStyle: formData.coverImage ? 'solid' : 'dashed',
-                    borderColor: 'divider',
-                    backgroundColor: 'background.paper',
-                    backgroundSize: 'cover',
-                    backgroundPosition: 'center',
-                    ...(formData.coverImage && {
-                      backgroundImage: `url(${URL.createObjectURL(formData.coverImage)})`
-                    })
-                  }}
-                >
-                  {!formData.coverImage && (
-                    <>
-                      <input
-                        accept="image/*"
-                        id="cover-image-upload"
-                        type="file"
-                        onChange={handleImageUpload('coverImage')}
-                        style={{ display: 'none' }}
-                      />
-                      <label htmlFor="cover-image-upload">
-                        <Button
-                          variant="contained"
-                          component="span"
-                          startIcon={<CloudUploadIcon />}
-                          sx={{ mb: 2 }}
-                        >
-                          Upload Cover Image
-                        </Button>
-                      </label>
-                      <Typography variant="body2" color="textSecondary">
-                        Banner format (1200x300) recommended
-                      </Typography>
-                    </>
-                  )}
-                  
-                  {formData.coverImage && (
-                    <Box sx={{ position: 'absolute', right: 16, bottom: 16 }}>
-                      <input
-                        accept="image/*"
-                        id="cover-image-change"
-                        type="file"
-                        onChange={handleImageUpload('coverImage')}
-                        style={{ display: 'none' }}
-                      />
-                      <label htmlFor="cover-image-change">
-                        <Button
-                          variant="contained"
-                          component="span"
-                          size="small"
-                        >
-                          Change
-                        </Button>
-                      </label>
-                    </Box>
-                  )}
-                </Paper>
-              </Grid>
-              
+
               <Grid item xs={12} sx={{ mt: 3 }}>
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      checked={formData.termsAgreed}
-                      onChange={handleChange('termsAgreed')}
-                      color="primary"
-                    />
-                  }
-                  label={
-                    <Typography variant="body2">
-                      I agree to the Terms of Service and Privacy Policy
-                    </Typography>
-                  }
-                />
+                <FormControl error={!!errors.termsAgreed}>
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        checked={formData.termsAgreed}
+                        onChange={handleChange('termsAgreed')}
+                        color="primary"
+                        sx={{ 
+                          '&.Mui-checked': { 
+                            color: theme.palette.primary.main 
+                          } 
+                        }}
+                      />
+                    }
+                    label={
+                      <Typography variant="body2">
+                        I agree to the Terms of Service and Privacy Policy
+                      </Typography>
+                    }
+                  />
+                  {errors.termsAgreed && (
+                    <FormHelperText>{errors.termsAgreed}</FormHelperText>
+                  )}
+                </FormControl>
               </Grid>
             </Grid>
           </Box>
@@ -756,270 +1018,197 @@ const MusicianRegistrationForm = () => {
     }
   };
 
-  // Render profile preview dialog
-  const renderProfilePreview = () => (
-    <Dialog
-      open={previewOpen}
-      onClose={() => setPreviewOpen(false)}
-      maxWidth="md"
-      fullWidth
-    >
-      <DialogTitle>
-        <Typography variant="h5">
-          Preview Your Profile
-        </Typography>
-      </DialogTitle>
-      <DialogContent>
-        <Box sx={{ position: 'relative', mb: 4, height: 200, backgroundColor: '#f0f0f0' }}>
-          {formData.coverImage && (
-            <Box
-              component="img"
-              src={URL.createObjectURL(formData.coverImage)}
-              sx={{
-                width: '100%',
-                height: 200,
-                objectFit: 'cover'
-              }}
-              alt="Cover"
-            />
-          )}
-          
-          <Box
-            sx={{
-              position: 'absolute',
-              bottom: -50,
-              left: 32,
-              width: 100,
-              height: 100,
-              borderRadius: '50%',
-              border: '4px solid white',
-              overflow: 'hidden',
-              backgroundColor: '#ccc'
+  return (
+    <ThemeProvider theme={theme}>
+      <GradientBackground>
+        {/* Background Effects */}
+        <Box sx={{ position: 'absolute', inset: 0, overflow: 'hidden', pointerEvents: 'none', zIndex: 0 }}>
+          <BackgroundEffect 
+            sx={{ 
+              top: { xs: -50, md: -100 }, 
+              right: { xs: -50, md: -100 }, 
+              opacity: animate ? 0.7 : 0, 
+              transition: 'opacity 1.2s' 
+            }} 
+          />
+          <BackgroundEffect 
+            sx={{ 
+              bottom: { xs: -75, md: -150 }, 
+              left: { xs: -75, md: -150 }, 
+              animationDelay: '2s', 
+              opacity: animate ? 0.7 : 0, 
+              transition: 'opacity 1.2s', 
+              transitionDelay: '0.3s' 
+            }} 
+          />
+        </Box>
+
+        {/* Fixed Progress Bar - Improved position and style */}
+        <Box sx={{ 
+          width: '100%', 
+          position: 'sticky', 
+          top: 0, 
+          zIndex: 9999,
+          backgroundColor: 'rgba(18, 30, 43, 0.95)',
+          borderBottom: `1px solid ${alpha(theme.palette.primary.main, 0.2)}`,
+          backdropFilter: 'blur(5px)',
+          mb: 4
+        }}>
+          <LinearProgress 
+            variant="determinate" 
+            value={progressPercentage} 
+            sx={{ 
+              height: 6,
+              backgroundColor: alpha(theme.palette.primary.main, 0.15),
+              '& .MuiLinearProgress-bar': {
+                background: `linear-gradient(90deg, ${theme.palette.primary.main} 0%, ${theme.palette.secondary.main} 100%)`,
+                transition: 'transform 0.5s ease'
+              }
             }}
-          >
-            {formData.profileImage && (
-              <Box
-                component="img"
-                src={URL.createObjectURL(formData.profileImage)}
-                sx={{
-                  width: '100%',
-                  height: '100%',
-                  objectFit: 'cover'
-                }}
-                alt="Profile"
-              />
-            )}
+          />
+          <Box sx={{ p: 1, display: 'flex', justifyContent: 'center' }}>
+            <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+              Step {activeStep + 1} of {steps.length} - {steps[activeStep]}
+            </Typography>
+          </Box>
+          
+          {/* Back Button moved below progress bar */}
+          <Box sx={{ px: 2, pb: 1 }}>
+            <Button
+              onClick={navigateBack}
+              startIcon={<ArrowBackIcon sx={{ fontSize: 20 }} />}
+              sx={{ 
+                color: '#737373',
+                textTransform: 'uppercase',
+                justifyContent: 'flex-start',
+                pl: 1,
+                '&:hover': {
+                  color: '#0B62F8',
+                  background: 'transparent',
+                }
+              }}
+            >
+              Back
+            </Button>
           </Box>
         </Box>
-        
-        <Box sx={{ mt: 8, mb: 4 }}>
-          <Typography variant="h4" sx={{ mb: 1 }}>
-            {formData.firstName} {formData.lastName}
-          </Typography>
-          <Typography variant="h6" color="primary" sx={{ mb: 3 }}>
-            {formData.role}
-          </Typography>
+      
+        <Container component="main" maxWidth="md" sx={{ mb: 6, pt: 4, zIndex: 1, position: 'relative' }}>
+          <Paper 
+            elevation={6} 
+            sx={{ 
+              p: 4, 
+              mt: 4, 
+              background: `linear-gradient(to bottom, ${alpha('#121e2b', 0.9)}, ${alpha('#16213e', 0.9)})`,
+              boxShadow: `0 8px 32px 0 ${alpha('#000', 0.37)}`,
+              border: `1px solid ${alpha(theme.palette.primary.main, 0.1)}`,
+              backdropFilter: 'blur(4px)',
+              opacity: animate ? 1 : 0,
+              transform: animate ? 'translateY(0)' : 'translateY(20px)',
+              transition: 'opacity 0.8s, transform 0.8s',
+            }}
+          >
+            <Box sx={{ mb: 4 }}>
+              <Typography 
+                variant="h4" 
+                align="center" 
+                sx={{ 
+                  color: 'primary.main', 
+                  fontWeight: 700,
+                  textShadow: '0 2px 4px rgba(0,0,0,0.3)'
+                }} 
+                gutterBottom
+              >
+                Musician Registration
+              </Typography>
+              <Typography variant="body1" align="center" color="text.secondary">
+                Fill out the form to create your professional musician profile
+              </Typography>
+            </Box>
+
+            <Stepper 
+              activeStep={activeStep} 
+              alternativeLabel 
+              sx={{ 
+                mb: 5,
+                '& .MuiStepIcon-root': {
+                  color: alpha(theme.palette.primary.main, 0.3),
+                  '&.Mui-active': {
+                    color: theme.palette.primary.main,
+                  },
+                  '&.Mui-completed': {
+                    color: theme.palette.success.main,
+                  },
+                },
+                '& .MuiStepConnector-line': {
+                  borderColor: alpha(theme.palette.primary.main, 0.2),
+                },
+              }}
+            >
+              {steps.map((label) => (
+                <Step key={label}>
+                  <StepLabel>{label}</StepLabel>
+                </Step>
+              ))}
+            </Stepper>
+
+            {getStepContent(activeStep)}
+
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 4 }}>
+              <Button
+                disabled={activeStep === 0}
+                onClick={handleBack}
+                startIcon={<ArrowBackIcon />}
+                sx={{ 
+                  color: theme.palette.text.secondary,
+                  '&:hover': {
+                    color: theme.palette.text.primary,
+                    backgroundColor: alpha(theme.palette.primary.main, 0.1),
+                  },
+                }}
+              >
+                Back
+              </Button>
+
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={handleNext}
+                endIcon={activeStep === steps.length - 1 ? <CheckIcon /> : <ArrowForwardIcon />}
+                sx={{ 
+                  background: `linear-gradient(45deg, ${theme.palette.primary.main} 30%, ${alpha(theme.palette.primary.light, 0.9)} 90%)`,
+                  boxShadow: `0 3px 10px ${alpha(theme.palette.primary.main, 0.5)}`,
+                  '&:hover': {
+                    background: `linear-gradient(45deg, ${theme.palette.primary.dark} 30%, ${theme.palette.primary.main} 90%)`,
+                  }
+                }}
+                // Disable submit button on last step if terms not agreed
+                disabled={activeStep === steps.length - 1 && !formData.termsAgreed}
+              >
+                {activeStep === steps.length - 1 ? 'Submit' : 'Next'}
+              </Button>
+            </Box>
+          </Paper>
           
-          <Grid container spacing={3}>
-            <Grid item xs={12} md={6}>
-              <Card variant="outlined" sx={{ mb: 3 }}>
-                <CardContent>
-                  <Typography variant="h6" gutterBottom>
-                    Personal Information
-                  </Typography>
-                  <Typography variant="body1">
-                    <strong>Location:</strong> {formData.city}, {formData.country}
-                  </Typography>
-                  <Typography variant="body1">
-                    <strong>Email:</strong> {formData.email}
-                  </Typography>
-                  <Typography variant="body1">
-                    <strong>Phone:</strong> {formData.phoneNumber}
-                  </Typography>
-                  <Typography variant="body1">
-                    <strong>Experience:</strong> {formData.experience}
-                  </Typography>
-                  
-                  {formData.role === 'Music Producer' && formData.genres.length > 0 && (
-                    <Box sx={{ mt: 2 }}>
-                      <Typography variant="body1" sx={{ mb: 1 }}>
-                        <strong>Genres:</strong>
-                      </Typography>
-                      <Box sx={{ display: 'flex', gap: 1 }}>
-                        {formData.genres.map((genre) => (
-                          <Chip key={genre} label={genre} color="primary" size="small" />
-                        ))}
-                      </Box>
-                    </Box>
-                  )}
-                </CardContent>
-              </Card>
-              
-              {Object.values(formData.socialMedia).some(val => val) && (
-                <Card variant="outlined">
-                  <CardContent>
-                    <Typography variant="h6" gutterBottom>
-                      Social Media
-                    </Typography>
-                    <Box sx={{ display: 'flex', gap: 2 }}>
-                      {formData.socialMedia.instagram && (
-                        <IconButton color="primary">
-                          <InstagramIcon />
-                        </IconButton>
-                      )}
-                      {formData.socialMedia.twitter && (
-                        <IconButton color="primary">
-                          <TwitterIcon />
-                        </IconButton>
-                      )}
-                      {formData.socialMedia.linkedin && (
-                        <IconButton color="primary">
-                          <LinkedInIcon />
-                        </IconButton>
-                      )}
-                    </Box>
-                  </CardContent>
-                </Card>
-              )}
-            </Grid>
-            
-            <Grid item xs={12} md={6}>
-              <Card variant="outlined" sx={{ mb: 3 }}>
-                <CardContent>
-                  <Typography variant="h6" gutterBottom>
-                    Audio Samples
-                  </Typography>
-                  {formData.audioSamples.length > 0 ? (
-                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                      {formData.audioSamples.map((file, index) => (
-                        <Typography key={index} variant="body1">
-                          {file.name}
-                        </Typography>
-                      ))}
-                    </Box>
-                  ) : (
-                    <Typography variant="body2" color="textSecondary">
-                      No audio samples uploaded
-                    </Typography>
-                  )}
-                </CardContent>
-              </Card>
-              
-              {Object.values(formData.portfolioLinks).some(val => val) && (
-                <Card variant="outlined">
-                  <CardContent>
-                    <Typography variant="h6" gutterBottom>
-                      Portfolio Links
-                    </Typography>
-                    <Box sx={{ display: 'flex',
-                    // Continue the Portfolio Links card in the preview dialog
-                    flexDirection: 'column', gap: 1 }}>
-                    {formData.portfolioLinks.spotify && (
-                    <Link href={formData.portfolioLinks.spotify} target="_blank" rel="noopener noreferrer">
-                        Spotify
-                    </Link>
-                    )}
-                    {formData.portfolioLinks.soundcloud && (
-                    <Link href={formData.portfolioLinks.soundcloud} target="_blank" rel="noopener noreferrer">
-                        SoundCloud
-                    </Link>
-                    )}
-                    {formData.portfolioLinks.youtube && (
-                    <Link href={formData.portfolioLinks.youtube} target="_blank" rel="noopener noreferrer">
-                        YouTube
-                    </Link>
-                    )}
-                    {formData.portfolioLinks.appleMusic && (
-                    <Link href={formData.portfolioLinks.appleMusic} target="_blank" rel="noopener noreferrer">
-                        Apple Music
-                    </Link>
-                    )}
-                    </Box>
-                    </CardContent>
-                    </Card>
-                    )}
-                    </Grid>
-                    </Grid>
-                    </Box>
-                    </DialogContent>
-                    <DialogActions>
-                    <Button onClick={() => setPreviewOpen(false)}>Edit Profile</Button>
-                    <Button 
-                    variant="contained" 
-                    onClick={handleSubmit}
-                    disabled={!formData.termsAgreed}
-                    startIcon={<CheckIcon />}
-                    >
-                    Complete Registration
-                    </Button>
-                    </DialogActions>
-                    </Dialog>
-                    );
-
-                    // Steps titles for the stepper
-                    const steps = ['Personal Information', 'Your Role', 'Portfolio', 'Profile Images'];
-
-                    return (
-                    <ThemeProvider theme={theme}>
-                    <Container component="main" maxWidth="md" sx={{ mb: 6 }}>
-                    <Paper elevation={3} sx={{ p: 4, mt: 4 }}>
-                    <Box sx={{ mb: 4 }}>
-                    <Typography variant="h4" align="center" color="secondary" gutterBottom>
-                    Musician Registration
-                    </Typography>
-                    <Typography variant="body1" align="center" color="textSecondary">
-                    Fill out the form to create your professional musician profile
-                    </Typography>
-                    </Box>
-
-                    <Stepper activeStep={activeStep} alternativeLabel sx={{ mb: 5 }}>
-                    {steps.map((label) => (
-                    <Step key={label}>
-                    <StepLabel>{label}</StepLabel>
-                    </Step>
-                    ))}
-                    </Stepper>
-
-                    {getStepContent(activeStep)}
-
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 4 }}>
-                    <Button
-                    disabled={activeStep === 0}
-                    onClick={handleBack}
-                    startIcon={<ArrowBackIcon />}
-                    >
-                    Back
-                    </Button>
-
-                    <Box>
-                    {activeStep === steps.length - 1 ? (
-                    <Button
-                    variant="contained"
-                    color="primary"
-                    onClick={handleNext}
-                    endIcon={<PreviewIcon />}
-                    disabled={!formData.termsAgreed}
-                    >
-                    Preview Profile
-                    </Button>
-                    ) : (
-                    <Button
-                    variant="contained"
-                    color="primary"
-                    onClick={handleNext}
-                    endIcon={<ArrowForwardIcon />}
-                    >
-                    Next
-                    </Button>
-                    )}
-                    </Box>
-                    </Box>
-                    </Paper>
-
-                    {renderProfilePreview()}
-                    </Container>
-                    </ThemeProvider>
-                    );
-                    };
+          {/* Already have an account? */}
+          <Box sx={{ 
+            mt: 3,
+            textAlign: 'center', 
+            opacity: animate ? 1 : 0, 
+            transform: animate ? 'translateY(0)' : 'translateY(20px)', 
+            transition: 'opacity 0.8s, transform 0.8s', 
+            transitionDelay: '0.3s',
+            zIndex: 10,
+            position: 'relative'
+          }}>
+            <Typography variant="body2" color="#737373">
+              Already have an account? <Link href="/login" sx={{ color: '#4A89DC', fontWeight: 600, textDecoration: 'none', '&:hover': { textDecoration: 'underline' } }}>Sign in</Link>
+            </Typography>
+          </Box>
+        </Container>
+      </GradientBackground>
+    </ThemeProvider>
+  );
+};
 
 export default MusicianRegistrationForm;
