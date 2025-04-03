@@ -8,6 +8,7 @@ import ContactUs from "./Components/ContactUs";
 import MusicPro from "./Profiles/MusicPro";
 import RegistationCatogary from "./Auth/RegistationCatogary";
 import MusicianRegistrationForm from "./Auth/MusicianRegister";
+import ForgotPassword from "./Components/FogotPass";
 
 
 
@@ -19,6 +20,7 @@ const App = () => {
         <Route path="/home" element={<Home />} />
         <Route path="/register" element={<Register />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/about" element={<AboutUs />} />
         <Route path="/contact" element={<ContactUs />} />
         <Route path="/musicpro" element={<MusicPro />} />
