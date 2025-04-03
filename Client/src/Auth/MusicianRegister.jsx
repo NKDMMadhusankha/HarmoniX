@@ -635,8 +635,26 @@ const MusicianRegistrationForm = () => {
           <BackgroundEffect sx={{ bottom: -75, left: -75, opacity: animate ? 0.7 : 0 }} />
         </Box>
 
-        <Container component="main" maxWidth="md" sx={{ mb: 6, pt: 4, zIndex: 1 }}>
-          <Paper elevation={6} sx={{ p: 4, mt: 4 }}>
+        {/* Back Button at Top */}
+        <Box sx={{ width: '100%', p: 2, zIndex: 1 }}>
+          <Button
+            onClick={navigateBack}
+            startIcon={<ArrowBackIcon />}
+            sx={{ 
+              color: '#737373',
+              textTransform: 'uppercase',
+              '&:hover': {
+                color: '#0B62F8',
+                background: 'transparent',
+              }
+            }}
+          >
+            Back
+          </Button>
+        </Box>
+      
+        <Container component="main" maxWidth="md" sx={{ mb: 6, zIndex: 1 }}>
+          <Paper elevation={6} sx={{ p: 4, mt: 2 }}>
             <Box sx={{ mb: 4 }}>
               <Typography variant="h4" align="center" gutterBottom>
                 Musician Registration

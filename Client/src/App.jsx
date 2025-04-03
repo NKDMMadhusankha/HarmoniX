@@ -9,6 +9,8 @@ import MusicPro from "./Profiles/MusicPro";
 import RegistationCatogary from "./Auth/RegistationCatogary";
 import MusicianRegistrationForm from "./Auth/MusicianRegister";
 import ForgotPassword from "./Components/FogotPass";
+import MusicProducers from "./Pages/MusicProducers";
+
 
 
 
@@ -26,6 +28,10 @@ const App = () => {
         <Route path="/musicpro" element={<MusicPro />} />
         <Route path="/catogary" element={<RegistationCatogary />} />
         <Route path="/musician/register" element={<MusicianRegistrationForm />} />
+
+        {/* Musicians Pages */}
+        <Route path="/music/producer" element={<MusicProducers />} />
+        
         
       </Routes>
     </Router>
