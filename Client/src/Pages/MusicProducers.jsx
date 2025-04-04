@@ -17,9 +17,6 @@ import Navbar from '../Components/Navbar';
 import Footer from '../Components/Footer';
 import Loader from '../Components/Loader';
 
-// Banner image
-import bannerImage from '../assets/MpBanner.png';
-
 // Card images
 import card7 from '../assets/card7.jpg';
 import card8 from '../assets/card8.jpg';
@@ -72,19 +69,21 @@ const ProducerCard = ({ image, producerInfo, index }) => {
         height: '100%', 
         display: 'flex', 
         flexDirection: 'column',
-        borderRadius: 2,
+        borderRadius: { xs: 1.5, sm: 2 },
         overflow: 'hidden',
         boxShadow: 'none',
         backgroundColor: '#FFFFFF',
+        // border: '1px solid white',
+        boxShadow: '0px 10px 30px rgba(0, 102, 255, 0.31)',
+        transition: 'transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out',
         '&:hover': {
           boxShadow: '0px 4px 20px rgba(0, 120, 255, 0.5)',
-          transform: 'scale(1.02)',
-          transition: 'transform 0.4s ease-in-out',
+          transform: 'translateY(-8px)',
         }
       }}>
         <CardMedia
           component="img"
-          height="240"
+          height={{ xs: 180, sm: 200, md: 240 }}
           image={image}
           alt={producerInfo.name}
           sx={{
@@ -93,8 +92,8 @@ const ProducerCard = ({ image, producerInfo, index }) => {
         />
         <CardContent sx={{ 
           flexGrow: 1, 
-          p: { xs: 2, sm: 3 },
-          pb: 1,
+          p: { xs: 1.5, sm: 2, md: 3 },
+          pb: { xs: 0.5, sm: 1 },
         }}>
           <Typography 
             gutterBottom 
@@ -103,8 +102,9 @@ const ProducerCard = ({ image, producerInfo, index }) => {
             color="#0078FF" 
             fontWeight="bold"
             sx={{
-              fontSize: { xs: '1.25rem', sm: '1.5rem' },
-              mb: 0.5
+              fontSize: { xs: '1.1rem', sm: '1.25rem', md: '1.5rem' },
+              mb: { xs: 0.25, sm: 0.5 },
+              lineHeight: 1.2
             }}
           >
             {producerInfo.name}
@@ -112,8 +112,11 @@ const ProducerCard = ({ image, producerInfo, index }) => {
           <Typography 
             variant="body2" 
             color="#999" 
-            mb={2}
-            sx={{ fontSize: { xs: '0.875rem', sm: '1rem' } }}
+            mb={{ xs: 1, sm: 1.5, md: 2 }}
+            sx={{ 
+              fontSize: { xs: '0.8rem', sm: '0.875rem', md: '1rem' },
+              fontWeight: 500
+            }}
           >
             {producerInfo.location}
           </Typography>
@@ -121,8 +124,13 @@ const ProducerCard = ({ image, producerInfo, index }) => {
             variant="body2" 
             color="black"
             sx={{ 
-              fontSize: { xs: '0.875rem', sm: '1rem' },
-              lineHeight: 1.5
+              fontSize: { xs: '0.8rem', sm: '0.875rem', md: '1rem' },
+              lineHeight: { xs: 1.4, sm: 1.5, md: 1.6 },
+              display: '-webkit-box',
+              overflow: 'hidden',
+              WebkitBoxOrient: 'vertical',
+              WebkitLineClamp: { xs: 4, sm: 5, md: 6 },
+              textOverflow: 'ellipsis'
             }}
           >
             {producerInfo.description}
@@ -130,9 +138,9 @@ const ProducerCard = ({ image, producerInfo, index }) => {
         </CardContent>
         <CardActions sx={{ 
           justifyContent: 'flex-start', 
-          px: { xs: 2, sm: 3 },
-          pb: 2, 
-          pt: 0
+          px: { xs: 1.5, sm: 2, md: 3 },
+          pb: { xs: 1.5, sm: 2 }, 
+          pt: { xs: 0.5, sm: 0.75 }
         }}>
           <Button 
             size="small" 
@@ -140,10 +148,12 @@ const ProducerCard = ({ image, producerInfo, index }) => {
               color: '#0078FF',
               fontWeight: 'bold',
               p: 0,
+              fontSize: { xs: '0.7rem', sm: '0.75rem', md: '0.8rem' },
               textTransform: 'uppercase',
               '&:hover': {
                 backgroundColor: 'transparent',
                 textDecoration: 'underline',
+                color: '#0056b3',
               }
             }}
           >
@@ -199,17 +209,39 @@ const MusicProducersPage = () => {
     <Box sx={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', backgroundColor: '#0D0D0D' }}>
       <Navbar />
       
-      {/* Banner Section - Modified with brightness control and responsive adjustments */}
+      {/* Banner Section with Video Background */}
       <Box
         sx={{
           position: 'relative',
-          height: { xs: '400px', sm: '550px', md: '720px' },
+          height: { xs: '300px', sm: '400px', md: '550px', lg: '720px' },
           display: 'flex',
           alignItems: 'center',
-          mb: { xs: 3, sm: 4, md: 6 },
+          mb: { xs: 2, sm: 3, md: 4, lg: 6 },
+          overflow: 'hidden'
         }}
       >
-        {/* Darkened background image */}
+        {/* Video Background */}
+        <Box
+          component="video"
+          autoPlay
+          loop
+          muted
+          playsInline
+          sx={{
+            position: 'absolute',
+            top: '50%',
+            left: '50%',
+            width: '100%',
+            height: '100%',
+            objectFit: 'cover',
+            transform: 'translate(-50%, -50%)',
+            zIndex: 0
+          }}
+        >
+          <source src="https://cdn.pixabay.com/video/2022/07/01/122740-726192563_large.mp4" type="video/mp4" />
+        </Box>
+        
+        {/* Dark overlay */}
         <Box
           sx={{
             position: 'absolute',
@@ -217,18 +249,8 @@ const MusicProducersPage = () => {
             left: 0,
             right: 0,
             bottom: 0,
-            backgroundImage: `url(${bannerImage})`,
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-            '&::before': {
-              content: '""',
-              position: 'absolute',
-              top: 0,
-              left: 0,
-              right: 0,
-              bottom: 0,
-              backgroundColor: 'rgba(0, 0, 0, 0.4)',
-            }
+            background: 'linear-gradient(to bottom, rgba(0,0,0,0.5) 0%, rgba(0,0,0,0.7) 100%)',
+            zIndex: 1
           }}
         />
         
@@ -236,16 +258,19 @@ const MusicProducersPage = () => {
           maxWidth={false}
           sx={{
             position: 'relative',
-            zIndex: 1,
-            pl: { xs: 3, sm: 4, md: 6, lg: '8%', xl: '12%' }, // Adjusted left padding for all screen sizes
-            pr: { xs: 3, sm: 4, md: 6 },
-            maxWidth: '100%' // Full width container
+            zIndex: 2,
+            pl: { xs: 2, sm: 3, md: 5, lg: '8%', xl: '12%' },
+            pr: { xs: 2, sm: 3, md: 5 },
+            maxWidth: '100%',
+            height: '100%',
+            display: 'flex',
+            alignItems: 'center'
           }}
         >
           <Box 
             sx={{ 
-              textAlign: { xs: 'center', md: 'left' },
-              maxWidth: { xs: '100%', sm: '90%', md: '80%', lg: '70%' }
+              textAlign: { xs: 'center', sm: 'left' },
+              maxWidth: { xs: '100%', sm: '85%', md: '75%', lg: '65%' }
             }}
           >
             <Typography
@@ -254,8 +279,10 @@ const MusicProducersPage = () => {
               sx={{
                 color: theme.palette.common.white,
                 fontWeight: 'bold',
-                mb: 1,
-                fontSize: { xs: '2.5rem', sm: '3.5rem', md: '4.5rem', lg: '5.1rem' },
+                mb: { xs: 0.5, sm: 1 },
+                fontSize: { xs: '2rem', sm: '2.9rem', md: '3.5rem', lg: '4.5rem', xl: '6.1rem' },
+                lineHeight: { xs: 1.1, sm: 1.1, md: 1.2 },
+                textShadow: '0px 2px 4px rgba(0,0,0,0.5)'
               }}
             >
               Top Music Producers
@@ -265,9 +292,11 @@ const MusicProducersPage = () => {
               component="h2"
               sx={{
                 color: theme.palette.common.white,
-                mb: 2,
+                mb: { xs: 1, sm: 1.5, md: 2 },
                 fontStyle: 'italic',
-                fontSize: { xs: '1.5rem', sm: '2rem', md: '2.5rem' },
+                fontWeight: '700',
+                fontSize: { xs: '1.2rem', sm: '2rem', md: '2rem', lg: '3.5rem' },
+                textShadow: '0px 2px 4px rgba(0,0,0,0.5)'
               }}
             >
               For Your Next HIT ...
@@ -275,10 +304,11 @@ const MusicProducersPage = () => {
             <Typography
               variant="body1"
               sx={{
-                color: theme.palette.common.white,
-                mb: 3,
-                fontStyle: 'Roboto Mono, monospace',
-                fontSize: { xs: '0.9rem', md: '1rem' },
+                color: 'rgba(255,255,255,0.9)',
+                mb: { xs: 2, sm: 2.5, md: 3 },
+                fontSize: { xs: '0.8rem', sm: '1rem', md: '1.3rem' },
+                maxWidth: { xs: '100%', md: '80%', lg: '70%', xl: '70%' },
+                mx: { xs: 'auto', sm: 0 }
               }}
             >
               Sign up free to browse our artist network & connect
@@ -286,15 +316,18 @@ const MusicProducersPage = () => {
             <Button
               variant="contained"
               sx={{
-                px: { xs: 2, md: 3 },
-                py: { xs: 1, md: 1.5 },
-                borderRadius: 2,
+                px: { xs: 2, sm: 2.5, md: 3 },
+                py: { xs: 1, sm: 1.2, md: 1.5 },
+                borderRadius: { xs: 1, sm: 1.5, md: 2 },
                 fontWeight: 'bold',
                 backgroundColor: '#0078FF',
                 color: 'white',
                 textTransform: 'uppercase',
+                fontSize: { xs: '0.75rem', sm: '0.8rem', md: '0.9rem' },
                 '&:hover': {
                   backgroundColor: '#0056b3',
+                  transform: 'scale(1.05)',
+                  transition: 'transform 0.2s ease-in-out'
                 }
               }}
             >
@@ -304,20 +337,26 @@ const MusicProducersPage = () => {
         </Container>
       </Box>
 
-      {/* Recommendation Section - Responsive adjustments */}
-      <Container maxWidth="lg" sx={{ px: { xs: 2, sm: 3, md: 4 } }}>
+      {/* Recommendation Section */}
+      <Container 
+        maxWidth="lg" 
+        sx={{ 
+          px: { xs: 2, sm: 3, md: 4 },
+          mb: { xs: 2, sm: 3, md: 4 }
+        }}
+      >
         <Box
           sx={{
             display: 'flex',
-            flexDirection: { xs: 'column', md: 'row' },
+            flexDirection: { xs: 'column', sm: 'row' },
             justifyContent: 'space-between',
             alignItems: 'center',
-            mb: { xs: 4, sm: 5, md: 6 },
-            borderRadius: { xs: 3, md: 4 },
+            mb: { xs: 3, sm: 4, md: 5, lg: 6 },
+            borderRadius: { xs: 2, sm: 3, md: 4 },
             overflow: 'hidden',
-            backgroundColor: 'transparent',
-            border: '1px solid #136AA8',
-            width: '100%'
+            border: '3px solid #136AA8',
+            width: '100%',
+            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.2)'
           }}
         >
           <Typography 
@@ -327,11 +366,13 @@ const MusicProducersPage = () => {
               fontWeight: 'medium',
               color: 'white',
               pl: { xs: 2, sm: 3, md: 4 },
-              pr: { xs: 2, sm: 3, md: 0 },
-              py: 2,
-              textAlign: { xs: 'center', md: 'left' },
-              fontSize: { xs: '1rem', sm: '1.2rem', md: '1.5rem' },
-              width: { xs: '100%', md: 'auto' },
+              pr: { xs: 2, sm: 2, md: 0 },
+              py: { xs: 1.5, sm: 2 },
+              textAlign: { xs: 'center', sm: 'left' },
+              fontSize: { xs: '0.9rem', sm: '1rem', md: '1.2rem', lg: '1.5rem' },
+              width: { xs: '100%', sm: 'auto' },
+              whiteSpace: { sm: 'nowrap' },
+              lineHeight: 1.3
             }}
           >
             Get Personalized Music Professional Recommendations
@@ -340,24 +381,23 @@ const MusicProducersPage = () => {
             variant="contained"
             endIcon={<ArrowForwardIcon />}
             sx={{
-              width: { xs: '100%', md: 'auto' },
-              height: { xs: 'auto', md: '100%' },
-              borderRadius: { 
-                xs: '0', 
-                md: '0' 
-              },
-              px: { xs: 3, md: 8 },
-              py: 2.5,
-              borderRadius: '0px 10px 10px 40px',
-              fontSize: { xs: '0.9rem', sm: '1rem', md: '1.1rem' },
+              width: { xs: '100%', sm: 'auto' },
+              height: { xs: 'auto', sm: '100%' },
+              borderRadius: { xs: '0', sm: '0px 10px 10px 40px' },
+              px: { xs: 2, sm: 3, md: 4, lg: 8 },
+              py: { xs: 1.5, sm: 2, md: 2.5 },
+              fontSize: { xs: '0.8rem', sm: '0.85rem', md: '0.9rem', lg: '1.1rem' },
               fontWeight: 'bold',
               backgroundColor: 'white',
               color: 'black',
               textTransform: 'uppercase',
-              transition: 'background-color 0.3s, color 0.4s',
+              transition: 'all 0.3s ease',
+              whiteSpace: 'nowrap',
+              letterSpacing: { xs: 0.5, md: 1 },
               '&:hover': {
                 backgroundColor: '#136AA8',
                 color: 'white',
+                transform: 'translateX(9px)'
               }
             }}
           >
@@ -365,8 +405,16 @@ const MusicProducersPage = () => {
           </Button>
         </Box>
 
-        {/* Producer Cards - Both Rows in a single Grid */}
-        <Grid container spacing={{ xs: 2, sm: 3, md: 4 }} sx={{ mb: { xs: 5, md: 10 } }}>
+        {/* Producer Cards */}
+        <Grid 
+          container 
+          spacing={{ xs: 1.5, sm: 2, md: 3, lg: 4 }} 
+          sx={{ 
+            mb: { xs: 4, sm: 5, md: 6, lg: 10 },
+            mx: { xs: -1, sm: -1.5, md: -2 },
+            width: { xs: 'calc(100% + 16px)', sm: 'calc(100% + 24px)', md: 'calc(100% + 32px)' }
+          }}
+        >
           {cardImages.map((image, index) => (
             <ProducerCard 
               key={index} 
