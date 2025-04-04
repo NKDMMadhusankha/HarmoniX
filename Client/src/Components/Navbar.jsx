@@ -157,7 +157,6 @@ const HarmoniXNavbar = () => {
   };
 
   const handleSignUpClick = () => {
-    // navigate('/register');
     navigate('/catogary');
     handleProfileMenuClose();
   };
@@ -251,6 +250,12 @@ const HarmoniXNavbar = () => {
                       <ListItem 
                         button 
                         key={option}
+                        onClick={() => {
+                          if (option === 'Music Producer') {
+                            navigate('/music/producer');
+                            setMobileMenuOpen(false);
+                          }
+                        }}
                         sx={{ 
                           py: 1.5, 
                           pl: 4,
@@ -466,6 +471,12 @@ const HarmoniXNavbar = () => {
                       {featureOptions.map((option, index) => (
                         <MenuItem 
                           key={option} 
+                          onClick={() => {
+                            if (option === 'Music Producer') {
+                              navigate('/music/producer');
+                              setFeaturesAnchorEl(null);
+                            }
+                          }}
                           sx={{
                             color: 'white',
                             '&:hover': {
@@ -500,7 +511,7 @@ const HarmoniXNavbar = () => {
                       <Button key={item} sx={{ my: 2, color: 'white', display: 'block', mx: 1 }}>
                         {item}
                       </Button>
-                    )
+                    ) 
                   ))}
                 </Box>
 
