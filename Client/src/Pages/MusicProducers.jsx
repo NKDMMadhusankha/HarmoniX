@@ -397,7 +397,7 @@ const MusicProducersPage = () => {
               '&:hover': {
                 backgroundColor: '#136AA8',
                 color: 'white',
-                transform: 'translateX(9px)'
+                transform: 'translateX(20px)'
               }
             }}
           >
