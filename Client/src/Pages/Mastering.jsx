@@ -238,7 +238,7 @@ const MusicProducersPage = () => {
             zIndex: 0
           }}
         >
-          <source src="https://cdn.pixabay.com/video/2022/07/01/122740-726192563_large.mp4" type="video/mp4" />
+          <source src="https://videos.pexels.com/video-files/5657831/5657831-uhd_2732_1440_25fps.mp4" type="video/mp4" />
         </Box>
         
         {/* Dark overlay */}
@@ -282,10 +282,11 @@ const MusicProducersPage = () => {
                 mb: { xs: 0.5, sm: 1 },
                 fontSize: { xs: '2rem', sm: '2.9rem', md: '3.5rem', lg: '4.5rem', xl: '6.1rem' },
                 lineHeight: { xs: 1.1, sm: 1.1, md: 1.2 },
-                textShadow: '0px 2px 4px rgba(0,0,0,0.5)'
+                textShadow: '0px 2px 4px rgba(0,0,0,0.5)',
+                whiteSpace: 'nowrap',
               }}
             >
-              Top Music Producers
+              Top Mastering Engineers
             </Typography>
             <Typography
               variant="h3"
