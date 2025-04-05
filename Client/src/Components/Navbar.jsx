@@ -252,7 +252,10 @@ const HarmoniXNavbar = () => {
                         key={option}
                         onClick={() => {
                           if (option === 'Music Producer') {
-                            navigate('/music/producer');
+                            navigate('/music/producer'); // Navigate to your MusicProducer page
+                            setMobileMenuOpen(false);
+                          } else if (option === 'Mastering Engineer') {
+                            navigate('/music/mastering');  // Navigate to your mastering page
                             setMobileMenuOpen(false);
                           }
                         }}
@@ -474,6 +477,9 @@ const HarmoniXNavbar = () => {
                           onClick={() => {
                             if (option === 'Music Producer') {
                               navigate('/music/producer');
+                              setFeaturesAnchorEl(null);
+                            } else if (option === 'Mastering Engineer') {
+                              navigate('/music/mastering');  // Navigate to your mastering page
                               setFeaturesAnchorEl(null);
                             }
                           }}
