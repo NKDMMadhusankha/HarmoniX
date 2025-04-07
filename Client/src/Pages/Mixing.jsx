@@ -238,7 +238,7 @@ const MusicProducersPage = () => {
             zIndex: 0
           }}
         >
-          <source src="https://videos.pexels.com/video-files/4985377/4985377-uhd_2560_1440_25fps.mp4" type="video/mp4" />
+          <source src="https://videos.pexels.com/video-files/7087631/7087631-uhd_2732_1440_25fps.mp4" type="video/mp4" />
         </Box>
         
         {/* Dark overlay */}
