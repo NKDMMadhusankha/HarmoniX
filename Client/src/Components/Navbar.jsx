@@ -257,6 +257,9 @@ const HarmoniXNavbar = () => {
                           } else if (option === 'Mastering Engineer') {
                             navigate('/music/mastering');  // Navigate to your mastering page
                             setMobileMenuOpen(false);
+                          } else if (option === 'Mixing Engineer') {
+                            navigate('/music/mixing');  // Navigate to your mastering page
+                            setMobileMenuOpen(false);
                           }
                         }}
                         sx={{ 
@@ -480,6 +483,9 @@ const HarmoniXNavbar = () => {
                               setFeaturesAnchorEl(null);
                             } else if (option === 'Mastering Engineer') {
                               navigate('/music/mastering');  // Navigate to your mastering page
+                              setFeaturesAnchorEl(null);
+                            } else if (option === 'Mixing Engineer') {
+                              navigate('/music/mixing');  // Navigate to your mastering page
                               setFeaturesAnchorEl(null);
                             }
                           }}

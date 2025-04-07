@@ -11,6 +11,7 @@ import MusicianRegistrationForm from "./Auth/MusicianRegister";
 import ForgotPassword from "./Components/FogotPass";
 import MusicProducers from "./Pages/MusicProducers";
 import Mastering from "./Pages/Mastering";
+import Mixing from "./Pages/Mixing";
 
 
 
@@ -33,6 +34,7 @@ const App = () => {
         {/* Musicians Pages */}
         <Route path="/music/producer" element={<MusicProducers />} />
         <Route path="/music/mastering" element={<Mastering />} />
+        <Route path="/music/mixing" element={<Mixing />} />
         
         
       </Routes>

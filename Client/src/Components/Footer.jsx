@@ -22,10 +22,10 @@ const Footer = () => {
           <Grid item xs={12} sm={6} md={3}>
             <Typography variant="h6" sx={{ mb: 2, fontWeight: 'bold' }}>Learn More</Typography>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-              <Link href="#" color="inherit" underline="hover">About HarmoniX</Link>
+              <Link href="/about" color="inherit" underline="hover">About HarmoniX</Link>
               <Link href="#" color="inherit" underline="hover">Jobs</Link>
               <Link href="#" color="inherit" underline="hover">Privacy Policy</Link>
-              <Link href="#" color="inherit" underline="hover">Contact Us</Link>
+              <Link href="/contact" color="inherit" underline="hover">Contact Us</Link>
             </Box>
           </Grid>
 
@@ -33,10 +33,11 @@ const Footer = () => {
           <Grid item xs={12} sm={6} md={3}>
             <Typography variant="h6" sx={{ mb: 2, fontWeight: 'bold' }}>Features</Typography>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-              <Link href="#" color="inherit" underline="hover">Music Producer</Link>
-              <Link href="#" color="inherit" underline="hover">Mixing Engineer</Link>
-              <Link href="#" color="inherit" underline="hover">Mastering Engineer</Link>
+              <Link href="/music/producer" color="inherit" underline="hover">Music Producer</Link>
+              <Link href="/music/mixing" color="inherit" underline="hover">Mixing Engineer</Link>
+              <Link href="/music/mastering" color="inherit" underline="hover">Mastering Engineer</Link>
               <Link href="#" color="inherit" underline="hover">Recording Engineer</Link>
+              <Link href="#" color="inherit" underline="hover">lyricist</Link>
             </Box>
           </Grid>
 
