@@ -75,23 +75,24 @@ const BackgroundEffect = styled(Box)(({ theme }) => ({
   },
 }));
 
-// Create a custom dark theme
+// Create a custom dark theme with darker form elements
 const theme = createTheme({
   palette: {
     mode: 'dark',
     primary: {
       main: '#0B62F8',
+      contrastText: '#fff',
     },
     secondary: {
       main: '#90caf9',
     },
     background: {
       default: '#121212',
-      paper: 'rgba(18, 30, 43, 0.8)',
+      paper: 'rgba(5, 10, 15, 0.95)', // Much darker paper background
     },
     text: {
       primary: '#ffffff',
-      secondary: '#888888',
+      secondary: '#aaaaaa',
     },
   },
   typography: {
@@ -107,8 +108,10 @@ const theme = createTheme({
       styleOverrides: {
         root: {
           backgroundImage: 'none',
+          backgroundColor: 'rgba(10, 15, 20, 0.95)', // Darker paper
           borderRadius: 12,
-          border: '1px solid rgba(40, 40, 40, 0.8)',
+          border: '1px solid rgba(30, 30, 30, 0.8)', // Darker border
+          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.5)',
         },
       },
     },
@@ -122,6 +125,9 @@ const theme = createTheme({
         },
         contained: {
           boxShadow: 'none',
+          '&:hover': {
+            boxShadow: '0 0 15px rgba(11, 98, 248, 0.5)',
+          },
         },
       },
     },
@@ -130,6 +136,17 @@ const theme = createTheme({
         root: {
           '& .MuiOutlinedInput-root': {
             borderRadius: 8,
+            backgroundColor: 'rgba(20, 25, 30, 0.8)', // Darker input background
+            '& fieldset': {
+              borderColor: 'rgba(60, 60, 60, 0.8)', // Darker border
+            },
+            '&:hover fieldset': {
+              borderColor: 'rgba(90, 90, 90, 0.8)', // Darker hover border
+            },
+            '&.Mui-focused fieldset': {
+              borderColor: '#0B62F8',
+              boxShadow: '0 0 0 2px rgba(11, 98, 248, 0.2)',
+            },
           },
         },
       },
@@ -137,7 +154,42 @@ const theme = createTheme({
     MuiSelect: {
       styleOverrides: {
         select: {
-          backdropFilter: 'blur(10px)',
+          backgroundColor: 'rgba(20, 25, 30, 0.8)', // Darker select background
+          '&:focus': {
+            backgroundColor: 'rgba(20, 25, 30, 0.8)',
+          },
+        },
+      },
+    },
+    MuiInputLabel: {
+      styleOverrides: {
+        root: {
+          color: '#aaaaaa', // Lighter label color for better contrast
+          '&.Mui-focused': {
+            color: '#0B62F8',
+          },
+        },
+      },
+    },
+    MuiCheckbox: {
+      styleOverrides: {
+        root: {
+          color: 'rgba(255, 255, 255, 0.5)',
+          '&.Mui-checked': {
+            color: '#0B62F8',
+          },
+        },
+      },
+    },
+    MuiStepIcon: {
+      styleOverrides: {
+        root: {
+          '&.Mui-completed': {
+            color: '#0B62F8',
+          },
+          '&.Mui-active': {
+            color: '#0B62F8',
+          },
         },
       },
     },
@@ -661,7 +713,7 @@ const MusicianRegistrationForm = () => {
           
           <Box sx={{ mt: 5, textAlign: 'center' }}>
             <Typography variant="body2" color="text.secondary">
-              Already have an account? <Link href="/login">Sign in</Link>
+              Already have an account ? <Link href="/login">Sign in</Link>
             </Typography>
           </Box>
         </Container>

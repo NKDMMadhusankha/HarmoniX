@@ -228,7 +228,7 @@ const LoginForm = () => {
             </Button>
 
             <Box sx={{ textAlign: 'center', mt: 2 }}>
-              <Typography variant="body2">Don't have an account? <RouterLink to="/catogary" style={{ color: '#1976d2', textDecoration: 'none' }}>Sign Up</RouterLink></Typography>
+              <Typography variant="body2">Don't have an account ? <RouterLink to="/catogary" style={{ color: '#1976d2', textDecoration: 'none' }}>Sign Up</RouterLink></Typography>
             </Box>
           </Box>
         </Paper>
