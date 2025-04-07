@@ -1,6 +1,7 @@
 const Musician = require('../models/Musician');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const { v4: uuidv4 } = require('uuid'); // Import UUID library
 
 const register = async (req, res) => {
   try {
@@ -39,7 +40,11 @@ const register = async (req, res) => {
 
     const hashedPassword = await bcrypt.hash(password, 10);
     
+    // Generate a unique userId
+    const userId = uuidv4();
+
     const newMusician = new Musician({
+      userId, // Assign the generated userId
       fullName,
       email,
       password: hashedPassword,

@@ -296,6 +296,8 @@ const MusicianRegistrationForm = () => {
 
   const handleSubmit = async () => {
     try {
+      console.log('Submitting form data:', formData); // Log formData for debugging
+
       const response = await fetch('http://localhost:5000/api/musician/register', {
         method: 'POST',
         headers: {

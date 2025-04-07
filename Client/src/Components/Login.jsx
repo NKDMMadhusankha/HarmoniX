@@ -66,21 +66,47 @@ const LoginForm = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
-    setLoading(true);  
+    setLoading(true);
 
     try {
-      const response = await axios.post('http://localhost:5000/api/auth/login', { email, password });
-
+      // First try logging in as a regular user
+      let response = await axios.post('http://localhost:5000/api/auth/login', { email, password });
+      
+      // If successful, store token and user data
       localStorage.setItem('authToken', response.data.token);
+      localStorage.setItem('userType', 'user');
+      localStorage.setItem('userData', JSON.stringify(response.data.user));
+      
       setSuccess(true);
-
+      
       setTimeout(() => {
         navigate('/home');
-      }, 3000);
+      }, 2000);
 
-    } catch (error) {
-      setError('Invalid email or password');
-      setLoading(false);
+    } catch (userError) {
+      // If user login fails, try musician login
+      try {
+        const musicianResponse = await axios.post('http://localhost:5000/api/musician/login', { email, password });
+        
+        localStorage.setItem('authToken', musicianResponse.data.token);
+        localStorage.setItem('userType', 'musician');
+        localStorage.setItem('userData', JSON.stringify(musicianResponse.data.musician));
+        
+        setSuccess(true);
+        
+        setTimeout(() => {
+          navigate('/musician/dashboard');
+        }, 2000);
+
+      } catch (musicianError) {
+        // If both logins fail
+        let errorMessage = 'Invalid email or password';
+        if (musicianError.response && musicianError.response.data && musicianError.response.data.error) {
+          errorMessage = musicianError.response.data.error;
+        }
+        setError(errorMessage);
+        setLoading(false);
+      }
     }
   };
 
@@ -202,7 +228,7 @@ const LoginForm = () => {
             </Button>
 
             <Box sx={{ textAlign: 'center', mt: 2 }}>
-              <Typography variant="body2">Don't have an account? <RouterLink to="/register" style={{ color: '#1976d2', textDecoration: 'none' }}>Sign Up</RouterLink></Typography>
+              <Typography variant="body2">Don't have an account? <RouterLink to="/catogary" style={{ color: '#1976d2', textDecoration: 'none' }}>Sign Up</RouterLink></Typography>
             </Box>
           </Box>
         </Paper>
