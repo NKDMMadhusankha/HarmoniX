@@ -185,7 +185,6 @@ const MusicianRegistrationForm = () => {
     country: '',
     role: '',
     genres: [],
-    audioSamples: [],
     portfolioLinks: {
       spotify: '',
       soundcloud: '',
@@ -205,14 +204,6 @@ const MusicianRegistrationForm = () => {
   useEffect(() => {
     setAnimate(true);
   }, []);
-
-  const handleAudioUpload = (event) => {
-    const files = Array.from(event.target.files);
-    setFormData({
-      ...formData,
-      audioSamples: [...formData.audioSamples, ...files]
-    });
-  };
 
   const handleGenreChange = (event) => {
     setFormData({
@@ -282,7 +273,6 @@ const MusicianRegistrationForm = () => {
       }
       if (!formData.experience) newErrors.experience = 'Experience level is required';
     } else if (activeStep === 2) {
-      if (formData.audioSamples.length === 0) newErrors.audioSamples = 'Please upload at least one audio sample';
       if (!formData.termsAgreed) newErrors.termsAgreed = 'You must agree to the terms';
     }
 
@@ -304,9 +294,31 @@ const MusicianRegistrationForm = () => {
     setActiveStep((prevStep) => prevStep - 1);
   };
 
-  const handleSubmit = () => {
-    console.log('Form submitted:', formData);
-    alert('Registration successful!');
+  const handleSubmit = async () => {
+    try {
+      const response = await fetch('http://localhost:5000/api/musician/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+  
+      const data = await response.json();
+  
+      if (!response.ok) {
+        throw new Error(data.message || 'Registration failed');
+      }
+  
+      console.log('Registration successful:', data);
+      // You can redirect or show success message here
+      alert('Registration successful!');
+      // Optionally redirect to login or dashboard
+      window.location.href = '/musician/dashboard';
+    } catch (error) {
+      console.error('Registration error:', error);
+      alert(error.message || 'Registration failed. Please try again.');
+    }
   };
 
   const navigateBack = () => {
@@ -531,59 +543,11 @@ const MusicianRegistrationForm = () => {
         return (
           <Box sx={{ mt: 3 }}>
             <Typography variant="h5" sx={{ mb: 3, color: 'primary.main', fontWeight: 'bold' }}>
-              Upload Audio Samples & Portfolio Links
+              Portfolio Links
             </Typography>
             <Grid container spacing={3}>
               <Grid item xs={12}>
-                <Paper variant="outlined" sx={{ p: 3, textAlign: 'center', borderStyle: 'dashed' }}>
-                  <input
-                    accept="audio/mp3,audio/wav"
-                    id="audio-upload"
-                    type="file"
-                    multiple
-                    onChange={handleAudioUpload}
-                    style={{ display: 'none' }}
-                  />
-                  <label htmlFor="audio-upload">
-                    <Button
-                      variant="contained"
-                      component="span"
-                      startIcon={<CloudUploadIcon />}
-                    >
-                      Upload Audio (MP3, WAV)
-                    </Button>
-                  </label>
-                  {errors.audioSamples && (
-                    <Typography color="error" variant="body2" sx={{ mt: 1 }}>
-                      {errors.audioSamples}
-                    </Typography>
-                  )}
-                </Paper>
-              </Grid>
-              
-              {formData.audioSamples.length > 0 && (
-                <Grid item xs={12}>
-                  <Typography variant="h6" sx={{ mb: 2, color: 'secondary.main' }}>
-                    Uploaded Samples ({formData.audioSamples.length})
-                  </Typography>
-                  <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-                    {formData.audioSamples.map((file, index) => (
-                      <Chip
-                        key={index}
-                        label={file.name}
-                        onDelete={() => {
-                          const newSamples = [...formData.audioSamples];
-                          newSamples.splice(index, 1);
-                          setFormData({ ...formData, audioSamples: newSamples });
-                        }}
-                      />
-                    ))}
-                  </Box>
-                </Grid>
-              )}
-              
-              <Grid item xs={12}>
-                <Typography variant="h6" sx={{ mb: 2, mt: 2, color: 'secondary.main' }}>
+                <Typography variant="h6" sx={{ mb: 2, color: 'secondary.main' }}>
                   Portfolio Links (Optional)
                 </Typography>
                 <Grid container spacing={2}>

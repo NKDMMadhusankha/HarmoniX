@@ -407,7 +407,7 @@ const RegistrationCategory = () => {
         position: 'relative'
       }}>
         <Typography variant="body2" color="#737373">
-          Already have an account? <SignInLink href="/login">Sign in</SignInLink>
+          Already have an account ? <SignInLink href="/login">Sign in</SignInLink>
         </Typography>
       </Box>
 
