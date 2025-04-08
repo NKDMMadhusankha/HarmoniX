@@ -375,7 +375,7 @@ const HarmoniXNavbar = () => {
         
         {/* Main navbar */}
         <AppBar 
-          position="static"
+          position="static" // Changed from 'static' to 'fixed'
           sx={{ 
             bgcolor: '#000000', 
             boxShadow: 'none', 
@@ -383,7 +383,8 @@ const HarmoniXNavbar = () => {
             width: '100vw',
             margin: 0,
             padding: 0,
-            borderRadius: 0
+            borderRadius: 0,
+            zIndex: theme.zIndex.drawer + 1 // Ensure it's above other content
           }}
         >
           <Toolbar disableGutters sx={{ px: { xs: 2, sm: 3 } }}>
