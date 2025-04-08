@@ -1,1048 +1,825 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { 
   Box, 
-  Container, 
   Typography, 
-  Button, 
+  Card, 
+  CardContent, 
   IconButton, 
   Grid, 
-  Paper, 
   Chip, 
-  Avatar, 
-  List, 
-  ListItem,
-  ListItemText,
+  Button,
+  Avatar,
+  Container,
+  Paper,
+  Stack,
   Divider,
-  Link,
-  alpha,
-  createTheme,
-  ThemeProvider,
   LinearProgress,
+  styled,
   Modal,
-  Fade
+  Dialog,
+  DialogContent,
+  DialogActions
 } from '@mui/material';
-import { styled, keyframes } from '@mui/system';
+import { createTheme, ThemeProvider } from '@mui/material/styles';
+import { 
+  PlayArrow, 
+  Pause, 
+  VolumeUp, 
+  AccessTime,
+  Instagram,
+  YouTube,
+  Link as LinkIcon,
+  CalendarToday,
+  Person,
+  Album,
+  AlbumOutlined,
+  Image,
+  Close
+} from '@mui/icons-material';
+import Navbar from '../Components/Navbar'; // Assuming you have a Navbar component
+import Footer from '../Components/Footer'; // Assuming you have a Footer component
+import ProImg from '../assets/procover.jpg'; // Assuming you have a profile image
 
-// Material UI Icons
-import PlayArrowIcon from '@mui/icons-material/PlayArrow';
-import PauseIcon from '@mui/icons-material/Pause';
-import HeadphonesIcon from '@mui/icons-material/Headphones';
-import InstagramIcon from '@mui/icons-material/Instagram';
-import YouTubeIcon from '@mui/icons-material/YouTube';
-import MusicNoteIcon from '@mui/icons-material/MusicNote';
-import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
-import MoreVertIcon from '@mui/icons-material/MoreVert';
-import PersonAddIcon from '@mui/icons-material/PersonAdd';
-import ShareIcon from '@mui/icons-material/Share';
-import TikTokIcon from '@mui/icons-material/MusicNote'; // Using MusicNote for TikTok
-import VerifiedIcon from '@mui/icons-material/Verified';
-import AccessTimeIcon from '@mui/icons-material/AccessTime';
-import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
-import LanguageIcon from '@mui/icons-material/Language';
-import CodeIcon from '@mui/icons-material/Code';
-import PianoIcon from '@mui/icons-material/Piano';
+// Custom styled components using Material UI's styled API
+const GradientBackground = styled(Box)(({ theme }) => ({
+  background: '#000000',
+  minHeight: '100vh',
+  color: '#fff',
+}));
 
-const trackList = [
-  { 
-    id: 1, 
-    name: 'Memoman, DeDeXgrande - Motion Feat. Erik Peers (Radio Edit)',
-    duration: '03:02',
-    date: 'Mar 28, 2024',
-    youtubeLink: 'https://youtube.com/watch?v=example1',
-    coverArt: 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80'
-  },
-  { 
-    id: 2, 
-    name: 'Deemie - Drop That (Vocals)',
-    duration: '02:48',
-    date: 'Mar 28, 2024',
-    youtubeLink: 'https://youtube.com/watch?v=example2',
-    coverArt: 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80'
-  },
-  { 
-    id: 3, 
-    name: 'Jessica Kuka - Body Language V2',
-    duration: '03:18',
-    date: 'Mar 28, 2024',
-    youtubeLink: 'https://youtube.com/watch?v=example3',
-    coverArt: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80'
-  },
-  { 
-    id: 4, 
-    name: 'Luciano Aguilar - Follow Me',
-    duration: '06:00',
-    date: 'Mar 28, 2024',
-    youtubeLink: 'https://youtube.com/watch?v=example4',
-    coverArt: 'https://images.unsplash.com/photo-1571330735066-03aaa9429d89?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80'
-  },
-  { 
-    id: 5, 
-    name: 'Elliott Keefe - Universe',
-    duration: '03:04',
-    date: 'Mar 28, 2024',
-    youtubeLink: 'https://youtube.com/watch?v=example5',
-    coverArt: 'https://images.unsplash.com/photo-1557787163-1635e2efb160?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80'
-  },
-];
-
-const genres = [
-  'EDM', 'Pop', 'Brooklyn Drill', 'Hip Hop', 'House', 'Deep House', 'Techno', 'Dark Trap', 'Trap'
-];
-
-const skills = [
-  'Mastering Engineer', 'Mixing Engineer', 'Producer', 'Recording Engineer'
-];
-
-const darkTheme = createTheme({
-  palette: {
-    mode: 'dark',
-    primary: {
-      main: '#00d5ff', // Neon blue
-      light: '#33ddff',
-      dark: '#00a6cc',
-    },
-    secondary: {
-      main: '#ff0099', // Neon pink
-      light: '#ff33ad',
-      dark: '#cc007a',
-    },
-    background: {
-      default: '#000000',
-      paper: '#0a0a0a',
-    },
-    text: {
-      primary: '#ffffff',
-      secondary: '#b3b3b3',
-    },
-  },
-  typography: {
-    fontFamily: '"Sora", "Inter", sans-serif',
-    h1: {
-      fontSize: '2.5rem',
-      fontWeight: 700,
-      letterSpacing: '-0.02em',
-    },
-    h6: {
-      fontWeight: 600,
-      letterSpacing: '0.02em',
-    },
-  },
-  shape: {
-    borderRadius: 16,
-  },
-  components: {
-    MuiPaper: {
-      defaultProps: {
-        elevation: 0,
-      },
-      styleOverrides: {
-        root: {
-          backgroundImage: 'none',
-          backgroundColor: 'rgba(10, 10, 10, 0.8)',
-          backdropFilter: 'blur(20px)',
-          border: '1px solid rgba(255, 255, 255, 0.05)',
-        },
-      },
-    },
-    MuiButton: {
-      styleOverrides: {
-        root: {
-          textTransform: 'none',
-          fontWeight: 500,
-          borderRadius: 12,
-        },
-        containedPrimary: {
-          background: 'linear-gradient(135deg, #00d5ff 0%, #0095ff 100%)',
-          boxShadow: '0 8px 20px -8px rgba(0, 213, 255, 0.5)',
-          '&:hover': {
-            background: 'linear-gradient(135deg, #00d5ff 20%, #0095ff 120%)',
-            boxShadow: '0 10px 24px -8px rgba(0, 213, 255, 0.6)',
-          },
-        },
-      },
-    },
-    MuiIconButton: {
-      styleOverrides: {
-        root: {
-          borderRadius: 12,
-        },
-      },
-    },
-  },
-});
-
-const GlassCard = styled(Box)(({ theme }) => ({
-  padding: theme.spacing(3),
-  borderRadius: theme.shape.borderRadius * 2,
-  backgroundColor: 'rgba(10, 10, 10, 0.8)',
-  backdropFilter: 'blur(20px)',
-  border: '1px solid rgba(255, 255, 255, 0.05)',
+const HeroSection = styled(Box)(({ theme }) => ({
   position: 'relative',
+  height: '450px',
+  backgroundImage: 'linear-gradient(90deg, rgba(0,10,50,0.6) 0%, rgba(0,0,0,0.7) 100%)',
   overflow: 'hidden',
-  '&::before': {
-    content: '""',
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    height: '1px',
-    background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent)',
+  display: 'flex',
+  alignItems: 'flex-end',
+  padding: theme.spacing(3),
+}));
+
+const ProfileOverlay = styled(Box)(({ theme }) => ({
+  position: 'absolute',
+  top: 0,
+  left: 0,
+  right: 0,
+  bottom: 0,
+  
+  backgroundImage: `url(${ProImg})`,
+  backgroundSize: 'cover',
+  backgroundPosition: 'center',
+  opacity: 0.7,
+  mixBlendMode: 'normal',
+}));
+
+const LargeAvatar = styled(Avatar)(({ theme }) => ({
+  width: 220,
+  height: 220,
+  border: '4px solid #1976d2',
+  boxShadow: '0 4px 20px rgba(0,0,0,0.5)',
+  marginBottom: theme.spacing(2),
+  [theme.breakpoints.down('sm')]: {
+    width: 160,
+    height: 160,
   },
 }));
 
-const TrackItem = styled(Box)(({ theme }) => ({
+const AvatarBadge = styled(Box)(({ theme }) => ({
+  position: 'absolute',
+  bottom: 12,
+  right: 12,
+  backgroundColor: theme.palette.primary.main,
+  padding: theme.spacing(1),
+  borderRadius: '50%',
+  boxShadow: '0 2px 10px rgba(0,0,0,0.3)',
+}));
+
+const TrackItem = styled(Paper)(({ theme }) => ({
+  background: 'linear-gradient(90deg, rgba(10,25,41,0.7) 0%, rgba(0,0,0,0.7) 100%)',
+  padding: theme.spacing(2),
+  marginBottom: theme.spacing(2),
+  backdropFilter: 'blur(10px)',
+  borderRadius: theme.shape.borderRadius,
+  transition: 'all 0.3s ease',
+  border: '1px solid rgba(25, 118, 210, 0.1)',
+  '&:hover': {
+    background: 'linear-gradient(90deg, rgba(25,58,95,0.7) 0%, rgba(3,3,30,0.7) 100%)',
+    boxShadow: '0 4px 20px rgba(0, 0, 0, 0.4)',
+    borderColor: 'rgba(25, 118, 210, 0.3)',
+  },
+}));
+
+const SocialButton = styled(Button)(({ theme }) => ({
+  backgroundColor: 'rgba(20, 20, 20, 0.8)',
+  color: '#fff',
+  '&:hover': {
+    backgroundColor: 'rgba(40, 40, 40, 0.9)',
+  },
+}));
+
+const GradientCard = styled(Card)(({ theme }) => ({
+  backgroundColor: 'rgba(10, 25, 41, 0.7)',
+  backdropFilter: 'blur(10px)',
+  marginBottom: theme.spacing(3),
+  borderRadius: theme.shape.borderRadius,
+  border: '1px solid rgba(25, 118, 210, 0.1)',
+}));
+
+const SectionTitle = styled(Typography)(({ theme }) => ({
+  marginBottom: theme.spacing(3),
+  paddingBottom: theme.spacing(1),
+  borderBottom: '1px solid rgba(25, 118, 210, 0.3)',
+  fontWeight: 'bold',
   display: 'flex',
   alignItems: 'center',
-  padding: theme.spacing(2),
-  borderRadius: theme.shape.borderRadius,
-  backgroundColor: 'rgba(255, 255, 255, 0.03)',
-  transition: 'all 0.3s ease',
-  cursor: 'pointer',
-  position: 'relative',
-  '&:hover': {
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-    transform: 'scale(1.02)',
-  },
 }));
 
-const rotate = keyframes`
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-`;
-
-const PlayerModal = styled(Modal)(({ theme }) => ({
+const IconContainer = styled(Box)(({ theme }) => ({
+  marginRight: theme.spacing(2),
+  padding: theme.spacing(1),
+  backgroundColor: 'rgba(25, 118, 210, 0.2)',
+  borderRadius: theme.shape.borderRadius,
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
-  backdropFilter: 'blur(8px)',
 }));
 
-const PlayerContent = styled(Box)(({ theme }) => ({
+const AlbumCover = styled(Box)(({ theme }) => ({
   position: 'relative',
-  width: { xs: '90%', sm: 400, md: 480 }, // Increased responsive width
-  maxWidth: '95%',
-  padding: theme.spacing(4),
-  // borderRadius: theme.shape.borderRadius * 2,
-  backgroundColor: alpha(theme.palette.background.paper, 0.8),
-  backdropFilter: 'blur(20px)',
-  border: '1px solid',
-  borderColor: alpha(theme.palette.primary.main, 0.2),
-  boxShadow: `0 0 40px ${alpha(theme.palette.primary.main, 0.2)}`,
-  textAlign: 'center',
-  color: '#ffffff',
-}));
-
-const RotatingCover = styled(Box)(({ theme, isplaying }) => ({
-  width: 200,
-  height: 200,
-  margin: '0 auto 20px',
-  borderRadius: '50%',
+  marginRight: theme.spacing(2),
+  borderRadius: theme.shape.borderRadius,
   overflow: 'hidden',
-  boxShadow: '0 0 30px rgba(0,0,0,0.5)',
-  animation: isplaying ? `${rotate} 20s linear infinite` : 'none',
-  animationPlayState: isplaying ? 'running' : 'paused',
+  width: 80,
+  height: 80,
+  [theme.breakpoints.down('sm')]: {
+    width: 60,
+    height: 60,
+  },
   '& img': {
     width: '100%',
     height: '100%',
     objectFit: 'cover',
-  }
+  },
+  '& .overlay': {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.4)',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    opacity: 0,
+    transition: 'opacity 0.3s ease',
+  },
+  '&:hover .overlay': {
+    opacity: 1,
+  },
 }));
 
+const GalleryImage = styled(Box)(({ theme }) => ({
+  borderRadius: theme.shape.borderRadius,
+  overflow: 'hidden',
+  position: 'relative',
+  height: 0,
+  paddingTop: '75%', // 4:3 aspect ratio
+  cursor: 'pointer',
+  '& img': {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    width: '100%',
+    height: '100%',
+    objectFit: 'cover',
+    transition: 'transform 0.3s ease',
+  },
+  '&:hover img': {
+    transform: 'scale(1.05)',
+  },
+}));
+
+const GradientDivider = styled(Box)(({ theme }) => ({
+  height: '1px',
+  background: 'linear-gradient(to right, rgba(25, 118, 210, 0.5), transparent)',
+  flexGrow: 1,
+  marginLeft: theme.spacing(2),
+}));
+
+const ExpandedImageModal = styled(Box)(({ theme }) => ({
+  position: 'fixed',
+  top: 0,
+  left: 0,
+  right: 0,
+  bottom: 0,
+  backgroundColor: 'rgba(0, 0, 0, 0.9)',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  zIndex: 1300,
+  backdropFilter: 'blur(10px)',
+}));
+
+const ExpandedImageContent = styled(Box)(({ theme }) => ({
+  maxWidth: '90%',
+  maxHeight: '90%',
+  position: 'relative',
+}));
+
+const CloseButton = styled(IconButton)(({ theme }) => ({
+  position: 'absolute',
+  top: theme.spacing(1),
+  right: theme.spacing(1),
+  color: '#fff',
+  backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  '&:hover': {
+    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+  },
+}));
+
+// Create a dark theme
+const darkTheme = createTheme({
+  palette: {
+    mode: 'dark',
+    primary: {
+      main: '#1976d2',
+    },
+    secondary: {
+      main: '#3f51b5',
+    },
+    background: {
+      default: '#000',
+      paper: 'rgba(10, 25, 41, 0.6)',
+    }
+  },
+  typography: {
+    fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif',
+    h3: {
+      fontWeight: 700,
+    },
+    h5: {
+      fontWeight: 700,
+    },
+    h6: {
+      fontWeight: 700,
+    },
+  },
+  shape: {
+    borderRadius: 8,
+  },
+});
+
 const MusicProducerProfile = () => {
-  const [playing, setPlaying] = useState(null);
-  const [progress, setProgress] = useState(0);
-  const [openPlayer, setOpenPlayer] = useState(false);
   const [currentTrack, setCurrentTrack] = useState(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const [selectedImage, setSelectedImage] = useState(null);
+  const audioRef = useRef(null);
+  const progressInterval = useRef(null);
   
-  const handlePlayTrack = (id) => {
-    const track = trackList.find(t => t.id === id);
-    if (playing === id) {
-      setPlaying(null);
-      setOpenPlayer(false);
+  const tracks = [
+    {
+      id: 1,
+      title: "Midnight Dream",
+      duration: "3:42",
+      uploadDate: "Apr 2, 2025",
+      cover: "https://picsum.photos/400/400?random=1",
+      audioSrc: "/tracks/midnight-dream.mp3",
+      streams: "128,450"
+    },
+    {
+      id: 2,
+      title: "Electric Soul",
+      duration: "4:18",
+      uploadDate: "Mar 27, 2025",
+      cover: "https://picsum.photos/400/400?random=2",
+      audioSrc: "/tracks/electric-soul.mp3",
+      streams: "98,321"
+    },
+    {
+      id: 3,
+      title: "Urban Pulse",
+      duration: "2:56",
+      uploadDate: "Mar 15, 2025",
+      cover: "https://picsum.photos/400/400?random=3",
+      audioSrc: "/tracks/urban-pulse.mp3",
+      streams: "76,129"
+    },
+    {
+      id: 4,
+      title: "Neon Lights (feat. Luna Ray)",
+      duration: "3:24",
+      uploadDate: "Mar 10, 2025",
+      cover: "https://picsum.photos/400/400?random=4",
+      audioSrc: "/tracks/neon-lights.mp3",
+      streams: "112,578"
+    },
+    {
+      id: 5,
+      title: "Cityscape",
+      duration: "5:07",
+      uploadDate: "Feb 28, 2025",
+      cover: "https://picsum.photos/400/400?random=5",
+      audioSrc: "/tracks/cityscape.mp3",
+      streams: "87,934"
+    }
+  ];
+
+  const galleryImages = [
+    "https://picsum.photos/800/600?random=20",
+    "https://picsum.photos/800/600?random=21",
+    "https://picsum.photos/800/600?random=22",
+    "https://picsum.photos/800/600?random=23",
+    "https://picsum.photos/800/600?random=24",
+    "https://picsum.photos/800/600?random=25",
+  ];
+
+  const genres = [
+    "Electronic", "Hip Hop", "House", "Cinematic", "Ambient", 
+    "Pop", "R&B", "Trap", "Lo-fi", "Synthwave", "Future Bass"
+  ];
+
+  const skills = [
+    "Music Production", "Mixing", "Mastering", "Sound Design",
+    "Composition", "Arrangement", "Vocal Tuning", "Audio Engineering",
+    "MIDI Programming", "Soundtrack Production"
+  ];
+
+  const tools = [
+    "Ableton Live", "Logic Pro", "Pro Tools", "Native Instruments",
+    "FL Studio", "Serum", "Omnisphere", "Kontakt", "Waves Plugins",
+    "iZotope", "Melodyne", "Auto-Tune"
+  ];
+
+  useEffect(() => {
+    return () => {
+      if (progressInterval.current) {
+        clearInterval(progressInterval.current);
+      }
+    };
+  }, []);
+
+  const handlePlayPause = (trackId) => {
+    if (currentTrack === trackId) {
+      setIsPlaying(!isPlaying);
+      if (isPlaying) {
+        clearInterval(progressInterval.current);
+      } else {
+        startProgressInterval();
+      }
     } else {
-      setPlaying(id);
-      setCurrentTrack(track);
-      setOpenPlayer(true);
+      setCurrentTrack(trackId);
+      setIsPlaying(true);
+      setProgress(0);
+      startProgressInterval();
     }
   };
 
-  useEffect(() => {
-    let timer;
-    if (playing !== null) {
-      timer = setInterval(() => {
-        setProgress((oldProgress) => {
-          if (oldProgress === 100) {
-            clearInterval(timer);
-            setPlaying(null);
-            return 0;
-          }
-          return oldProgress + 1;
-        });
-      }, 1000);
-    } else {
-      setProgress(0);
+  const startProgressInterval = () => {
+    if (progressInterval.current) {
+      clearInterval(progressInterval.current);
     }
-    return () => {
-      clearInterval(timer);
-    };
-  }, [playing]);
+    
+    progressInterval.current = setInterval(() => {
+      setProgress(prev => {
+        if (prev >= 100) {
+          clearInterval(progressInterval.current);
+          return 0;
+        }
+        return prev + 0.5;
+      });
+    }, 100);
+  };
 
-  const handleClosePlayer = () => {
-    setPlaying(null);
-    setOpenPlayer(false);
-    setProgress(0);
+  const handleImageClick = (image) => {
+    setSelectedImage(image);
+  };
+
+  const handleCloseModal = () => {
+    setSelectedImage(null);
   };
 
   return (
     <ThemeProvider theme={darkTheme}>
-      <Box
-        sx={{
-          minHeight: '100vh',
-          background: 'linear-gradient(135deg, #000000 0%, #0a0a0a 100%)',
-          position: 'relative',
-          '&::before': {
-            content: '""',
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            width: '100%',
-            height: '100%',
-            background: 'radial-gradient(circle at 50% 0%, rgba(0, 213, 255, 0.15), transparent 70%)',
-            pointerEvents: 'none',
-          },
-        }}
-      >
-        <Container>
-          <Typography variant="h4" sx={{ textAlign: 'center', mt: 4 }}>
-            Music Producer Profile
-          </Typography>
-        </Container>
-        {/* Hero Section - Enhanced with better visual impact */}
-        <Box 
-          sx={{ 
-            position: 'relative',
-            height: { xs: 380, md: 400 },
-            overflow: 'hidden',
-            background: 'linear-gradient(135deg, #121212 0%, #080808 100%)',
-          }}
-        >
-          {/* Abstract background pattern */}
-          <Box 
-            sx={{
-              position: 'absolute',
-              top: 0,
-              left: 0,
-              width: '100%',
-              height: '100%',
-              opacity: 0.15,
-              backgroundImage: "url('https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80')",
-              backgroundSize: "cover",
-              backgroundPosition: "center",
-              filter: "blur(6px) saturate(120%)",
-            }}
-          />
+      <GradientBackground>
+        {/* Navbar */}
+        <Navbar />
+        
+        {/* Hero Section with Larger Cover Image */}
+        <HeroSection>
+          <ProfileOverlay />
           
-          {/* Colored overlay */}
-          <Box 
-            sx={{
-              position: 'absolute',
-              top: 0,
-              left: 0,
-              width: '100%',
-              height: '100%',
-              background: 'radial-gradient(circle at 30% 70%, rgba(156, 39, 176, 0.15), transparent 60%), radial-gradient(circle at 70% 30%, rgba(33, 150, 243, 0.15), transparent 60%)',
-            }}
-          />
-          
-          {/* Bottom gradient fade */}
-          <Box 
-            sx={{
-              position: 'absolute',
-              bottom: 0,
-              left: 0,
-              width: '100%',
-              height: '40%',
-              background: 'linear-gradient(to top, rgba(8,8,8,1), rgba(8,8,8,0))'
-            }}
-          />
-          
-          {/* Content */}
-          <Container sx={{ 
+          {/* Producer Info Overlay */}
+          <Box sx={{ 
             position: 'relative', 
-            height: '100%', 
             display: 'flex', 
-            flexDirection: 'column', 
-            justifyContent: 'flex-end', 
-            pb: { xs: 4, md: 6 },
-            pt: { xs: 2, md: 4 }, 
+            alignItems: 'flex-end', 
+            width: '100%', 
+            zIndex: 1,
+            flexWrap: { xs: 'wrap', md: 'nowrap' }
           }}>
-            <Grid container spacing={4} alignItems="flex-end">
-              <Grid item xs={12} sm="auto">
-                <Box sx={{ 
-                  position: 'relative',
-                  display: 'flex',
-                  justifyContent: { xs: 'center', sm: 'flex-start' },
-                  mb: { xs: 2, sm: 0 },
-                }}>
-                  <Avatar 
-                    src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?ixlib=rb-1.2.1&auto=format&fit=crop&w=634&q=80"
-                    alt="Noize London"
-                    sx={{ 
-                      width: { xs: 140, md: 180 }, 
-                      height: { xs: 140, md: 180 },
-                      border: 4,
-                      borderColor: 'primary.main',
-                      boxShadow: '0 10px 30px rgba(0,0,0,0.4), 0 0 0 4px rgba(156, 39, 176, 0.3)',
-                    }}
-                  />
-                  <Box 
-                    sx={{ 
-                      position: 'absolute', 
-                      bottom: -8, 
-                      right: { xs: 'calc(50% - 78px)', sm: -8 },
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      bgcolor: 'primary.main',
-                      width: 36,
-                      height: 36,
-                      borderRadius: '50%',
-                      boxShadow: '0 4px 12px rgba(0,0,0,0.4)',
-                    }}
-                  >
-                    <MusicNoteIcon fontSize="small" />
-                  </Box>
-                </Box>
-              </Grid>
-              
-              <Grid item xs={12} sm sx={{ textAlign: { xs: 'center', sm: 'left' } }}>
-                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: { xs: 'center', sm: 'flex-start' }, mb: 0.5 }}>
-                  <Typography variant="h4" component="h1" sx={{ mr: 1 }}>
-                    Noize London
-                  </Typography>
-                  <VerifiedIcon sx={{ color: 'secondary.main', fontSize: 20 }} />
-                </Box>
-                
-                <Typography variant="body1" color="text.secondary" sx={{ mb: 2 }}>
-                  London, United Kingdom
-                </Typography>
-                
-                <Box sx={{ 
-                  display: 'flex', 
-                  flexWrap: 'wrap', 
-                  gap: 1, 
-                  mb: 2,
-                  justifyContent: { xs: 'center', sm: 'flex-start' } 
-                }}>
-                  {skills.slice(0, 3).map((skill, index) => (
-                    <Chip 
-                      key={index}
-                      label={skill}
-                      size="small"
-                      sx={{ 
-                        bgcolor: alpha(darkTheme.palette.primary.main, 0.2),
-                        color: 'primary.light',
-                        borderWidth: 1,
-                        borderStyle: 'solid',
-                        borderColor: alpha(darkTheme.palette.primary.main, 0.4),
-                        '&:hover': {
-                          bgcolor: alpha(darkTheme.palette.primary.main, 0.3),
-                        }
-                      }}
-                    />
-                  ))}
-                  <Chip 
-                    icon={<HeadphonesIcon fontSize="small" />}
-                    label="Available for hire"
-                    size="small"
-                    sx={{ 
-                      bgcolor: alpha(darkTheme.palette.secondary.main, 0.2),
-                      color: 'secondary.light',
-                      borderWidth: 1,
-                      borderStyle: 'solid',
-                      borderColor: alpha(darkTheme.palette.secondary.main, 0.4),
-                      '&:hover': {
-                        bgcolor: alpha(darkTheme.palette.secondary.main, 0.3),
-                      }
-                    }}
-                  />
-                </Box>
-              </Grid>
-              
-              <Grid item xs={12} sm="auto" sx={{ display: 'flex', justifyContent: { xs: 'center', sm: 'flex-end' } }}>
-                <Box sx={{ display: 'flex', gap: 1.5 }}>
-                  <Button 
-                    variant="contained" 
-                    color="primary"
-                    startIcon={<PersonAddIcon />}
-                    sx={{ 
-                      borderRadius: 28,
-                      px: 3,
-                      py: 1,
-                      fontSize: { xs: '0.875rem', md: '1rem' },
-                      fontWeight: 'bold',
-                    }}
-                  >
-                    Hire me
-                  </Button>
-                  <IconButton 
-                    aria-label="Share profile"
-                    sx={{ 
-                      bgcolor: alpha(darkTheme.palette.background.paper, 0.6),
-                      backdropFilter: 'blur(10px)',
-                      width: 40,
-                      height: 40,
-                      '&:hover': { 
-                        bgcolor: alpha(darkTheme.palette.background.paper, 0.8),
-                        transform: 'scale(1.05)',
-                      }
-                    }}
-                  >
-                    <ShareIcon fontSize="small" />
-                  </IconButton>
-                </Box>
-              </Grid>
-            </Grid>
-          </Container>
-        </Box>
-
-        {/* Main Content */}
-        <Container sx={{ py: 5 }}>
-          <Grid container spacing={4}>
-            {/* Left Column - Featured Tracks */}
-            <Grid item xs={12} md={8}>
-              <GlassCard sx={{ p: 4 }}>
-                <Box sx={{ position: 'relative' }}>
-                  <Box sx={{ 
-                    display: 'flex', 
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    mb: 4 
-                  }}>
-                    <Typography 
-                      variant="h5" 
-                      sx={{ 
-                        fontWeight: 700,
-                        background: 'linear-gradient(to right, #fff, #b3b3b3)',
-                        backgroundClip: 'text',
-                        WebkitBackgroundClip: 'text',
-                        WebkitTextFillColor: 'transparent',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: 1
-                      }}
-                    >
-                      <PlayArrowIcon sx={{ color: 'primary.main' }} />
-                      Featured Tracks
-                    </Typography>
-                    <Button 
-                      variant="outlined"
-                      size="small"
-                      endIcon={<KeyboardArrowRightIcon />}
-                      sx={{ 
-                        borderRadius: 5,
-                        borderColor: 'primary.main',
-                        color: 'primary.main',
-                        '&:hover': {
-                          borderColor: 'primary.light',
-                          bgcolor: alpha(darkTheme.palette.primary.main, 0.1)
-                        }
-                      }}
-                    >
-                      View all
-                    </Button>
-                  </Box>
-
-                  <Grid container spacing={2}>
-                    {trackList.map((track) => (
-                      <Grid item xs={12} sm={6} key={track.id}>
-                        <Box
-                          sx={{
-                            position: 'relative',
-                            bgcolor: alpha('#ffffff', 0.03),
-                            borderRadius: 3,
-                            overflow: 'hidden',
-                            transition: 'all 0.3s ease',
-                            border: '1px solid',
-                            borderColor: playing === track.id 
-                              ? 'primary.main'
-                              : 'transparent',
-                            '&:hover': {
-                              transform: 'translateY(-4px)',
-                              boxShadow: `0 8px 24px ${alpha(darkTheme.palette.primary.main, 0.2)}`,
-                              bgcolor: alpha('#ffffff', 0.05),
-                            }
-                          }}
-                        >
-                          <Box sx={{ position: 'relative', pt: '56.25%' }}>
-                            <img
-                              src={track.coverArt}
-                              alt={track.name}
-                              style={{
-                                position: 'absolute',
-                                top: 0,
-                                left: 0,
-                                width: '100%',
-                                height: '100%',
-                                objectFit: 'cover',
-                                filter: playing === track.id ? 'none' : 'grayscale(0.5)',
-                                transition: 'filter 0.3s ease'
-                              }}
-                            />
-                            <Box
-                              sx={{
-                                position: 'absolute',
-                                top: 0,
-                                left: 0,
-                                right: 0,
-                                bottom: 0,
-                                background: 'linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.3) 50%, rgba(0,0,0,0) 100%)',
-                              }}
-                            />
-                            <IconButton
-                              onClick={() => handlePlayTrack(track.id)}
-                              sx={{
-                                position: 'absolute',
-                                bottom: 16,
-                                left: 16,
-                                bgcolor: playing === track.id ? 'primary.main' : alpha('#ffffff', 0.1),
-                                backdropFilter: 'blur(4px)',
-                                '&:hover': {
-                                  bgcolor: playing === track.id ? 'primary.dark' : alpha('#ffffff', 0.2),
-                                }
-                              }}
-                            >
-                              {playing === track.id ? <PauseIcon /> : <PlayArrowIcon />}
-                            </IconButton>
-                            
-                            <Box sx={{ 
-                              position: 'absolute',
-                              bottom: 16,
-                              right: 16,
-                              display: 'flex',
-                              gap: 1
-                            }}>
-                              <IconButton
-                                component={Link}
-                                href={track.youtubeLink}
-                                target="_blank"
-                                size="small"
-                                sx={{
-                                  bgcolor: alpha('#ff0000', 0.2),
-                                  '&:hover': { bgcolor: alpha('#ff0000', 0.3) }
-                                }}
-                              >
-                                <YouTubeIcon sx={{ color: '#ff0000' }} />
-                              </IconButton>
-                              <IconButton
-                                size="small"
-                                sx={{
-                                  bgcolor: alpha('#ffffff', 0.1),
-                                  '&:hover': { bgcolor: alpha('#ffffff', 0.2) }
-                                }}
-                              >
-                                <MoreVertIcon />
-                              </IconButton>
-                            </Box>
-                          </Box>
-
-                          <Box sx={{ p: 2 }}>
-                            <Typography 
-                              variant="subtitle1"
-                              sx={{ 
-                                fontWeight: playing === track.id ? 600 : 500,
-                                color: playing === track.id ? 'primary.light' : 'text.primary',
-                                mb: 1
-                              }}
-                            >
-                              {track.name}
-                            </Typography>
-                            <Box sx={{ 
-                              display: 'flex', 
-                              alignItems: 'center', 
-                              gap: 2,
-                              color: 'text.secondary'
-                            }}>
-                              <Typography variant="caption" sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                                <CalendarMonthIcon fontSize="inherit" />
-                                {track.date}
-                              </Typography>
-                              <Typography variant="caption" sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                                <AccessTimeIcon fontSize="inherit" />
-                                {track.duration}
-                              </Typography>
-                            </Box>
-                          </Box>
-
-                          {playing === track.id && (
-                            <LinearProgress
-                              variant="determinate"
-                              value={progress}
-                              sx={{
-                                position: 'absolute',
-                                bottom: 0,
-                                left: 0,
-                                right: 0,
-                                height: 2,
-                                bgcolor: alpha(darkTheme.palette.primary.main, 0.1),
-                                '& .MuiLinearProgress-bar': {
-                                  bgcolor: 'primary.main',
-                                }
-                              }}
-                            />
-                          )}
-                        </Box>
-                      </Grid>
-                    ))}
-                  </Grid>
-                </Box>
-              </GlassCard>
-              
-              {/* Equipment Section - Improved styling */}
-              <GlassCard>
-                <Box sx={{ position: 'relative' }}>
-                  <Typography variant="h6" sx={{ mb: 3 }}>
-                    Equipment & Tools
-                  </Typography>
-                  
-                  <Grid container spacing={3}>
-                    <Grid item xs={12} md={6}>
-                      <Box sx={{ 
-                        display: 'flex', 
-                        alignItems: 'center', 
-                        gap: 1, 
-                        mb: 1.5,
-                        color: 'text.secondary' 
-                      }}>
-                        <CodeIcon fontSize="small" />
-                        <Typography variant="body2" fontWeight={500}>
-                          DAW & Software
-                        </Typography>
-                      </Box>
-                      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-                        <Chip 
-                          label="Ableton Live" 
-                          size="small" 
-                          sx={{ 
-                            bgcolor: alpha('#ffffff', 0.05),
-                            '&:hover': { bgcolor: alpha('#ffffff', 0.1) },
-                          }}
-                        />
-                        <Chip 
-                          label="Logic Pro" 
-                          size="small"
-                          sx={{ 
-                            bgcolor: alpha('#ffffff', 0.05),
-                            '&:hover': { bgcolor: alpha('#ffffff', 0.1) },
-                          }}
-                        />
-                        <Chip 
-                          label="FL Studio" 
-                          size="small"
-                          sx={{ 
-                            bgcolor: alpha('#ffffff', 0.05),
-                            '&:hover': { bgcolor: alpha('#ffffff', 0.1) },
-                          }}
-                        />
-                      </Box>
-                    </Grid>
-                    
-                    <Grid item xs={12} md={6}>
-                      <Box sx={{ 
-                        display: 'flex', 
-                        alignItems: 'center', 
-                        gap: 1, 
-                        mb: 1.5,
-                        color: 'text.secondary' 
-                      }}>
-                        <PianoIcon fontSize="small" />
-                        <Typography variant="body2" fontWeight={500}>
-                          Instruments
-                        </Typography>
-                      </Box>
-                      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-                        <Chip 
-                          label="Piano" 
-                          size="small"
-                          sx={{ 
-                            bgcolor: alpha('#ffffff', 0.05),
-                            '&:hover': { bgcolor: alpha('#ffffff', 0.1) },
-                          }}
-                        />
-                        <Chip 
-                          label="Guitar" 
-                          size="small"
-                          sx={{ 
-                            bgcolor: alpha('#ffffff', 0.05),
-                            '&:hover': { bgcolor: alpha('#ffffff', 0.1) },
-                          }}
-                        />
-                        <Chip 
-                          label="Synths" 
-                          size="small"
-                          sx={{ 
-                            bgcolor: alpha('#ffffff', 0.05),
-                            '&:hover': { bgcolor: alpha('#ffffff', 0.1) },
-                          }}
-                        />
-                      </Box>
-                    </Grid>
-                    
-                    <Grid item xs={12}>
-                      <Box sx={{ 
-                        display: 'flex', 
-                        alignItems: 'center', 
-                        gap: 1, 
-                        mb: 1.5,
-                        color: 'text.secondary' 
-                      }}>
-                        <LanguageIcon fontSize="small" />
-                        <Typography variant="body2" fontWeight={500}>
-                          Languages
-                        </Typography>
-                      </Box>
-                      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-                        <Chip 
-                          label="English" 
-                          size="small"
-                          sx={{ 
-                            bgcolor: alpha('#ffffff', 0.05),
-                            '&:hover': { bgcolor: alpha('#ffffff', 0.1) },
-                          }}
-                        />
-                        <Chip 
-                          label="Italian" 
-                          size="small"
-                          sx={{ 
-                            bgcolor: alpha('#ffffff', 0.05),
-                            '&:hover': { bgcolor: alpha('#ffffff', 0.1) },
-                          }}
-                        />
-                        <Chip 
-                          label="French" 
-                          size="small"
-                          sx={{ 
-                            bgcolor: alpha('#ffffff', 0.05),
-                            '&:hover': { bgcolor: alpha('#ffffff', 0.1) },
-                          }}
-                        />
-                      </Box>
-                    </Grid>
-                  </Grid>
-                </Box>
-              </GlassCard>
-            </Grid>
+            <Box sx={{ position: 'relative', mb: { xs: 2, md: 0 } }}>
+              <LargeAvatar 
+                src="https://img.freepik.com/free-photo/medium-shot-man-playing-guitar-studio_23-2150232123.jpg?t=st=1744101142~exp=1744104742~hmac=dd039b0e837d5847a9cf25a79c4fc73db3aa76a68129ff1ca1d67bea0a9f5d9a&w=996" 
+                alt="SOUNDWAVE"
+              />
+              <AvatarBadge>
+                <Person fontSize="small" />
+              </AvatarBadge>
+            </Box>
             
-           {/* Right Column - Bio and Info */}
-<Grid item xs={12} md={4}>
-  {/* About Section - Improved styling */}
-  <GlassCard>
-    <Box sx={{ position: 'relative' }}>
-      <Typography variant="h6" sx={{ mb: 2, pl: 1 }}>
-        About
-      </Typography>
-      
-      <Box sx={{ color: 'text.secondary' }}>
-        <Typography variant="body2" paragraph>
-          Fabio is a songwriter, producer and mixing/mastering engineer from London with over 16 years professional experience dedicated to helping musicians accelerate their growth in all areas of the industry.
-        </Typography>
-        
-        <Typography variant="body2" paragraph>
-          Noize is run by Fabio Lendrum, a singer, songwriter, producer and mixing engineer who has worked along side some of the biggest names in music including Dallas Austin (Michael Jackson, Kelis), Rick Nowles (Nelly Furtado, Lykke Li, Stevie Knicks), and Kool Kojak (Britney Spears, Nicki Minaj, Flo Rida).
-        </Typography>
-        
-        <Typography variant="body2" paragraph>
-          Fabio's personal focus is now on making underground house music and techno but he still mixes and masters a wide variety of music including Hip-Hop, Pop and World music.
-        </Typography>
-      </Box>
-    </Box>
-  </GlassCard>
-  
-  {/* Genres Section - Enhanced styling */}
-  <GlassCard>
-    <Box sx={{ position: 'relative' }}>
-      <Typography variant="h6" sx={{ mb: 2, pl: 1 }}>
-        Genres
-      </Typography>
-      
-      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-        {genres.map((genre, index) => (
-          <Chip 
-            key={index} 
-            label={genre} 
-            size="small"
-            sx={{ 
-              bgcolor: alpha('#ffffff', 0.05),
-              '&:hover': { 
-                bgcolor: alpha('#ffffff', 0.1),
-                transform: 'translateY(-2px)',
-              },
-              transition: 'all 0.2s ease',
-            }}
-            clickable
-          />
-        ))}
-      </Box>
-    </Box>
-  </GlassCard>
-  
-  {/* Connect Section - Enhanced styling */}
-  <GlassCard>
-    <Box sx={{ position: 'relative' }}>
-      <Typography variant="h6" sx={{ mb: 3, pl: 1 }}>
-        Connect
-      </Typography>
-      
-      <Box sx={{ 
-        display: 'flex', 
-        gap: 2, 
-        mb: 3,
-        justifyContent: { xs: 'center', sm: 'flex-start' }
-      }}>
-        <IconButton 
-          component={Link}
-          href="https://instagram.com/noizelondon"
-          target="_blank"
-          rel="noreferrer"
-          aria-label="Instagram"
-          sx={{ 
-            background: 'linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%)',
-            color: 'white',
-            width: 48,
-            height: 48,
-            boxShadow: '0 4px 10px rgba(225, 48, 108, 0.3)',
-            '&:hover': { 
-              opacity: 0.9,
-              transform: 'scale(1.1)',
-            },
-            transition: 'all 0.2s ease',
-          }}
-        >
-          <InstagramIcon />
-        </IconButton>
-        
-        <IconButton 
-          component={Link}
-          href="https://youtube.com/@noizelondon"
-          target="_blank"
-          rel="noreferrer"
-          aria-label="YouTube"
-          sx={{ 
-            bgcolor: '#c4302b',
-            color: 'white',
-            width: 48,
-            height: 48,
-            boxShadow: '0 4px 10px rgba(196, 48, 43, 0.3)',
-            '&:hover': { 
-              opacity: 0.9,
-              transform: 'scale(1.1)',
-            },
-            transition: 'all 0.2s ease',
-          }}
-        >
-          <YouTubeIcon />
-        </IconButton>
-        
-        <IconButton 
-          component={Link}
-          href="https://tiktok.com/@noizelondon"
-          target="_blank"
-          rel="noreferrer"
-          aria-label="TikTok"
-          sx={{ 
-            background: 'linear-gradient(45deg, #000000, #333333)',
-            color: 'white',
-            width: 48,
-            height: 48,
-            boxShadow: '0 4px 10px rgba(0, 0, 0, 0.3)',
-            '&:hover': { 
-              opacity: 0.9,
-              transform: 'scale(1.1)',
-            },
-            transition: 'all 0.2s ease',
-          }}
-        >
-          <TikTokIcon />
-        </IconButton>
-      </Box>
-      
-      <Divider sx={{ 
-        my: 3, 
-        background: 'linear-gradient(to right, rgba(0,0,0,0), rgba(255,255,255,0.2), rgba(0,0,0,0))' 
-      }} />
-      
-      <Box sx={{ 
-        p: 2, 
-        borderRadius: 2, 
-        bgcolor: alpha('#ffffff', 0.03),
-        border: '1px solid',
-        borderColor: alpha('#ffffff', 0.05),
-      }}>
-        <Typography variant="body2" color="text.secondary" sx={{ fontStyle: 'italic' }}>
-          Fabio's past personal project KAIOS has had huge success in a very small time frame. Deemed by Pete Tong as BBC Radio 1's Future Stars of 2021 and coming with over 1,000,000 streams on their first ever remix for Martin Garrix and Elderbrook.
-        </Typography>
-      </Box>
-    </Box>
-  </GlassCard>
-</Grid>
-          </Grid>
-        </Container>
-        <PlayerModal
-          open={openPlayer}
-          onClose={handleClosePlayer}
-          closeAfterTransition
-        >
-          <Fade in={openPlayer}>
-            <PlayerContent>
-              <RotatingCover isplaying={playing !== null}>
-                <img 
-                  src={currentTrack?.coverArt} 
-                  alt={currentTrack?.name}
-                />
-              </RotatingCover>
+            <Box sx={{ 
+              ml: { xs: 0, md: 4 }, 
+              flex: 1,
+              width: { xs: '100%', md: 'auto' }
+            }}>
               <Typography 
-                variant="h6" 
+                variant="h3" 
+                component="h1" 
                 sx={{ 
-                  mb: 1,
-                  color: 'common.white',  // Add this line
-                  textShadow: '0 2px 4px rgba(0,0,0,0.3)' // Optional: adds depth
+                  fontWeight: 'bold',
+                  color: '#fff',
+                  fontSize: { xs: '2rem', md: '3rem' }
                 }}
               >
-                {currentTrack?.name}
+                Mithila Madhusankha
               </Typography>
-              <Box sx={{ px: 4 }}>
-                <LinearProgress 
-                  variant="determinate" 
-                  value={progress} 
-                  sx={{
-                    height: 4,
-                    borderRadius: 2,
-                    mb: 2,
-                    bgcolor: alpha(darkTheme.palette.primary.main, 0.1),
-                    '& .MuiLinearProgress-bar': {
-                      bgcolor: 'primary.main',
-                    }
-                  }}
+              
+              <Typography variant="subtitle1" color="white" sx={{ mt: 0.5 }}>
+                Los Angeles, CA · United States
+              </Typography>
+              
+              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mt: 2 }}>
+                <Chip 
+                  label="Producer" 
+                  size="small"
+                  sx={{ backgroundColor: 'rgba(25, 118, 210, 0.4)' }}
+                />
+                <Chip 
+                  label="Composer" 
+                  size="small" 
+                  sx={{ backgroundColor: 'rgba(25, 118, 210, 0.4)' }}
+                />
+                <Chip 
+                  label="Mixing Engineer" 
+                  size="small" 
+                  sx={{ backgroundColor: 'rgba(25, 118, 210, 0.4)' }}
                 />
               </Box>
-              <IconButton
-                onClick={() => handlePlayTrack(currentTrack?.id)}
-                sx={{
-                  bgcolor: 'primary.main',
-                  color: 'common.white',
-                  '&:hover': {
-                    bgcolor: 'primary.dark',
-                  },
-                }}
-              >
-                {playing ? <PauseIcon /> : <PlayArrowIcon />}
-              </IconButton>
-            </PlayerContent>
-          </Fade>
-        </PlayerModal>
-      </Box>
+            </Box>
+            
+            <Button 
+              variant="contained" 
+              color="primary"
+              sx={{ 
+                px: 3, 
+                py: 1.5, 
+                boxShadow: '0 4px 12px rgba(25, 118, 210, 0.4)',
+                mt: { xs: 2, md: 0 }
+              }}
+            >
+              Message me
+            </Button>
+          </Box>
+        </HeroSection>
+
+        {/* Main Content */}
+        <Container maxWidth="xl" sx={{ py: 6 }}>
+          <Grid container spacing={4}>
+            {/* Left Column - About Section */}
+            <Grid item xs={12} md={4}>
+              <GradientCard elevation={3}>
+                <CardContent>
+                  <SectionTitle variant="h5" gutterBottom>
+                    <IconContainer>
+                      <Person />
+                    </IconContainer>
+                    About MITHILA
+                  </SectionTitle>
+                  
+                  <Box sx={{ position: 'relative', pl: 2 }}>
+                    <Box sx={{ 
+                      position: 'absolute', 
+                      left: 0, 
+                      top: 0, 
+                      bottom: 0, 
+                      width: '4px', 
+                      borderRadius: 4,
+                      background: 'linear-gradient(to bottom, #1976d2, #7c4dff)' 
+                    }} />
+                    
+                    <Typography variant="body1" paragraph sx={{ fontSize: '1.1rem', lineHeight: 1.6 }}>
+                      Enter the immersive sonic universe of SOUNDWAVE, where electronic elements 
+                      blend with organic textures to create memorable auditory experiences.
+                    </Typography>
+                    
+                    <Typography variant="body1" paragraph sx={{ fontSize: '1.1rem', lineHeight: 1.6 }}>
+                      With over 10 years in the industry, SOUNDWAVE has crafted sounds for films, 
+                      commercials, and chart-topping artists. His unique approach to music production 
+                      combines traditional composition techniques with cutting-edge digital tools.
+                    </Typography>
+                    
+                    <Typography variant="body1" paragraph sx={{ fontSize: '1.1rem', lineHeight: 1.6 }}>
+                      Specializing in atmospheric electronic, hip-hop fusion, and cinematic compositions, 
+                      SOUNDWAVE's unique approach has earned recognition across multiple platforms and continents.
+                    </Typography>
+                    
+                    <Typography variant="body1" sx={{ fontSize: '1.1rem', lineHeight: 1.6 }}>
+                      His work has been featured in major film festivals, international advertising campaigns, 
+                      and on platforms like Spotify, Apple Music, and SoundCloud with millions of streams.
+                    </Typography>
+                  </Box>
+                </CardContent>
+              </GradientCard>
+              
+              {/* Links Section */}
+              <GradientCard elevation={3}>
+                <CardContent>
+                  <SectionTitle variant="h5" gutterBottom>
+                    <IconContainer>
+                      <LinkIcon />
+                    </IconContainer>
+                    Links
+                  </SectionTitle>
+                  
+                  <Stack direction="row" spacing={2} flexWrap="wrap">
+                    <SocialButton 
+                      variant="contained" 
+                      startIcon={<LinkIcon />} 
+                      size="medium"
+                      sx={{ mb: 1 }}
+                    >
+                      Spotify
+                    </SocialButton>
+                    <SocialButton 
+                      variant="contained" 
+                      startIcon={<YouTube />} 
+                      size="medium"
+                      sx={{ mb: 1 }}
+                    >
+                      YouTube
+                    </SocialButton>
+                    <SocialButton 
+                      variant="contained" 
+                      startIcon={<Instagram />}
+                      size="medium"
+                      sx={{ mb: 1 }}
+                    >
+                      Instagram
+                    </SocialButton>
+                  </Stack>
+                </CardContent>
+              </GradientCard>
+              
+              {/* Genres & Skills */}
+              <GradientCard elevation={3}>
+                <CardContent>
+                  <SectionTitle variant="h5" gutterBottom>
+                    <IconContainer>
+                      <AlbumOutlined />
+                    </IconContainer>
+                    Genres & Skills
+                  </SectionTitle>
+                  
+                  <Box sx={{ mb: 3 }}>
+                    <Typography variant="subtitle2" color="primary.light" sx={{ mb: 1, textTransform: 'uppercase' }}>
+                      GENRES
+                    </Typography>
+                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+                      {genres.map((genre, index) => (
+                        <Chip 
+                          key={index} 
+                          label={genre} 
+                          size="small" 
+                          sx={{ 
+                            mb: 1, 
+                            bgcolor: 'rgba(25, 118, 210, 0.2)',
+                            fontSize: '0.75rem'
+                          }} 
+                        />
+                      ))}
+                    </Box>
+                  </Box>
+                  
+                  <Box sx={{ mb: 3 }}>
+                    <Typography variant="subtitle2" color="primary.light" sx={{ mb: 1, textTransform: 'uppercase' }}>
+                      SKILLS
+                    </Typography>
+                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+                      {skills.map((skill, index) => (
+                        <Chip 
+                          key={index} 
+                          label={skill} 
+                          variant="outlined" 
+                          size="small"
+                          sx={{ 
+                            mb: 1, 
+                            borderColor: 'rgba(25, 118, 210, 0.3)',
+                            fontSize: '0.75rem'
+                          }} 
+                        />
+                      ))}
+                    </Box>
+                  </Box>
+                  
+                  <Box>
+                    <Typography variant="subtitle2" color="primary.light" sx={{ mb: 1, textTransform: 'uppercase' }}>
+                      TOOLS
+                    </Typography>
+                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+                      {tools.map((tool, index) => (
+                        <Chip 
+                          key={index} 
+                          label={tool} 
+                          size="small"
+                          sx={{ 
+                            mb: 1, 
+                            background: 'linear-gradient(90deg, rgba(10,25,41,0.6) 0%, rgba(25,58,95,0.6) 100%)',
+                            fontSize: '0.75rem'
+                          }} 
+                        />
+                      ))}
+                    </Box>
+                  </Box>
+                </CardContent>
+              </GradientCard>
+            </Grid>
+            
+            {/* Right Column - Featured Tracks */}
+            <Grid item xs={12} md={8}>
+              <Box sx={{ mb: 4 }}>
+                <Typography 
+                  variant="h4" 
+                  sx={{ 
+                    fontWeight: 'bold',
+                    display: 'flex',
+                    alignItems: 'center',
+                    mb: 3,
+                    fontSize: { xs: '1.75rem', md: '2.25rem' }
+                  }}
+                >
+                  <IconContainer sx={{ mr: 2, p: 1.5 }}>
+                    <Album />
+                  </IconContainer>
+                  Featured Tracks
+                  <GradientDivider />
+                </Typography>
+              </Box>
+              
+              <Stack spacing={2}>
+                {tracks.map(track => (
+                  <TrackItem key={track.id} elevation={2}>
+                    <Box sx={{ 
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      width: '100%',
+                      flexDirection: { xs: 'column', sm: 'row' }
+                    }}>
+                      {/* Track Image */}
+                      <AlbumCover sx={{ mb: { xs: 2, sm: 0 } }}>
+                        <img src={track.cover} alt={track.title} />
+                        <Box 
+                          className="overlay"
+                          sx={{ 
+                            borderRadius: 1,
+                            cursor: 'pointer'
+                          }}
+                          onClick={() => handlePlayPause(track.id)}
+                        >
+                          {isPlaying && currentTrack === track.id ? (
+                            <Pause sx={{ color: 'white', fontSize: 32 }} />
+                          ) : (
+                            <PlayArrow sx={{ color: 'white', fontSize: 32 }} />
+                          )}
+                        </Box>
+                      </AlbumCover>
+                      
+                      {/* Track Info */}
+                      <Box sx={{ 
+                        flex: 1,
+                        width: { xs: '100%', sm: 'auto' }
+                      }}>
+                        <Typography variant="h6">{track.title}</Typography>
+                        <Box sx={{ 
+                          display: 'flex', 
+                          alignItems: 'center', 
+                          color: 'text.secondary',
+                          flexWrap: 'wrap'
+                        }}>
+                          <AccessTime fontSize="small" sx={{ mr: 0.5, fontSize: 14 }} />
+                          <Typography variant="caption" sx={{ mr: 2 }}>
+                            {track.duration}
+                          </Typography>
+                          <CalendarToday fontSize="small" sx={{ mr: 0.5, fontSize: 14 }} />
+                          <Typography variant="caption">
+                            {track.uploadDate}
+                          </Typography>
+                        </Box>
+                        
+                        {/* Progress Bar (visible only for current track) */}
+                        {currentTrack === track.id && (
+                          <LinearProgress 
+                            variant="determinate" 
+                            value={progress} 
+                            sx={{ 
+                              mt: 1.5,
+                              height: 4,
+                              borderRadius: 2,
+                              backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                              '& .MuiLinearProgress-bar': {
+                                background: 'linear-gradient(to right, #1976d2, #7c4dff)',
+                                borderRadius: 2,
+                              }
+                            }} 
+                          />
+                        )}
+                      </Box>
+                      
+                      {/* Track Stats */}
+                      <Box sx={{ 
+                        display: 'flex', 
+                        alignItems: 'center', 
+                        color: 'text.secondary',
+                        mt: { xs: 2, sm: 0 }
+                      }}>
+                        <VolumeUp fontSize="small" sx={{ mr: 0.5 }} />
+                        <Typography variant="caption">
+                          {track.streams}
+                        </Typography>
+                      </Box>
+                    </Box>
+                  </TrackItem>
+                ))}
+              </Stack>
+              
+              {/* Artist Gallery Section */}
+              <Box sx={{ mt: 6 }}>
+                <Typography 
+                  variant="h4" 
+                  sx={{ 
+                    fontWeight: 'bold',
+                    display: 'flex',
+                    alignItems: 'center',
+                    mb: 3,
+                    fontSize: { xs: '1.75rem', md: '2.25rem' }
+                  }}
+                >
+                  <IconContainer sx={{ mr: 2, p: 1.5 }}>
+                    <Image />
+                  </IconContainer>
+                  Artist Gallery
+                  <GradientDivider />
+                </Typography>
+                
+                <Grid container spacing={2}>
+                  {galleryImages.map((image, index) => (
+                    <Grid item xs={12} sm={6} md={4} key={index}>
+                      <GalleryImage onClick={() => handleImageClick(image)}>
+                        <img src={image} alt={`Gallery Image ${index + 1}`} />
+                      </GalleryImage>
+                    </Grid>
+                  ))}
+                </Grid>
+              </Box>
+            </Grid>
+          </Grid>
+        </Container>
+        
+        {/* Footer */}
+        <Footer />
+        
+        {/* Audio Element */}
+        <audio ref={audioRef} style={{ display: 'none' }}>
+          <source src="" type="audio/mpeg" />
+        </audio>
+
+        {/* Image Modal */}
+        <Modal
+          open={!!selectedImage}
+          onClose={handleCloseModal}
+          aria-labelledby="image-modal"
+          aria-describedby="image-modal-description"
+        >
+          <ExpandedImageModal>
+            <ExpandedImageContent>
+              <img 
+                src={selectedImage} 
+                alt="Expanded view" 
+                style={{ 
+                  maxWidth: '100%', 
+                  maxHeight: '90vh',
+                  borderRadius: 8,
+                  boxShadow: '0 10px 30px rgba(0, 0, 0, 0.5)'
+                }} 
+              />
+              <CloseButton onClick={handleCloseModal}>
+                <Close />
+              </CloseButton>
+            </ExpandedImageContent>
+          </ExpandedImageModal>
+        </Modal>
+      </GradientBackground>
     </ThemeProvider>
- 
   );
-}
+};
+
 export default MusicProducerProfile;
