@@ -93,6 +93,28 @@ const AvatarBadge = styled(Box)(({ theme }) => ({
   boxShadow: '0 2px 10px rgba(0,0,0,0.3)',
 }));
 
+// New TrackContainer style for the updated track listing
+const TrackContainer = styled(Box)(({ theme }) => ({
+  display: 'flex',
+  alignItems: 'center',
+  padding: theme.spacing(2),
+  borderRadius: theme.shape.borderRadius,
+  backgroundColor: 'rgba(0, 0, 0, 0.6)',
+  marginBottom: theme.spacing(1),
+  transition: 'all 0.3s ease',
+  '&:hover': {
+    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+  }
+}));
+
+const PlayButton = styled(IconButton)(({ theme }) => ({
+  backgroundColor: 'rgba(0, 0, 0, 0.6)',
+  color: theme.palette.common.white,
+  '&:hover': {
+    backgroundColor: theme.palette.primary.main,
+  }
+}));
+
 const TrackItem = styled(Paper)(({ theme }) => ({
   background: 'linear-gradient(90deg, rgba(10,25,41,0.7) 0%, rgba(0,0,0,0.7) 100%)',
   padding: theme.spacing(2),
@@ -276,51 +298,43 @@ const MusicProducerProfile = () => {
   const audioRef = useRef(null);
   const progressInterval = useRef(null);
   
+  // New tracks data that matches the format in the image
   const tracks = [
     {
       id: 1,
-      title: "Midnight Dream",
-      duration: "3:42",
-      uploadDate: "Apr 2, 2025",
-      cover: "https://picsum.photos/400/400?random=1",
-      audioSrc: "/tracks/midnight-dream.mp3",
-      streams: "128,450"
+      title: "Goddam ft. Olivia Ruff | Jazz Mafia (co-written & produced by Adam Theis)",
+      duration: "04:25",
+      uploadDate: "Mar 26, 2024"
     },
     {
       id: 2,
-      title: "Electric Soul",
-      duration: "4:18",
-      uploadDate: "Mar 27, 2025",
-      cover: "https://picsum.photos/400/400?random=2",
-      audioSrc: "/tracks/electric-soul.mp3",
-      streams: "98,321"
+      title: "The Situation ft. Lateef The Truthspeaker | Jazz Mafia (produced by Adam Theis)",
+      duration: "05:17",
+      uploadDate: "Mar 26, 2024"
     },
     {
       id: 3,
-      title: "Urban Pulse",
-      duration: "2:56",
-      uploadDate: "Mar 15, 2025",
-      cover: "https://picsum.photos/400/400?random=3",
-      audioSrc: "/tracks/urban-pulse.mp3",
-      streams: "76,129"
+      title: "Kill Em With Kindness | Cosa Nostra Strings (written & produced by Adam Theis)",
+      duration: "07:57",
+      uploadDate: "Mar 26, 2024"
     },
     {
       id: 4,
-      title: "Neon Lights (feat. Luna Ray)",
-      duration: "3:24",
-      uploadDate: "Mar 10, 2025",
-      cover: "https://picsum.photos/400/400?random=4",
-      audioSrc: "/tracks/neon-lights.mp3",
-      streams: "112,578"
+      title: "China Cat Sunflower | Grateful Brass (prod, arr, ft. Adam Theis)",
+      duration: "06:25",
+      uploadDate: "Mar 26, 2024"
     },
     {
       id: 5,
-      title: "Cityscape",
-      duration: "5:07",
-      uploadDate: "Feb 28, 2025",
-      cover: "https://picsum.photos/400/400?random=5",
-      audioSrc: "/tracks/cityscape.mp3",
-      streams: "87,934"
+      title: "Stone Cold Lovin | Jazz Mafia (co-written, produced by Adam Theis)",
+      duration: "04:20",
+      uploadDate: "Mar 26, 2024"
+    },
+    {
+      id: 6,
+      title: "Rock and Clap | Jazz Mafia (written & produced by Adam Theis)",
+      duration: "05:20",
+      uploadDate: "Mar 26, 2024"
     }
   ];
 
@@ -358,36 +372,30 @@ const MusicProducerProfile = () => {
     };
   }, []);
 
+  useEffect(() => {
+    let timer;
+    if (isPlaying) {
+      timer = setInterval(() => {
+        setProgress((prevProgress) => {
+          if (prevProgress >= 100) {
+            clearInterval(timer);
+            return 0;
+          }
+          return prevProgress + 0.5;
+        });
+      }, 1000);
+    }
+    return () => clearInterval(timer);
+  }, [isPlaying]);
+
   const handlePlayPause = (trackId) => {
     if (currentTrack === trackId) {
       setIsPlaying(!isPlaying);
-      if (isPlaying) {
-        clearInterval(progressInterval.current);
-      } else {
-        startProgressInterval();
-      }
     } else {
       setCurrentTrack(trackId);
       setIsPlaying(true);
       setProgress(0);
-      startProgressInterval();
     }
-  };
-
-  const startProgressInterval = () => {
-    if (progressInterval.current) {
-      clearInterval(progressInterval.current);
-    }
-    
-    progressInterval.current = setInterval(() => {
-      setProgress(prev => {
-        if (prev >= 100) {
-          clearInterval(progressInterval.current);
-          return 0;
-        }
-        return prev + 0.5;
-      });
-    }, 100);
   };
 
   const handleImageClick = (image) => {
@@ -665,89 +673,68 @@ const MusicProducerProfile = () => {
                 </Typography>
               </Box>
               
-              <Stack spacing={2}>
+              {/* NEW FEATURED TRACKS SECTION - UPDATED */}
+              <Stack spacing={1}>
                 {tracks.map(track => (
-                  <TrackItem key={track.id} elevation={2}>
+                  <TrackContainer key={track.id}>
+                    {/* Play Button */}
+                    <PlayButton 
+                      onClick={() => handlePlayPause(track.id)}
+                      size="medium"
+                    >
+                      {isPlaying && currentTrack === track.id ? (
+                        <Pause sx={{ fontSize: 24 }} />
+                      ) : (
+                        <PlayArrow sx={{ fontSize: 24 }} />
+                      )}
+                    </PlayButton>
+                    
+                    {/* Track Information */}
                     <Box sx={{ 
                       display: 'flex', 
-                      alignItems: 'center', 
-                      width: '100%',
-                      flexDirection: { xs: 'column', sm: 'row' }
+                      flexDirection: 'column', 
+                      flex: 1, 
+                      ml: 2 
                     }}>
-                      {/* Track Image */}
-                      <AlbumCover sx={{ mb: { xs: 2, sm: 0 } }}>
-                        <img src={track.cover} alt={track.title} />
-                        <Box 
-                          className="overlay"
-                          sx={{ 
-                            borderRadius: 1,
-                            cursor: 'pointer'
-                          }}
-                          onClick={() => handlePlayPause(track.id)}
-                        >
-                          {isPlaying && currentTrack === track.id ? (
-                            <Pause sx={{ color: 'white', fontSize: 32 }} />
-                          ) : (
-                            <PlayArrow sx={{ color: 'white', fontSize: 32 }} />
-                          )}
-                        </Box>
-                      </AlbumCover>
+                      <Typography 
+                        variant="body1" 
+                        sx={{ 
+                          fontWeight: 500,
+                          color: 'white'
+                        }}
+                      >
+                        {track.title}
+                      </Typography>
                       
-                      {/* Track Info */}
-                      <Box sx={{ 
-                        flex: 1,
-                        width: { xs: '100%', sm: 'auto' }
-                      }}>
-                        <Typography variant="h6">{track.title}</Typography>
-                        <Box sx={{ 
-                          display: 'flex', 
-                          alignItems: 'center', 
-                          color: 'text.secondary',
-                          flexWrap: 'wrap'
-                        }}>
-                          <AccessTime fontSize="small" sx={{ mr: 0.5, fontSize: 14 }} />
-                          <Typography variant="caption" sx={{ mr: 2 }}>
-                            {track.duration}
-                          </Typography>
-                          <CalendarToday fontSize="small" sx={{ mr: 0.5, fontSize: 14 }} />
-                          <Typography variant="caption">
-                            {track.uploadDate}
-                          </Typography>
-                        </Box>
+                      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mt: 0.5 }}>
+                        <Typography variant="body2" color="text.secondary">
+                          {track.duration}
+                        </Typography>
                         
-                        {/* Progress Bar (visible only for current track) */}
-                        {currentTrack === track.id && (
-                          <LinearProgress 
-                            variant="determinate" 
-                            value={progress} 
-                            sx={{ 
-                              mt: 1.5,
-                              height: 4,
-                              borderRadius: 2,
-                              backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                              '& .MuiLinearProgress-bar': {
-                                background: 'linear-gradient(to right, #1976d2, #7c4dff)',
-                                borderRadius: 2,
-                              }
-                            }} 
-                          />
-                        )}
-                      </Box>
-                      
-                      {/* Track Stats */}
-                      <Box sx={{ 
-                        display: 'flex', 
-                        alignItems: 'center', 
-                        color: 'text.secondary',
-                        mt: { xs: 2, sm: 0 }
-                      }}>
-                        <VolumeUp fontSize="small" sx={{ mr: 0.5 }} />
-                        <Typography variant="caption">
-                          {track.streams}
+                        <Typography variant="body2" color="text.secondary">
+                          {track.uploadDate}
                         </Typography>
                       </Box>
+                      
+                      {/* Progress Bar */}
+                      {currentTrack === track.id && (
+                        <LinearProgress 
+                          variant="determinate" 
+                          value={progress} 
+                          sx={{ 
+                            mt: 1.5,
+                            height: 4,
+                            borderRadius: 2,
+                            backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                            '& .MuiLinearProgress-bar': {
+                              background: 'linear-gradient(to right, #1976d2, #7c4dff)',
+                              borderRadius: 2,
+                            }
+                          }} 
+                        />
+                      )}
                     </Box>
-                  </TrackItem>
+                  </TrackContainer>
                 ))}
               </Stack>
               
