@@ -89,21 +89,21 @@ const MusicServices = () => {
       title: 'Music Producers',
       description: 'Hire and work with top producers ready to turn your song or idea into a hit track.',
       image: VocalRecordingImg,
-      link: '/vocal-recording'
+      link: '/music/producer'
     },
     {
       id: 2,
       title: 'Mixing Engineers',
       description: 'Hire hit-making mixing engineers that will transform your recorded tracks into release-ready songs',
       image: StudioBookingImg,
-      link: '/studio-booking'
+      link: '/music/mixing'
     },
     {
       id: 3,
       title: 'Mastering Engineers',
       description: 'Award-winning mastering engineers in every price and genre for hire',
       image: MusicVideoImg,
-      link: '/music-video'
+      link: '/music/mastering'
     },
     {
       id: 4,
