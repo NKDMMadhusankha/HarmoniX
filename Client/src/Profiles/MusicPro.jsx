@@ -83,16 +83,6 @@ const LargeAvatar = styled(Avatar)(({ theme }) => ({
   },
 }));
 
-const AvatarBadge = styled(Box)(({ theme }) => ({
-  position: 'absolute',
-  bottom: 12,
-  right: 12,
-  backgroundColor: theme.palette.primary.main,
-  padding: theme.spacing(1),
-  borderRadius: '50%',
-  boxShadow: '0 2px 10px rgba(0,0,0,0.3)',
-}));
-
 // New TrackContainer style for the updated track listing
 const TrackContainer = styled(Box)(({ theme }) => ({
   display: 'flex',
@@ -133,8 +123,36 @@ const TrackItem = styled(Paper)(({ theme }) => ({
 const SocialButton = styled(Button)(({ theme }) => ({
   backgroundColor: 'rgba(20, 20, 20, 0.8)',
   color: '#fff',
+  borderRadius: '12px',
+  padding: '10px 16px',
+  transition: 'all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1)',
+  position: 'relative',
+  overflow: 'hidden',
+  backdropFilter: 'blur(8px)',
+  boxShadow: '0 4px 12px rgba(0, 0, 0, 0.2)',
+  textTransform: 'none',
+  fontWeight: 600,
   '&:hover': {
-    backgroundColor: 'rgba(40, 40, 40, 0.9)',
+    backgroundColor: 'rgba(30, 30, 30, 0.95)',
+    transform: 'translateY(-3px)',
+    boxShadow: '0 8px 16px rgba(0, 0, 0, 0.3)',
+  },
+  '&::before': {
+    content: '""',
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    width: '100%',
+    height: '3px',
+    transform: 'scaleX(0)',
+    transformOrigin: 'left',
+    transition: 'transform 0.3s ease',
+  },
+  '&:hover::before': {
+    transform: 'scaleX(1)',
+  },
+  '& .MuiButton-startIcon': {
+    marginRight: '12px',
   },
 }));
 
@@ -430,9 +448,6 @@ const MusicProducerProfile = () => {
                 src="https://img.freepik.com/free-photo/medium-shot-man-playing-guitar-studio_23-2150232123.jpg?t=st=1744101142~exp=1744104742~hmac=dd039b0e837d5847a9cf25a79c4fc73db3aa76a68129ff1ca1d67bea0a9f5d9a&w=996" 
                 alt="SOUNDWAVE"
               />
-              <AvatarBadge>
-                <Person fontSize="small" />
-              </AvatarBadge>
             </Box>
             
             <Box sx={{ 
@@ -485,7 +500,7 @@ const MusicProducerProfile = () => {
                 mt: { xs: 2, md: 0 }
               }}
             >
-              Message me
+              Contact me
             </Button>
           </Box>
         </HeroSection>
@@ -501,41 +516,43 @@ const MusicProducerProfile = () => {
                     <IconContainer>
                       <Person />
                     </IconContainer>
-                    About MITHILA
+                    About ME
                   </SectionTitle>
                   
-                  <Box sx={{ position: 'relative', pl: 2 }}>
-                    <Box sx={{ 
-                      position: 'absolute', 
-                      left: 0, 
-                      top: 0, 
-                      bottom: 0, 
-                      width: '4px', 
+                <Box sx={{ position: 'relative', pl: 2 }}>
+                  <Box
+                    sx={{
+                      position: 'absolute',
+                      left: 0,
+                      top: 0,
+                      bottom: 0,
+                      width: '4px',
                       borderRadius: 4,
-                      background: 'linear-gradient(to bottom, #1976d2, #7c4dff)' 
-                    }} />
-                    
-                    <Typography variant="body1" paragraph sx={{ fontSize: '1.1rem', lineHeight: 1.6 }}>
-                      Enter the immersive sonic universe of SOUNDWAVE, where electronic elements 
-                      blend with organic textures to create memorable auditory experiences.
-                    </Typography>
-                    
-                    <Typography variant="body1" paragraph sx={{ fontSize: '1.1rem', lineHeight: 1.6 }}>
-                      With over 10 years in the industry, SOUNDWAVE has crafted sounds for films, 
-                      commercials, and chart-topping artists. His unique approach to music production 
-                      combines traditional composition techniques with cutting-edge digital tools.
-                    </Typography>
-                    
-                    <Typography variant="body1" paragraph sx={{ fontSize: '1.1rem', lineHeight: 1.6 }}>
-                      Specializing in atmospheric electronic, hip-hop fusion, and cinematic compositions, 
-                      SOUNDWAVE's unique approach has earned recognition across multiple platforms and continents.
-                    </Typography>
-                    
-                    <Typography variant="body1" sx={{ fontSize: '1.1rem', lineHeight: 1.6 }}>
-                      His work has been featured in major film festivals, international advertising campaigns, 
-                      and on platforms like Spotify, Apple Music, and SoundCloud with millions of streams.
-                    </Typography>
-                  </Box>
+                      background: 'linear-gradient(to bottom, #1976d2, #7c4dff)',
+                    }}
+                  />
+
+                  <Typography variant="body1" 
+                  sx={{ fontSize: '1rem', 
+                        lineHeight: 1.6, 
+                        whiteSpace: 'pre-line', 
+                        fontWeight: 'normal' 
+                        }}>
+                    {`Enter the immersive sonic universe of SOUNDWAVE, where electronic elements 
+                    blend with organic textures to create memorable auditory experiences.
+
+                    With over 10 years in the industry, SOUNDWAVE has crafted sounds for films, 
+                    commercials, and chart-topping artists. His unique approach to music production 
+                    combines traditional composition techniques with cutting-edge digital tools.
+
+                    Specializing in atmospheric electronic, hip-hop fusion, and cinematic compositions, 
+                    SOUNDWAVE's unique approach has earned recognition across multiple platforms and continents.
+
+                    His work has been featured in major film festivals, international advertising campaigns, 
+                    and on platforms like Spotify, Apple Music, and SoundCloud with millions of streams.`}
+                  </Typography>
+                </Box>
+        
                 </CardContent>
               </GradientCard>
               
@@ -552,7 +569,7 @@ const MusicProducerProfile = () => {
                   <Stack direction="row" spacing={2} flexWrap="wrap">
                     <SocialButton 
                       variant="contained" 
-                      startIcon={<LinkIcon />} 
+                      startIcon={<LinkIcon sx={{ color: '#1DB954' }} />} 
                       size="medium"
                       sx={{ mb: 1 }}
                     >
@@ -560,7 +577,7 @@ const MusicProducerProfile = () => {
                     </SocialButton>
                     <SocialButton 
                       variant="contained" 
-                      startIcon={<YouTube />} 
+                      startIcon={<YouTube sx={{ color: '#FF0000' }} />} 
                       size="medium"
                       sx={{ mb: 1 }}
                     >
@@ -568,7 +585,7 @@ const MusicProducerProfile = () => {
                     </SocialButton>
                     <SocialButton 
                       variant="contained" 
-                      startIcon={<Instagram />}
+                      startIcon={<Instagram sx={{ color: '#E1306C' }} />}
                       size="medium"
                       sx={{ mb: 1 }}
                     >

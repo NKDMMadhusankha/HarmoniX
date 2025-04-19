@@ -94,16 +94,6 @@ const LargeAvatar = styled(Avatar)(({ theme }) => ({
   },
 }));
 
-const AvatarBadge = styled(Box)(({ theme }) => ({
-  position: 'absolute',
-  bottom: 12,
-  right: 12,
-  backgroundColor: theme.palette.primary.main,
-  padding: theme.spacing(1),
-  borderRadius: '50%',
-  boxShadow: '0 2px 10px rgba(0,0,0,0.3)',
-}));
-
 const GradientCard = styled(Card)(({ theme }) => ({
   backgroundColor: 'rgba(10, 25, 41, 0.7)',
   backdropFilter: 'blur(10px)',
@@ -708,9 +698,6 @@ const MusicianProfileEditInline = () => {
                   src={avatarPreview || formData.avatar} 
                   alt="Profile Avatar"
                 />
-                <AvatarBadge>
-                  <Person fontSize="small" />
-                </AvatarBadge>
                 
                 <IconButton 
                   component="label"
@@ -896,7 +883,7 @@ const MusicianProfileEditInline = () => {
                     </>
                   ) : (
                     <>
-                      <Typography variant="body1" paragraph sx={{ fontSize: '1.1rem', lineHeight: 1.6 }}>
+                      <Typography variant="body1" paragraph sx={{ fontSize: '1rem', lineHeight: 1.6 }}>
                         {formData.about}
                       </Typography>
                       

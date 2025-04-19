@@ -360,18 +360,27 @@ const MusicianRegistrationForm = () => {
   
       const data = await response.json();
   
-      if (!response.ok) {
-        throw new Error(data.message || 'Registration failed');
+      if (response.ok) {
+        console.log('Registration successful:', data);
+        
+        // Redirect based on role
+        switch(formData.role) {
+          case 'Music Producer':
+            window.location.href = '/musicpro/dashboard';
+            break;
+          case 'Mixing Engineer':
+            window.location.href = '/mixing/dashboard';
+            break;
+          case 'Mastering Engineer':
+            window.location.href = '/mastering/dashboard';
+            break;
+          case 'Lyricist':
+            window.location.href = '/lyricist/dashboard';
+            break;
+        }
       }
-  
-      console.log('Registration successful:', data);
-      // You can redirect or show success message here
-      alert('Registration successful!');
-      // Optionally redirect to login or dashboard
-      window.location.href = '/musician/dashboard';
     } catch (error) {
-      console.error('Registration error:', error);
-      alert(error.message || 'Registration failed. Please try again.');
+      console.error('Error during form submission:', error);
     }
   };
 

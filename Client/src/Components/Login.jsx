@@ -72,7 +72,6 @@ const LoginForm = () => {
       // First try logging in as a regular user
       let response = await axios.post('http://localhost:5000/api/auth/login', { email, password });
       
-      // If successful, store token and user data
       localStorage.setItem('authToken', response.data.token);
       localStorage.setItem('userType', 'user');
       localStorage.setItem('userData', JSON.stringify(response.data.user));
@@ -94,12 +93,32 @@ const LoginForm = () => {
         
         setSuccess(true);
         
+        // Get musician role from response
+        const musicianRole = musicianResponse.data.musician.role;
+        
+        // Determine dashboard route based on role
+        let dashboardRoute = '/musician/dashboard'; // Default fallback
+        
+        switch(musicianRole) {
+          case 'Music Producer':
+            dashboardRoute = '/musicpro/dashboard';
+            break;
+          case 'Mixing Engineer':
+            dashboardRoute = '/mixing/dashboard';
+            break;
+          case 'Mastering Engineer':
+            dashboardRoute = '/mastering/dashboard';
+            break;
+          case 'Lyricist':
+            dashboardRoute = '/lyricist/dashboard';
+            break;
+        }
+        
         setTimeout(() => {
-          navigate('/musician/dashboard');
+          navigate(dashboardRoute);
         }, 2000);
 
       } catch (musicianError) {
-        // If both logins fail
         let errorMessage = 'Invalid email or password';
         if (musicianError.response && musicianError.response.data && musicianError.response.data.error) {
           errorMessage = musicianError.response.data.error;

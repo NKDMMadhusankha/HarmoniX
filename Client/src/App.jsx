@@ -13,10 +13,9 @@ import MusicProducers from "./Pages/MusicProducers";
 import Mastering from "./Pages/Mastering";
 import Mixing from "./Pages/Mixing";
 
-import MusicProDashbord from "./Dashbord/MusicProDashbord";
-
-
-
+import MusicProDashbord from "./Dashboard/MusicProDashboard";
+import MixingDashboard from "./Dashboard/MixingDashboard";
+import MasteringDashboard from "./Dashboard/MasteringDashboard";
 
 const App = () => {
   return (
@@ -39,7 +38,10 @@ const App = () => {
         <Route path="/music/mixing" element={<Mixing />} />
 
         {/* Dashbords for editing thire Profile */}
-        <Route path="/producer/edit" element={<MusicProDashbord />} />
+        <Route path="/musicpro/dashboard" element={<MusicProDashbord />} />
+        <Route path="/mixing/dashboard" element={<MixingDashboard />} />
+        <Route path="/mastering/dashboard" element={<MasteringDashboard />} />
+        {/* <Route path="/lyricist/dashboard" element={<LyricistDashboard />} /> */}
         
         
       </Routes>
