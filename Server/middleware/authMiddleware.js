@@ -2,29 +2,54 @@ const jwt = require('jsonwebtoken');
 
 module.exports = function (roles = []) {
   return function (req, res, next) {
-    // Get the token from the headers
     const token = req.header('x-auth-token');
+    
     if (!token) {
       console.log('Authorization denied: No token provided');
-      return res.status(401).json({ msg: 'No token, authorization denied' });
+      return res.status(401).json({ 
+        success: false,
+        message: 'Authorization denied: No token provided' 
+      });
     }
 
     try {
-      // Verify the token
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      
+      // Check token expiration manually
+      const now = Date.now().valueOf() / 1000;
+      if (decoded.exp < now) {
+        return res.status(401).json({
+          success: false,
+          message: 'Token expired',
+          code: 'TOKEN_EXPIRED'
+        });
+      }
+
       req.user = decoded;
       console.log(`Token verified for user: ${decoded.id}, role: ${decoded.role}`);
 
       // Check if user role matches the required roles
       if (roles.length && !roles.includes(decoded.role)) {
         console.log(`Forbidden: User role '${decoded.role}' does not match required roles: ${roles}`);
-        return res.status(403).json({ msg: 'Forbidden: You do not have the required role' });
+        return res.status(403).json({ 
+          success: false,
+          message: 'Forbidden: You do not have the required role' 
+        });
       }
 
       next();
     } catch (error) {
-      console.log('Invalid token:', error.message);
-      res.status(400).json({ msg: 'Token is not valid' });
+      console.error('JWT Error:', error.name);
+      
+      const message = error.name === 'TokenExpiredError' 
+        ? 'Token expired' 
+        : 'Invalid token';
+        
+      res.status(401).json({ 
+        success: false,
+        message,
+        code: error.name
+      });
     }
   };
 };

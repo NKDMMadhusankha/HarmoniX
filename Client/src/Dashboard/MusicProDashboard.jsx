@@ -51,6 +51,7 @@ import {
 import Navbar from '../Components/Navbar';
 import Footer from '../Components/Footer';
 import ProImg from '../assets/procover.jpg';
+import { authFetch } from '../utils/authFetch';
 
 // Styled components
 const GradientBackground = styled(Box)(({ theme }) => ({
@@ -69,13 +70,13 @@ const HeroSection = styled(Box)(({ theme }) => ({
   padding: theme.spacing(3),
 }));
 
-const ProfileOverlay = styled(Box)(({ theme, bgImage }) => ({
+const ProfileOverlay = styled(Box)(({ theme, bgimage }) => ({
   position: 'absolute',
   top: 0,
   left: 0,
   right: 0,
   bottom: 0,
-  backgroundImage: `url(${bgImage || ProImg})`,
+  backgroundImage: `url(${bgimage || ProImg})`,
   backgroundSize: 'cover',
   backgroundPosition: 'center',
   opacity: 0.7,
@@ -190,25 +191,17 @@ const GalleryImage = styled(Box)(({ theme }) => ({
   }
 }));
 
-const EditableField = styled(Box)(({ theme }) => ({
-  position: 'relative',
-  '& .edit-button': {
-    position: 'absolute',
-    right: 0,
-    top: 0,
-    opacity: 0,
-    transition: 'opacity 0.2s ease',
-  },
-  '&:hover .edit-button': {
-    opacity: 1,
-  }
-}));
-
 const EditControls = styled(Box)(({ theme }) => ({
   display: 'flex',
   justifyContent: 'flex-end',
-  gap: theme.spacing(1),
-  marginTop: theme.spacing(2),
+  gap: theme.spacing(2),
+  marginTop: theme.spacing(3),
+  padding: theme.spacing(2),
+  backgroundColor: 'rgba(10, 25, 41, 0.7)',
+  position: 'sticky',
+  bottom: 0,
+  zIndex: 100,
+  borderTop: '1px solid rgba(25, 118, 210, 0.2)',
 }));
 
 // Create a dark theme
@@ -302,18 +295,9 @@ const MusicianProfileEditInline = () => {
     newTrack: { title: '', duration: '' },
   });
 
-  // Editing states for each section
-  const [editing, setEditing] = useState({
-    basicInfo: false,
-    about: false,
-    links: false,
-    genres: false,
-    skills: false,
-    tools: false,
-    tracks: false,
-    gallery: false
-  });
-
+  // Editing state
+  const [isEditing, setIsEditing] = useState(false);
+  
   // File upload states
   const [newAvatarFile, setNewAvatarFile] = useState(null);
   const [newCoverFile, setNewCoverFile] = useState(null);
@@ -348,15 +332,80 @@ const MusicianProfileEditInline = () => {
   }, []);
 
   // File upload handlers
-  const handleAvatarUpload = (e) => {
+  const handleAvatarUpload = async (e) => {
     const file = e.target.files[0];
-    if (file) {
-      setNewAvatarFile(file);
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setAvatarPreview(reader.result);
-      };
-      reader.readAsDataURL(file);
+    if (!file) {
+      showNotification('Please select an image file', 'error');
+      return;
+    }
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      showNotification('Please select a valid image file', 'error');
+      return;
+    }
+
+    // Validate file size (max 5MB)
+    const maxSize = 5 * 1024 * 1024; // 5MB
+    if (file.size > maxSize) {
+      showNotification('Image size should be less than 5MB', 'error');
+      return;
+    }
+
+    try {
+      const formData = new FormData();
+      formData.append('image', file);
+
+      const token = localStorage.getItem('authToken');
+      if (!token) {
+        showNotification('Please login to upload images', 'error');
+        window.location.href = '/login';
+        return;
+      }
+
+      // Show loading notification
+      showNotification('Uploading image...', 'info');
+
+      const response = await fetch('http://localhost:5000/api/musician/profile/image', {
+        method: 'POST',
+        body: formData,
+        headers: {
+          'x-auth-token': token
+        },
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        if (response.status === 401) {
+          localStorage.removeItem('authToken');
+          showNotification('Session expired - please login again', 'error');
+          window.location.href = '/login';
+          return;
+        }
+        throw new Error(data.message || 'Upload failed');
+      }
+
+      if (!data.imageUrl) {
+        throw new Error('Invalid server response - no image URL received');
+      }
+
+      // Update UI on success
+      setAvatarPreview(data.imageUrl);
+      showNotification('Profile image updated successfully', 'success');
+
+    } catch (error) {
+      console.error("Avatar upload failed:", {
+        error: error.message,
+        stack: error.stack
+      });
+      
+      let errorMessage = 'Image upload failed';
+      if (error.message) {
+        errorMessage += `: ${error.message}`;
+      }
+      
+      showNotification(errorMessage, 'error');
     }
   };
 
@@ -394,105 +443,57 @@ const MusicianProfileEditInline = () => {
     }
   };
 
-  // Start editing a section
-  const startEditing = (section) => {
-    setEditing({ ...editing, [section]: true });
+  // Start editing all sections
+  const startEditing = () => {
+    setIsEditing(true);
   };
 
-  // Cancel editing a section
-  const cancelEditing = (section) => {
-    setEditing({ ...editing, [section]: false });
-    // Reset editable data for that section
-    switch (section) {
-      case 'basicInfo':
-        setEditableData({
-          ...editableData,
-          name: formData.name,
-          country: formData.country,
-          tags: [...formData.tags]
-        });
-        break;
-      case 'about':
-        setEditableData({ ...editableData, about: formData.about });
-        break;
-      case 'links':
-        setEditableData({ 
-          ...editableData, 
-          links: [...formData.links],
-          newLink: { platform: '', url: '' }
-        });
-        break;
-      case 'genres':
-        setEditableData({ 
-          ...editableData, 
-          genres: [...formData.genres],
-          newGenre: ''
-        });
-        break;
-      case 'skills':
-        setEditableData({ 
-          ...editableData, 
-          skills: [...formData.skills],
-          newSkill: ''
-        });
-        break;
-      case 'tools':
-        setEditableData({ 
-          ...editableData, 
-          tools: [...formData.tools],
-          newTool: ''
-        });
-        break;
-      case 'tracks':
-        setEditableData({ 
-          ...editableData, 
-          tracks: [...formData.tracks],
-          newTrack: { title: '', duration: '' }
-        });
-        break;
-      default:
-        break;
-    }
+  // Cancel editing all sections
+  const cancelEditing = () => {
+    setIsEditing(false);
+    // Reset all editable data
+    setEditableData({
+      ...editableData,
+      name: formData.name,
+      country: formData.country,
+      tags: [...formData.tags],
+      about: formData.about,
+      links: [...formData.links],
+      genres: [...formData.genres],
+      skills: [...formData.skills],
+      tools: [...formData.tools],
+      tracks: [...formData.tracks],
+      newTag: '',
+      newLink: { platform: '', url: '' },
+      newGenre: '',
+      newSkill: '',
+      newTool: '',
+      newTrack: { title: '', duration: '' }
+    });
+    setAvatarPreview('');
+    setCoverPreview('');
   };
 
-  // Save changes for a section
-  const saveChanges = (section) => {
-    let newFormData = { ...formData };
-    
-    switch (section) {
-      case 'basicInfo':
-        newFormData = {
-          ...newFormData,
-          name: editableData.name,
-          country: editableData.country,
-          tags: [...editableData.tags]
-        };
-        break;
-      case 'about':
-        newFormData = { ...newFormData, about: editableData.about };
-        break;
-      case 'links':
-        newFormData = { ...newFormData, links: [...editableData.links] };
-        break;
-      case 'genres':
-        newFormData = { ...newFormData, genres: [...editableData.genres] };
-        break;
-      case 'skills':
-        newFormData = { ...newFormData, skills: [...editableData.skills] };
-        break;
-      case 'tools':
-        newFormData = { ...newFormData, tools: [...editableData.tools] };
-        break;
-      case 'tracks':
-        newFormData = { ...newFormData, tracks: [...editableData.tracks] };
-        break;
-      default:
-        break;
-    }
+  // Save all changes
+  const saveChanges = () => {
+    const newFormData = {
+      ...formData,
+      name: editableData.name,
+      country: editableData.country,
+      tags: [...editableData.tags],
+      about: editableData.about,
+      links: [...editableData.links],
+      genres: [...editableData.genres],
+      skills: [...editableData.skills],
+      tools: [...editableData.tools],
+      tracks: [...editableData.tracks],
+      avatar: avatarPreview || formData.avatar,
+      coverImage: coverPreview || formData.coverImage
+    };
     
     setFormData(newFormData);
-    setEditing({ ...editing, [section]: false });
-    showNotification(`${section} updated successfully`, 'success');
+    setIsEditing(false);
+    showNotification('Profile updated successfully', 'success');
   };
 
   // Handle input changes for editable fields
@@ -605,24 +606,6 @@ const MusicianProfileEditInline = () => {
     showNotification('Gallery image removed', 'success');
   };
 
-  // Save the entire profile
-  const handleSaveProfile = () => {
-    // Apply avatarPreview and coverPreview to formData if they exist
-    let updatedFormData = { ...formData };
-    
-    if (avatarPreview) {
-      updatedFormData.avatar = avatarPreview;
-    }
-    
-    if (coverPreview) {
-      updatedFormData.coverImage = coverPreview;
-    }
-
-    setFormData(updatedFormData);
-    showNotification('Profile saved successfully!', 'success');
-    console.log("SAVED PROFILE DATA:", updatedFormData);
-  };
-
   // Notification helper
   const showNotification = (message, severity) => {
     setNotification({
@@ -648,31 +631,33 @@ const MusicianProfileEditInline = () => {
         {/* Hero Section with Larger Cover Image */}
         <Box sx={{ position: 'relative', mb: 4 }}>
           <HeroSection>
-            <ProfileOverlay bgImage={coverPreview || formData.coverImage} />
+            <ProfileOverlay bgimage={coverPreview || formData.coverImage} />
             
-            <Box sx={{ 
-              position: 'absolute', 
-              top: 10,  // Changed from bottom to top
-              right: 10, 
-              zIndex: 2,
-              backgroundColor: 'rgba(0, 0, 0, 0.5)',
-              borderRadius: 1,
-              padding: '4px'
-            }}>
-              <Button
-                component="label"
-                variant="contained"
-                startIcon={<CloudUpload />}
-                size="small"
-              >
-                Change Cover
-                <VisuallyHiddenInput 
-                  type="file"   
-                  accept="image/*"
-                  onChange={handleCoverUpload}
-                />
-              </Button>
-            </Box>
+            {isEditing && (
+              <Box sx={{ 
+                position: 'absolute', 
+                top: 10,
+                right: 10, 
+                zIndex: 2,
+                backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                borderRadius: 1,
+                padding: '4px'
+              }}>
+                <Button
+                  component="label"
+                  variant="contained"
+                  startIcon={<CloudUpload />}
+                  size="small"
+                >
+                  Change Cover
+                  <VisuallyHiddenInput 
+                    type="file"   
+                    accept="image/*"
+                    onChange={handleCoverUpload}
+                  />
+                </Button>
+              </Box>
+            )}
             
             {/* Producer Info Overlay */}
             <Box sx={{ 
@@ -689,23 +674,25 @@ const MusicianProfileEditInline = () => {
                   alt="Profile Avatar"
                 />
                 
-                <IconButton 
-                  component="label"
-                  sx={{ 
-                    position: 'absolute', 
-                    top: 0, 
-                    right: 0, 
-                    backgroundColor: 'rgba(25, 118, 210, 0.8)',
-                    '&:hover': { backgroundColor: 'rgba(25, 118, 210, 1)' }
-                  }}
-                >
-                  <Edit fontSize="small" />
-                  <VisuallyHiddenInput 
-                    type="file" 
-                    accept="image/*"
-                    onChange={handleAvatarUpload}
-                  />
-                </IconButton>
+                {isEditing && (
+                  <IconButton 
+                    component="label"
+                    sx={{ 
+                      position: 'absolute', 
+                      top: 0, 
+                      right: 0, 
+                      backgroundColor: 'rgba(25, 118, 210, 0.8)',
+                      '&:hover': { backgroundColor: 'rgba(25, 118, 210, 1)' }
+                    }}
+                  >
+                    <Edit fontSize="small" />
+                    <VisuallyHiddenInput 
+                      type="file" 
+                      accept="image/*"
+                      onChange={handleAvatarUpload}
+                    />
+                  </IconButton>
+                )}
               </Box>
               
               <Box sx={{ 
@@ -713,7 +700,7 @@ const MusicianProfileEditInline = () => {
                 flex: 1,
                 width: { xs: '100%', md: 'auto' }
               }}>
-                {editing.basicInfo ? (
+                {isEditing ? (
                   <>
                     <TextField
                       fullWidth
@@ -768,46 +755,16 @@ const MusicianProfileEditInline = () => {
                         </IconButton>
                       </Box>
                     </Box>
-                    
-                    <EditControls>
-                      <Button 
-                        variant="outlined" 
-                        color="secondary" 
-                        startIcon={<Clear />}
-                        onClick={() => cancelEditing('basicInfo')}
-                      >
-                        Cancel
-                      </Button>
-                      <Button 
-                        variant="contained" 
-                        color="primary" 
-                        startIcon={<Check />}
-                        onClick={() => saveChanges('basicInfo')}
-                      >
-                        Save
-                      </Button>
-                    </EditControls>
                   </>
                 ) : (
                   <>
-                    <EditableField>
-                      <Typography variant="h3" sx={{ fontWeight: 'bold', mb: 1 }}>
-                        {formData.name}
-                      </Typography>
-                      <IconButton 
-                        className="edit-button"
-                        size="small"
-                        onClick={() => startEditing('basicInfo')}
-                      >
-                        <Edit fontSize="small" />
-                      </IconButton>
-                    </EditableField>
+                    <Typography variant="h3" sx={{ fontWeight: 'bold', mb: 1 }}>
+                      {formData.name}
+                    </Typography>
                     
-                    <EditableField>
-                      <Typography variant="subtitle1" sx={{ mb: 2 }}>
-                        {formData.country}
-                      </Typography>
-                    </EditableField>
+                    <Typography variant="subtitle1" sx={{ mb: 2 }}>
+                      {formData.country}
+                    </Typography>
                     
                     <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mt: 2 }}>
                       {formData.tags.map((tag, index) => (
@@ -828,6 +785,21 @@ const MusicianProfileEditInline = () => {
 
         {/* Main Content */}
         <Container maxWidth="xl" sx={{ py: 4 }}>
+          {/* Edit Profile Button (when not editing) */}
+          {!isEditing && (
+            <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 4 }}>
+              <Button 
+                variant="contained" 
+                color="primary" 
+                startIcon={<Edit />}
+                onClick={startEditing}
+                sx={{ px: 4, py: 1.5 }}
+              >
+                Edit Profile
+              </Button>
+            </Box>
+          )}
+
           <Grid container spacing={4}>
             {/* Left Column - About Section */}
             <Grid item xs={12} md={4}>
@@ -841,52 +813,19 @@ const MusicianProfileEditInline = () => {
                     About You
                   </SectionTitle>
                   
-                  {editing.about ? (
-                    <>
-                      <TextField
-                        fullWidth
-                        multiline
-                        rows={6}
-                        value={editableData.about}
-                        onChange={(e) => setEditableData({ ...editableData, about: e.target.value })}
-                        variant="outlined"
-                      />
-                      
-                      <EditControls>
-                        <Button 
-                          variant="outlined" 
-                          color="secondary" 
-                          startIcon={<Clear />}
-                          onClick={() => cancelEditing('about')}
-                        >
-                          Cancel
-                        </Button>
-                        <Button 
-                          variant="contained" 
-                          color="primary" 
-                          startIcon={<Check />}
-                          onClick={() => saveChanges('about')}
-                        >
-                          Save
-                        </Button>
-                      </EditControls>
-                    </>
+                  {isEditing ? (
+                    <TextField
+                      fullWidth
+                      multiline
+                      rows={6}
+                      value={editableData.about}
+                      onChange={(e) => setEditableData({ ...editableData, about: e.target.value })}
+                      variant="outlined"
+                    />
                   ) : (
-                    <>
-                      <Typography variant="body1" paragraph sx={{ fontSize: '1rem', lineHeight: 1.6 }}>
-                        {formData.about}
-                      </Typography>
-                      
-                      <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
-                        <Button 
-                          variant="outlined" 
-                          startIcon={<Edit />}
-                          onClick={() => startEditing('about')}
-                        >
-                          Edit Bio
-                        </Button>
-                      </Box>
-                    </>
+                    <Typography variant="body1" paragraph sx={{ fontSize: '1rem', lineHeight: 1.6 }}>
+                      {formData.about}
+                    </Typography>
                   )}
                 </CardContent>
               </GradientCard>
@@ -901,49 +840,15 @@ const MusicianProfileEditInline = () => {
                     Links
                   </SectionTitle>
                   
-                  {editing.links ? (
-                    <>
-                      <Stack direction="column" spacing={2}>
-                        {editableData.links.map((link, index) => (
-                          <Box key={index} sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
-                            <FormControl fullWidth size="small">
-                              <InputLabel>Platform</InputLabel>
-                              <Select
-                                value={link.platform}
-                                onChange={(e) => handleLinkChange(e, index, 'platform')}
-                                label="Platform"
-                              >
-                                <MenuItem value="Spotify">Spotify</MenuItem>
-                                <MenuItem value="YouTube">YouTube</MenuItem>
-                                <MenuItem value="Instagram">Instagram</MenuItem>
-                                <MenuItem value="SoundCloud">SoundCloud</MenuItem>
-                                <MenuItem value="Bandcamp">Bandcamp</MenuItem>
-                                <MenuItem value="Apple Music">Apple Music</MenuItem>
-                                <MenuItem value="Website">Website</MenuItem>
-                              </Select>
-                            </FormControl>
-                            <TextField
-                              size="small"
-                              fullWidth
-                              value={link.url}
-                              onChange={(e) => handleLinkChange(e, index, 'url')}
-                              placeholder="URL"
-                            />
-                            <IconButton size="small" onClick={() => removeItem(index, 'links')}>
-                              <Delete />
-                            </IconButton>
-                          </Box>
-                        ))}
-                        
-                        <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', mt: 1 }}>
+                  {isEditing ? (
+                    <Stack direction="column" spacing={2}>
+                      {editableData.links.map((link, index) => (
+                        <Box key={index} sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
                           <FormControl fullWidth size="small">
                             <InputLabel>Platform</InputLabel>
                             <Select
-                              value={editableData.newLink.platform}
-                              onChange={(e) => setEditableData({ 
-                                ...editableData, 
-                                newLink: { ...editableData.newLink, platform: e.target.value } 
-                              })}
+                              value={link.platform}
+                              onChange={(e) => handleLinkChange(e, index, 'platform')}
                               label="Platform"
                             >
                               <MenuItem value="Spotify">Spotify</MenuItem>
@@ -958,71 +863,72 @@ const MusicianProfileEditInline = () => {
                           <TextField
                             size="small"
                             fullWidth
-                            value={editableData.newLink.url}
-                            onChange={(e) => setEditableData({ 
-                              ...editableData, 
-                              newLink: { ...editableData.newLink, url: e.target.value } 
-                            })}
+                            value={link.url}
+                            onChange={(e) => handleLinkChange(e, index, 'url')}
                             placeholder="URL"
                           />
-                          <IconButton size="small" onClick={addNewLink}>
-                            <AddCircleOutline />
+                          <IconButton size="small" onClick={() => removeItem(index, 'links')}>
+                            <Delete />
                           </IconButton>
                         </Box>
-                      </Stack>
+                      ))}
                       
-                      <EditControls>
-                        <Button 
-                          variant="outlined" 
-                          color="secondary" 
-                          startIcon={<Clear />}
-                          onClick={() => cancelEditing('links')}
-                        >
-                          Cancel
-                        </Button>
-                        <Button 
-                          variant="contained" 
-                          color="primary" 
-                          startIcon={<Check />}
-                          onClick={() => saveChanges('links')}
-                        >
-                          Save
-                        </Button>
-                      </EditControls>
-                    </>
-                  ) : (
-                    <>
-                      <Stack direction="column" spacing={2}>
-                        {formData.links.map((link, index) => (
-                          <Button 
-                            key={index}
-                            variant="contained" 
-                            startIcon={link.platform === 'YouTube' ? <YouTube /> : 
-                                      link.platform === 'Instagram' ? <Instagram /> : <LinkIcon />} 
-                            size="medium"
-                            sx={{ 
-                              backgroundColor: 'rgba(20, 20, 20, 0.8)',
-                              color: '#fff',
-                              '&:hover': {
-                                backgroundColor: 'rgba(40, 40, 40, 0.9)',
-                              }
-                            }}
+                      <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', mt: 1 }}>
+                        <FormControl fullWidth size="small">
+                          <InputLabel>Platform</InputLabel>
+                          <Select
+                            value={editableData.newLink.platform}
+                            onChange={(e) => setEditableData({ 
+                              ...editableData, 
+                              newLink: { ...editableData.newLink, platform: e.target.value } 
+                            })}
+                            label="Platform"
                           >
-                            {link.platform}
-                          </Button>
-                        ))}
-                      </Stack>
-                      
-                      <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2 }}>
-                        <Button 
-                          variant="outlined" 
-                          startIcon={<Edit />}
-                          onClick={() => startEditing('links')}
-                        >
-                          Edit Links
-                        </Button>
+                            <MenuItem value="Spotify">Spotify</MenuItem>
+                            <MenuItem value="YouTube">YouTube</MenuItem>
+                            <MenuItem value="Instagram">Instagram</MenuItem>
+                            <MenuItem value="SoundCloud">SoundCloud</MenuItem>
+                            <MenuItem value="Bandcamp">Bandcamp</MenuItem>
+                            <MenuItem value="Apple Music">Apple Music</MenuItem>
+                            <MenuItem value="Website">Website</MenuItem>
+                          </Select>
+                        </FormControl>
+                        <TextField
+                          size="small"
+                          fullWidth
+                          value={editableData.newLink.url}
+                          onChange={(e) => setEditableData({ 
+                            ...editableData, 
+                            newLink: { ...editableData.newLink, url: e.target.value } 
+                          })}
+                          placeholder="URL"
+                        />
+                        <IconButton size="small" onClick={addNewLink}>
+                          <AddCircleOutline />
+                        </IconButton>
                       </Box>
-                    </>
+                    </Stack>
+                  ) : (
+                    <Stack direction="column" spacing={2}>
+                      {formData.links.map((link, index) => (
+                        <Button 
+                          key={index}
+                          variant="contained" 
+                          startIcon={link.platform === 'YouTube' ? <YouTube /> : 
+                                    link.platform === 'Instagram' ? <Instagram /> : <LinkIcon />} 
+                          size="medium"
+                          sx={{ 
+                            backgroundColor: 'rgba(20, 20, 20, 0.8)',
+                            color: '#fff',
+                            '&:hover': {
+                              backgroundColor: 'rgba(40, 40, 40, 0.9)',
+                            }
+                          }}
+                        >
+                          {link.platform}
+                        </Button>
+                      ))}
+                    </Stack>
                   )}
                 </CardContent>
               </GradientCard>
@@ -1039,19 +945,11 @@ const MusicianProfileEditInline = () => {
                   
                   {/* Genres Section */}
                   <Box sx={{ mb: 3 }}>
-                    <Typography variant="subtitle2" color="primary.light" sx={{ mb: 1, textTransform: 'uppercase', display: 'flex', justifyContent: 'space-between' }}>
+                    <Typography variant="subtitle2" color="primary.light" sx={{ mb: 1, textTransform: 'uppercase' }}>
                       GENRES
-                      <Button 
-                        variant="outlined" 
-                        size="small"
-                        startIcon={<Edit />}
-                        onClick={() => startEditing('genres')}
-                      >
-                        Edit
-                      </Button>
                     </Typography>
                     
-                    {editing.genres ? (
+                    {isEditing ? (
                       <>
                         <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mb: 2 }}>
                           {editableData.genres.map((genre, index) => (
@@ -1081,25 +979,6 @@ const MusicianProfileEditInline = () => {
                             <AddCircleOutline fontSize="small" />
                           </IconButton>
                         </Box>
-                        
-                        <EditControls>
-                          <Button 
-                            variant="outlined" 
-                            color="secondary" 
-                            startIcon={<Clear />}
-                            onClick={() => cancelEditing('genres')}
-                          >
-                            Cancel
-                          </Button>
-                          <Button 
-                            variant="contained" 
-                            color="primary" 
-                            startIcon={<Check />}
-                            onClick={() => saveChanges('genres')}
-                          >
-                            Save
-                          </Button>
-                        </EditControls>
                       </>
                     ) : (
                       <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
@@ -1121,19 +1000,11 @@ const MusicianProfileEditInline = () => {
                   
                   {/* Skills Section */}
                   <Box sx={{ mb: 3 }}>
-                    <Typography variant="subtitle2" color="primary.light" sx={{ mb: 1, textTransform: 'uppercase', display: 'flex', justifyContent: 'space-between' }}>
+                    <Typography variant="subtitle2" color="primary.light" sx={{ mb: 1, textTransform: 'uppercase' }}>
                       SKILLS
-                      <Button 
-                        variant="outlined" 
-                        size="small"
-                        startIcon={<Edit />}
-                        onClick={() => startEditing('skills')}
-                      >
-                        Edit
-                      </Button>
                     </Typography>
                     
-                    {editing.skills ? (
+                    {isEditing ? (
                       <>
                         <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mb: 2 }}>
                           {editableData.skills.map((skill, index) => (
@@ -1164,25 +1035,6 @@ const MusicianProfileEditInline = () => {
                             <AddCircleOutline fontSize="small" />
                           </IconButton>
                         </Box>
-                        
-                        <EditControls>
-                          <Button 
-                            variant="outlined" 
-                            color="secondary" 
-                            startIcon={<Clear />}
-                            onClick={() => cancelEditing('skills')}
-                          >
-                            Cancel
-                          </Button>
-                          <Button 
-                            variant="contained" 
-                            color="primary" 
-                            startIcon={<Check />}
-                            onClick={() => saveChanges('skills')}
-                          >
-                            Save
-                          </Button>
-                        </EditControls>
                       </>
                     ) : (
                       <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
@@ -1205,19 +1057,11 @@ const MusicianProfileEditInline = () => {
                   
                   {/* Tools Section */}
                   <Box>
-                    <Typography variant="subtitle2" color="primary.light" sx={{ mb: 1, textTransform: 'uppercase', display: 'flex', justifyContent: 'space-between' }}>
+                    <Typography variant="subtitle2" color="primary.light" sx={{ mb: 1, textTransform: 'uppercase' }}>
                       TOOLS
-                      <Button 
-                        variant="outlined" 
-                        size="small"
-                        startIcon={<Edit />}
-                        onClick={() => startEditing('tools')}
-                      >
-                        Edit
-                      </Button>
                     </Typography>
                     
-                    {editing.tools ? (
+                    {isEditing ? (
                       <>
                         <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mb: 2 }}>
                           {editableData.tools.map((tool, index) => (
@@ -1247,25 +1091,6 @@ const MusicianProfileEditInline = () => {
                             <AddCircleOutline fontSize="small" />
                           </IconButton>
                         </Box>
-                        
-                        <EditControls>
-                          <Button 
-                            variant="outlined" 
-                            color="secondary" 
-                            startIcon={<Clear />}
-                            onClick={() => cancelEditing('tools')}
-                          >
-                            Cancel
-                          </Button>
-                          <Button 
-                            variant="contained" 
-                            color="primary" 
-                            startIcon={<Check />}
-                            onClick={() => saveChanges('tools')}
-                          >
-                            Save
-                          </Button>
-                        </EditControls>
                       </>
                     ) : (
                       <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
@@ -1305,94 +1130,32 @@ const MusicianProfileEditInline = () => {
                     <MusicNote />
                   </IconContainer>
                   Featured Tracks
-                  {!editing.tracks && (
-                    <Button 
-                      variant="outlined" 
-                      startIcon={<Edit />}
-                      sx={{ ml: 2 }}
-                      onClick={() => startEditing('tracks')}
-                    >
-                      Edit Tracks
-                    </Button>
-                  )}
                   <GradientDivider />
                 </Typography>
               </Box>
               
               {/* Tracks Section */}
-              {editing.tracks ? (
-                <>
-                  <Stack spacing={2}>
-                    {editableData.tracks.map((track, index) => (
-                      <TrackContainer key={track.id}>
-                        <Box sx={{ flex: 1 }}>
-                          <TextField
-                            fullWidth
-                            value={track.title}
-                            onChange={(e) => handleTrackChange(e, index, 'title')}
-                            variant="outlined"
-                            size="small"
-                            sx={{ mb: 1 }}
-                          />
-                          
-                          <Box sx={{ display: 'flex', gap: 2 }}>
-                            <TextField
-                              value={track.duration}
-                              onChange={(e) => handleTrackChange(e, index, 'duration')}
-                              variant="outlined"
-                              size="small"
-                              label="Duration"
-                              sx={{ width: 120 }}
-                            />
-                            
-                            <Button
-                              component="label"
-                              variant="outlined"
-                              size="small"
-                              startIcon={<Upload />}
-                            >
-                              Audio
-                              <VisuallyHiddenInput 
-                                type="file" 
-                                accept="audio/*"
-                                onChange={handleAudioUpload}
-                              />
-                            </Button>
-                          </Box>
-                        </Box>
-                        
-                        <IconButton size="small" onClick={() => removeItem(index, 'tracks')}>
-                          <Delete />
-                        </IconButton>
-                      </TrackContainer>
-                    ))}
-                    
-                    {/* Add New Track */}
-                    <TrackContainer>
+              {isEditing ? (
+                <Stack spacing={2}>
+                  {editableData.tracks.map((track, index) => (
+                    <TrackContainer key={track.id}>
                       <Box sx={{ flex: 1 }}>
                         <TextField
                           fullWidth
-                          value={editableData.newTrack.title}
-                          onChange={(e) => setEditableData({ 
-                            ...editableData, 
-                            newTrack: { ...editableData.newTrack, title: e.target.value } 
-                          })}
+                          value={track.title}
+                          onChange={(e) => handleTrackChange(e, index, 'title')}
                           variant="outlined"
                           size="small"
-                          placeholder="Track title"
                           sx={{ mb: 1 }}
                         />
                         
                         <Box sx={{ display: 'flex', gap: 2 }}>
                           <TextField
-                            value={editableData.newTrack.duration}
-                            onChange={(e) => setEditableData({ 
-                              ...editableData, 
-                              newTrack: { ...editableData.newTrack, duration: e.target.value } 
-                            })}
+                            value={track.duration}
+                            onChange={(e) => handleTrackChange(e, index, 'duration')}
                             variant="outlined"
                             size="small"
-                            placeholder="Duration"
+                            label="Duration"
                             sx={{ width: 120 }}
                           />
                           
@@ -1412,31 +1175,62 @@ const MusicianProfileEditInline = () => {
                         </Box>
                       </Box>
                       
-                      <IconButton size="small" onClick={addNewTrack}>
-                        <AddCircleOutline />
+                      <IconButton size="small" onClick={() => removeItem(index, 'tracks')}>
+                        <Delete />
                       </IconButton>
                     </TrackContainer>
-                  </Stack>
+                  ))}
                   
-                  <EditControls>
-                    <Button 
-                      variant="outlined" 
-                      color="secondary" 
-                      startIcon={<Clear />}
-                      onClick={() => cancelEditing('tracks')}
-                    >
-                      Cancel
-                    </Button>
-                    <Button 
-                      variant="contained" 
-                      color="primary" 
-                      startIcon={<Check />}
-                      onClick={() => saveChanges('tracks')}
-                    >
-                      Save
-                    </Button>
-                  </EditControls>
-                </>
+                  {/* Add New Track */}
+                  <TrackContainer>
+                    <Box sx={{ flex: 1 }}>
+                      <TextField
+                        fullWidth
+                        value={editableData.newTrack.title}
+                        onChange={(e) => setEditableData({ 
+                          ...editableData, 
+                          newTrack: { ...editableData.newTrack, title: e.target.value } 
+                        })}
+                        variant="outlined"
+                        size="small"
+                        placeholder="Track title"
+                        sx={{ mb: 1 }}
+                      />
+                      
+                      <Box sx={{ display: 'flex', gap: 2 }}>
+                        <TextField
+                          value={editableData.newTrack.duration}
+                          onChange={(e) => setEditableData({ 
+                            ...editableData, 
+                            newTrack: { ...editableData.newTrack, duration: e.target.value } 
+                          })}
+                          variant="outlined"
+                          size="small"
+                          placeholder="Duration"
+                          sx={{ width: 120 }}
+                        />
+                        
+                        <Button
+                          component="label"
+                          variant="outlined"
+                          size="small"
+                          startIcon={<Upload />}
+                        >
+                          Audio
+                          <VisuallyHiddenInput 
+                            type="file" 
+                            accept="audio/*"
+                            onChange={handleAudioUpload}
+                          />
+                        </Button>
+                      </Box>
+                    </Box>
+                    
+                    <IconButton size="small" onClick={addNewTrack}>
+                      <AddCircleOutline />
+                    </IconButton>
+                  </TrackContainer>
+                </Stack>
               ) : (
                 <Stack spacing={1}>
                   {formData.tracks.map((track, index) => (
@@ -1461,6 +1255,12 @@ const MusicianProfileEditInline = () => {
                             {track.uploadDate}
                           </Typography>
                         </Box>
+                        {track.audioUrl && (
+                          <audio controls style={{ width: '100%', marginTop: '8px' }}>
+                            <source src={track.audioUrl} type="audio/mpeg" />
+                            Your browser does not support the audio element.
+                          </audio>
+                        )}
                       </Box>
                     </TrackContainer>
                   ))}
@@ -1483,20 +1283,22 @@ const MusicianProfileEditInline = () => {
                     <Image />
                   </IconContainer>
                   Artist Gallery
-                  <Button
-                    component="label"
-                    variant="contained"
-                    startIcon={<CloudUpload />}
-                    size="small"
-                    sx={{ ml: 2 }}
-                  >
-                    Add Image
-                    <VisuallyHiddenInput 
-                      type="file" 
-                      accept="image/*"
-                      onChange={handleGalleryUpload}
-                    />
-                  </Button>
+                  {isEditing && (
+                    <Button
+                      component="label"
+                      variant="contained"
+                      startIcon={<CloudUpload />}
+                      size="small"
+                      sx={{ ml: 2 }}
+                    >
+                      Add Image
+                      <VisuallyHiddenInput 
+                        type="file" 
+                        accept="image/*"
+                        onChange={handleGalleryUpload}
+                      />
+                    </Button>
+                  )}
                   <GradientDivider />
                 </Typography>
                 
@@ -1505,14 +1307,16 @@ const MusicianProfileEditInline = () => {
                     <Grid item xs={12} sm={6} md={4} key={index}>
                       <GalleryImage>
                         <img src={image} alt={`Gallery Image ${index + 1}`} />
-                        <Box className="overlay">
-                          <IconButton 
-                            onClick={() => removeGalleryImage(index)}
-                            sx={{ backgroundColor: 'rgba(0,0,0,0.5)', color: 'white' }}
-                          >
-                            <Delete />
-                          </IconButton>
-                        </Box>
+                        {isEditing && (
+                          <Box className="overlay">
+                            <IconButton 
+                              onClick={() => removeGalleryImage(index)}
+                              sx={{ backgroundColor: 'rgba(0,0,0,0.5)', color: 'white' }}
+                            >
+                              <Delete />
+                            </IconButton>
+                          </Box>
+                        )}
                       </GalleryImage>
                     </Grid>
                   ))}
@@ -1520,6 +1324,30 @@ const MusicianProfileEditInline = () => {
               </Box>
             </Grid>
           </Grid>
+
+          {/* Edit Controls (Save/Cancel) - Only visible when editing */}
+          {isEditing && (
+            <EditControls>
+              <Button 
+                variant="outlined" 
+                color="error" 
+                startIcon={<Clear />}
+                onClick={cancelEditing}
+                size="large"
+              >
+                Cancel
+              </Button>
+              <Button 
+                variant="contained" 
+                color="primary" 
+                startIcon={<Check />}
+                onClick={saveChanges}
+                size="large"
+              >
+                Save Changes
+              </Button>
+            </EditControls>
+          )}
         </Container>
         
         {/* Footer */}

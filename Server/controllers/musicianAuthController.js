@@ -92,7 +92,7 @@ const login = async (req, res) => {
     }
 
     const token = jwt.sign({ id: musician._id, role: 'musician' }, process.env.JWT_SECRET, { 
-      expiresIn: '1h' 
+      expiresIn: '7d' 
     });
 
     res.json({ 
@@ -109,4 +109,21 @@ const login = async (req, res) => {
   }
 };
 
-module.exports = { register, login };
+const refreshToken = async (req, res) => {
+  try {
+    const { refreshToken } = req.body;
+    const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
+    
+    const newToken = jwt.sign(
+      { id: decoded.id, role: decoded.role },
+      process.env.JWT_SECRET,
+      { expiresIn: '7d' }
+    );
+    
+    res.json({ token: newToken });
+  } catch (error) {
+    res.status(401).json({ error: 'Invalid refresh token' });
+  }
+};
+
+module.exports = { register, login, refreshToken };

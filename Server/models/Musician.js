@@ -4,7 +4,7 @@ const MusicianSchema = new mongoose.Schema({
   userId: {
     type: String,
     required: true,
-    unique: true, // Ensure uniqueness
+    unique: true,
   },
   fullName: { type: String, required: true },
   email: { type: String, required: true, unique: true },
@@ -29,7 +29,17 @@ const MusicianSchema = new mongoose.Schema({
     twitter: { type: String, default: '' },
     linkedin: { type: String, default: '' }
   },
-  termsAgreed: { type: Boolean, required: true }
+  termsAgreed: { type: Boolean, required: true },
+  about: { type: String, default: '' },
+  profileImage: { type: String, default: '' },
+  coverImage: { type: String, default: '' },
+  tracks: [{
+    title: String,
+    duration: String,
+    audioUrl: String,
+    uploadDate: Date
+  }],
+  galleryImages: [String]
 }, { timestamps: true });
 
 module.exports = mongoose.model('Musician', MusicianSchema);
