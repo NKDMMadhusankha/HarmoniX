@@ -34,7 +34,7 @@ const LogoWrapper = styled(Box)({
   alignItems: 'center',
   justifyContent: 'center',
   margin: '0 40px',
-  opacity: 0.4,
+  opacity: 0.8,
   transition: 'opacity 0.6s ease',
   '&:hover': {
     opacity: 1,
@@ -68,6 +68,8 @@ const LogoScrollBar = () => {
   const logos = [
     logo1, logo2, logo3, logo4, logo5, logo6, logo7,
     logo1, logo2, logo3, logo4, logo5, logo6, logo7, 
+    logo1, logo2, logo3, logo4, logo5, logo6, logo7,
+    logo1, logo2, logo3, logo4, logo5, logo6, logo7,
     logo1, logo2, logo3, logo4, logo5, logo6, logo7,
     logo1, logo2, logo3, logo4, logo5, logo6, logo7,
     logo1, logo2, logo3, logo4, logo5, logo6, logo7,
