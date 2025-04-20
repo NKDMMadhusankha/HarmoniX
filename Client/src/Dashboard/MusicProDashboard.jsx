@@ -26,7 +26,8 @@ import {
   Tooltip,
   FormHelperText,
   Snackbar,
-  Alert
+  Alert,
+  CircularProgress
 } from '@mui/material';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import {
@@ -52,6 +53,7 @@ import Navbar from '../Components/Navbar';
 import Footer from '../Components/Footer';
 import ProImg from '../assets/procover.jpg';
 import { authFetch } from '../utils/authFetch';
+
 
 // Styled components
 const GradientBackground = styled(Box)(({ theme }) => ({
@@ -315,13 +317,13 @@ const MusicianProfileEditInline = () => {
     severity: 'success'
   });
 
+  const [loading, setLoading] = useState(false);
+
   // Initialize editable data
   useEffect(() => {
     setEditableData({
       ...editableData,
       name: formData.name,
-      country: formData.country,
-      tags: [...formData.tags],
       about: formData.about,
       links: [...formData.links],
       genres: [...formData.genres],
@@ -331,82 +333,44 @@ const MusicianProfileEditInline = () => {
     });
   }, []);
 
-  // File upload handlers
-  const handleAvatarUpload = async (e) => {
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      showNotification('You must be logged in to edit your profile', 'error');
+      setIsEditing(false);
+      // Optionally, redirect to login page:
+      // window.location.href = '/login';
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchProfile();
+    // eslint-disable-next-line
+  }, []);
+
+  // File upload handlers (no backend)
+  const handleAvatarUpload = (e) => {
     const file = e.target.files[0];
     if (!file) {
       showNotification('Please select an image file', 'error');
       return;
     }
-
-    // Validate file type
     if (!file.type.startsWith('image/')) {
       showNotification('Please select a valid image file', 'error');
       return;
     }
-
-    // Validate file size (max 5MB)
     const maxSize = 5 * 1024 * 1024; // 5MB
     if (file.size > maxSize) {
       showNotification('Image size should be less than 5MB', 'error');
       return;
     }
-
-    try {
-      const formData = new FormData();
-      formData.append('image', file);
-
-      const token = localStorage.getItem('authToken');
-      if (!token) {
-        showNotification('Please login to upload images', 'error');
-        window.location.href = '/login';
-        return;
-      }
-
-      // Show loading notification
-      showNotification('Uploading image...', 'info');
-
-      const response = await fetch('http://localhost:5000/api/musician/profile/image', {
-        method: 'POST',
-        body: formData,
-        headers: {
-          'x-auth-token': token
-        },
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        if (response.status === 401) {
-          localStorage.removeItem('authToken');
-          showNotification('Session expired - please login again', 'error');
-          window.location.href = '/login';
-          return;
-        }
-        throw new Error(data.message || 'Upload failed');
-      }
-
-      if (!data.imageUrl) {
-        throw new Error('Invalid server response - no image URL received');
-      }
-
-      // Update UI on success
-      setAvatarPreview(data.imageUrl);
-      showNotification('Profile image updated successfully', 'success');
-
-    } catch (error) {
-      console.error("Avatar upload failed:", {
-        error: error.message,
-        stack: error.stack
-      });
-      
-      let errorMessage = 'Image upload failed';
-      if (error.message) {
-        errorMessage += `: ${error.message}`;
-      }
-      
-      showNotification(errorMessage, 'error');
-    }
+    setNewAvatarFile(file);
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setAvatarPreview(reader.result);
+      showNotification('Profile image preview updated', 'success');
+    };
+    reader.readAsDataURL(file);
   };
 
   const handleCoverUpload = (e) => {
@@ -416,6 +380,7 @@ const MusicianProfileEditInline = () => {
       const reader = new FileReader();
       reader.onloadend = () => {
         setCoverPreview(reader.result);
+        showNotification('Cover image preview updated', 'success');
       };
       reader.readAsDataURL(file);
     }
@@ -439,7 +404,7 @@ const MusicianProfileEditInline = () => {
     const file = e.target.files[0];
     if (file) {
       setNewAudioFile(file);
-      showNotification('Audio file selected', 'info');
+      showNotification('Audio file selected (local only)', 'info');
     }
   };
 
@@ -495,6 +460,60 @@ const MusicianProfileEditInline = () => {
     setIsEditing(false);
     showNotification('Profile updated successfully', 'success');
   };
+
+
+  // Save the entire profile (with backend API call)
+const handleSaveProfile = async () => {
+  setLoading(true);
+  const token = localStorage.getItem('token');
+  if (!token) {
+    setNotification({ open: true, message: 'You must be logged in to save your profile', severity: 'error' });
+    setLoading(false);
+    return;
+  }
+
+  const formDataToSend = new FormData();
+
+  // Add text fields (stringify arrays/objects)
+  formDataToSend.append('name', editableData.name);
+  formDataToSend.append('country', editableData.country);
+  formDataToSend.append('about', editableData.about);
+  formDataToSend.append('tags', JSON.stringify(editableData.tags));
+  formDataToSend.append('links', JSON.stringify(editableData.links));
+  formDataToSend.append('genres', JSON.stringify(editableData.genres));
+  formDataToSend.append('skills', JSON.stringify(editableData.skills));
+  formDataToSend.append('tools', JSON.stringify(editableData.tools));
+  formDataToSend.append('tracks', JSON.stringify(editableData.tracks));
+
+  // Add files if selected
+  if (newAvatarFile) formDataToSend.append('avatar', newAvatarFile);
+  if (newCoverFile) formDataToSend.append('coverImage', newCoverFile);
+  if (newGalleryFile) formDataToSend.append('gallery', newGalleryFile);
+  if (newAudioFile) formDataToSend.append('track', newAudioFile);
+
+  try {
+    const response = await fetch('http://localhost:5001/api/musician/profile', {
+      method: 'PUT',
+      headers: {
+        'x-auth-token': token
+        // Do NOT set Content-Type for FormData; browser will set it
+      },
+      body: formDataToSend
+    });
+    const data = await response.json();
+    if (data.success) {
+      setNotification({ open: true, message: 'Profile saved successfully!', severity: 'success' });
+      // Optionally update local state with backend data:
+      // setFormData(data.musician);
+    } else {
+      setNotification({ open: true, message: data.message || 'Failed to save profile', severity: 'error' });
+    }
+  } catch (err) {
+    setNotification({ open: true, message: 'Server error', severity: 'error' });
+  } finally {
+    setTimeout(() => setLoading(false), 3000); // <-- Always show loading for at least 3 seconds
+  }
+};
 
   // Handle input changes for editable fields
   const handleEditableChange = (e) => {
@@ -620,6 +639,77 @@ const MusicianProfileEditInline = () => {
       ...notification,
       open: false
     });
+  };
+
+  const fetchProfile = async () => {
+    setLoading(true);
+    const token = localStorage.getItem('token');
+    if (!token) {
+      setNotification({ open: true, message: 'You must be logged in to view your profile', severity: 'error' });
+      setLoading(false);
+      return;
+    }
+    try {
+      const response = await fetch('http://localhost:5000/api/musician/profiles', {
+        method: 'GET',
+        headers: {
+          'x-auth-token': token
+        }
+      });
+      const data = await response.json();
+      if (data.success && data.musician) {
+        setFormData({
+          name: data.musician.fullName,
+          country: data.musician.country,
+          avatar: data.musician.profileImage,
+          coverImage: data.musician.coverImage,
+          tags: data.musician.tags || [],
+          about: data.musician.about || '',
+          links: data.musician.links || [],
+          genres: data.musician.genres || [],
+          skills: data.musician.skills || [],
+          tools: data.musician.tools || [],
+          tracks: (data.musician.featuredTracks || []).map((track, i) => ({
+            id: i + 1,
+            title: track.title,
+            duration: track.duration,
+            uploadDate: track.uploadDate,
+            audioFile: track.audioUrl
+          })),
+          galleryImages: data.musician.galleryImages || []
+        });
+        setEditableData(prev => ({
+          ...prev,
+          name: data.musician.fullName,
+          country: data.musician.country,
+          tags: data.musician.tags || [],
+          about: data.musician.about || '',
+          links: data.musician.links || [],
+          genres: data.musician.genres || [],
+          skills: data.musician.skills || [],
+          tools: data.musician.tools || [],
+          tracks: (data.musician.featuredTracks || []).map((track, i) => ({
+            id: i + 1,
+            title: track.title,
+            duration: track.duration,
+            uploadDate: track.uploadDate,
+            audioFile: track.audioUrl
+          })),
+          newTag: '',
+          newLink: { platform: '', url: '' },
+          newGenre: '',
+          newSkill: '',
+          newTool: '',
+          newTrack: { title: '', duration: '' }
+        }));
+      } else {
+        setNotification({ open: true, message: data.message || 'Failed to fetch profile', severity: 'error' });
+      }
+    } catch (err) {
+      setNotification({ open: true, message: 'Server error', severity: 'error' });
+    } finally {
+      setTimeout(() => setLoading(false), 3000); // <-- Always show loading for at least 3 seconds
+    }
   };
 
   return (
@@ -1341,10 +1431,18 @@ const MusicianProfileEditInline = () => {
                 variant="contained" 
                 color="primary" 
                 startIcon={<Check />}
-                onClick={saveChanges}
+                onClick={handleSaveProfile}
                 size="large"
               >
                 Save Changes
+              </Button>
+              <Button
+                variant="contained"
+                color="primary"
+                startIcon={<Check />}
+                onClick={handleSaveProfile}
+              >
+                Save Profile
               </Button>
             </EditControls>
           )}
@@ -1368,6 +1466,25 @@ const MusicianProfileEditInline = () => {
             {notification.message}
           </Alert>
         </Snackbar>
+
+        {loading && (
+          <Box
+            sx={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              width: '100vw',
+              height: '100vh',
+              bgcolor: 'rgba(0,0,0,0.4)',
+              zIndex: 2000,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}
+          >
+            <CircularProgress size={80} color="primary" />
+          </Box>
+        )}
       </GradientBackground>
     </ThemeProvider>
   );

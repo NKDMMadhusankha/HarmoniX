@@ -1,11 +1,7 @@
 const mongoose = require('mongoose');
 
 const MusicianSchema = new mongoose.Schema({
-  userId: {
-    type: String,
-    required: true,
-    unique: true,
-  },
+  userId: { type: String, required: true, unique: true },
   fullName: { type: String, required: true },
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
@@ -30,16 +26,28 @@ const MusicianSchema = new mongoose.Schema({
     linkedin: { type: String, default: '' }
   },
   termsAgreed: { type: Boolean, required: true },
-  about: { type: String, default: '' },
   profileImage: { type: String, default: '' },
   coverImage: { type: String, default: '' },
-  tracks: [{
-    title: String,
-    duration: String,
-    audioUrl: String,
-    uploadDate: Date
-  }],
-  galleryImages: [String]
+  featuredTracks: [
+    {
+      title: { type: String },
+      duration: { type: String },
+      uploadDate: { type: String },
+      audioUrl: { type: String }
+    }
+  ],
+  galleryImages: [{ type: String }],
+  // --- Add these fields for full frontend compatibility ---
+  about: { type: String, default: '' },
+  tags: { type: [String], default: [] },
+  links: [
+    {
+      platform: { type: String },
+      url: { type: String }
+    }
+  ],
+  skills: { type: [String], default: [] },
+  tools: { type: [String], default: [] }
 }, { timestamps: true });
 
 module.exports = mongoose.model('Musician', MusicianSchema);

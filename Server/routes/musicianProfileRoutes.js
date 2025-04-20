@@ -1,28 +1,25 @@
+// routes/musicianProfileRoutes.js
 const express = require('express');
-const router = express.Router();
-const musicianProfileController = require('../controllers/musicianProfileController');
 const authMiddleware = require('../middleware/authMiddleware');
-const upload = require('../middleware/uploadMiddleware');
+const upload = require('../utils/upload');
+const { updateProfile } = require('../controllers/musicianProfileController');
+const { getProfile } = require('../controllers/musicianProfileController');
 
-// Get musician profile
-router.get('/profile', authMiddleware(['musician']), musicianProfileController.getProfile);
+const router = express.Router();
 
-// Update basic profile info
-router.put('/profile', authMiddleware(['musician']), musicianProfileController.updateProfile);
+router.put(
+  '/profile',
+  authMiddleware(['musician']),
+  upload.fields([
+    { name: 'avatar', maxCount: 1 },
+    { name: 'coverImage', maxCount: 1 },
+    { name: 'gallery', maxCount: 10 },
+    { name: 'track', maxCount: 10 },
+  ]),
+  updateProfile
+);
 
-// Update portfolio links
-router.put('/profile/links', authMiddleware(['musician']), musicianProfileController.updatePortfolioLinks);
-
-// Upload profile image
-router.post('/profile/image', authMiddleware(['musician']), upload.single('image'), musicianProfileController.uploadProfileImage);
-
-// Upload cover image
-router.post('/profile/cover', authMiddleware(['musician']), upload.single('image'), musicianProfileController.uploadCoverImage);
-
-// Add track
-router.post('/profile/tracks', authMiddleware(['musician']), upload.single('audio'), musicianProfileController.addTrack);
-
-// Add gallery image
-router.post('/profile/gallery', authMiddleware(['musician']), upload.single('image'), musicianProfileController.addGalleryImage);
+// GET /api/musician/profile
+router.get('/profiles', authMiddleware(['musician']), getProfile);
 
 module.exports = router;

@@ -5,13 +5,12 @@ const cors = require('cors');
 const authController = require('./controllers/authController');
 const authRoutes = require('./routes/authRoutes'); // Make sure this path is correct
 const musicianAuthRoutes = require('./routes/musicianAuthRoutes');
-const musicianProfileRoutes = require('./routes/musicianProfileRoutes');
 
 // Load environment variables
 dotenv.config();
 
 const app = express();
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 5001;
 
 // Middleware
 app.use(express.json());
@@ -43,7 +42,14 @@ app.post('/api/auth/register', authController.register);
 // New auth routes
 app.use('/api/auth', authRoutes); // This must match your frontend request
 app.use('/api/musician', musicianAuthRoutes);
+
+
+const musicianProfileRoutes = require('./routes/musicianProfileRoutes');
 app.use('/api/musician', musicianProfileRoutes);
+
+
+
+
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
