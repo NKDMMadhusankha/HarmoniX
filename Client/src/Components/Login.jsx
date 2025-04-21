@@ -73,6 +73,7 @@ const LoginForm = () => {
       let response = await axios.post('http://localhost:5000/api/auth/login', { email, password });
       
       localStorage.setItem('authToken', response.data.token);
+      localStorage.setItem('token', response.data.token); // <-- Add this line
       localStorage.setItem('userType', 'user');
       localStorage.setItem('userData', JSON.stringify(response.data.user));
       
@@ -88,6 +89,7 @@ const LoginForm = () => {
         const musicianResponse = await axios.post('http://localhost:5000/api/musician/login', { email, password });
         
         localStorage.setItem('authToken', musicianResponse.data.token);
+        localStorage.setItem('token', musicianResponse.data.token); // <-- Add this line
         localStorage.setItem('userType', 'musician');
         localStorage.setItem('userData', JSON.stringify(musicianResponse.data.musician));
         

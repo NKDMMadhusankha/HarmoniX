@@ -21,13 +21,16 @@ app.use(cors({
 }));
 
 // Connect to MongoDB
-mongoose.connect(process.env.MONGO_URI)
-  .then(() => console.log('MongoDB Connected'))
+mongoose.connect(process.env.MONGO_URI, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true
+})
+  .then(() => console.log('MongoDB connected'))
   .catch(err => {
     if (err.name === 'MongooseServerSelectionError') {
       console.error('MongoDB Connection Error: Could not connect to any servers in your MongoDB Atlas cluster. Make sure your current IP address is on your Atlas cluster\'s IP whitelist: https://www.mongodb.com/docs/atlas/security-whitelist/');
     } else {
-      console.error('MongoDB Connection Error:', err);
+      console.error('MongoDB connection error:', err);
     }
   });
 

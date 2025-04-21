@@ -54,7 +54,6 @@ import Footer from '../Components/Footer';
 import ProImg from '../assets/procover.jpg';
 import { authFetch } from '../utils/authFetch';
 
-
 // Styled components
 const GradientBackground = styled(Box)(({ theme }) => ({
   background: '#000000',
@@ -241,41 +240,18 @@ const darkTheme = createTheme({
 const MusicianProfileEditInline = () => {
   // State for form data
   const [formData, setFormData] = useState({
-    name: 'Mithila Madhusankha',
-    country: 'United States',
-    avatar: 'https://img.freepik.com/free-photo/medium-shot-man-playing-guitar-studio_23-2150232123.jpg?t=st=1744101142~exp=1744104742~hmac=dd039b0e837d5847a9cf25a79c4fc73db3aa76a68129ff1ca1d67bea0a9f5d9a&w=996',
-    coverImage: ProImg,
-    tags: ['Producer', 'Composer', 'Mixing Engineer'],
-    about: 'Enter the immersive sonic universe of SOUNDWAVE, where electronic elements blend with organic textures to create memorable auditory experiences. With over 10 years in the industry, SOUNDWAVE has crafted sounds for films, commercials, and chart-topping artists. His unique approach to music production combines traditional composition techniques with cutting-edge digital tools.',
-    links: [
-      { platform: 'Spotify', url: 'https://open.spotify.com/artist/example' },
-      { platform: 'YouTube', url: 'https://youtube.com/channel/example' },
-      { platform: 'Instagram', url: 'https://instagram.com/example' }
-    ],
-    genres: ['Electronic', 'Hip Hop', 'House', 'Cinematic', 'Ambient'],
-    skills: ['Music Production', 'Mixing', 'Mastering', 'Sound Design', 'Composition'],
-    tools: ['Ableton Live', 'Logic Pro', 'Pro Tools', 'Native Instruments', 'FL Studio'],
-    tracks: [
-      {
-        id: 1,
-        title: "Goddam ft. Olivia Ruff | Jazz Mafia (co-written & produced by Adam Theis)",
-        duration: "04:25",
-        uploadDate: "Mar 26, 2024",
-        audioFile: null
-      },
-      {
-        id: 2,
-        title: "The Situation ft. Lateef The Truthspeaker | Jazz Mafia (produced by Adam Theis)",
-        duration: "05:17",
-        uploadDate: "Mar 26, 2024",
-        audioFile: null
-      }
-    ],
-    galleryImages: [
-      "https://picsum.photos/800/600?random=20",
-      "https://picsum.photos/800/600?random=21",
-      "https://picsum.photos/800/600?random=22"
-    ]
+    name: '',
+    country: '',
+    avatar: '',
+    coverImage: '',
+    tags: [],
+    about: '',
+    links: [],
+    genres: [],
+    skills: [],
+    tools: [],
+    tracks: [],
+    galleryImages: []
   });
 
   // State for editable versions of data
@@ -319,36 +295,19 @@ const MusicianProfileEditInline = () => {
 
   const [loading, setLoading] = useState(false);
 
-  // Initialize editable data
-  useEffect(() => {
-    setEditableData({
-      ...editableData,
-      name: formData.name,
-      about: formData.about,
-      links: [...formData.links],
-      genres: [...formData.genres],
-      skills: [...formData.skills],
-      tools: [...formData.tools],
-      tracks: [...formData.tracks]
-    });
-  }, []);
-
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (!token) {
       showNotification('You must be logged in to edit your profile', 'error');
       setIsEditing(false);
-      // Optionally, redirect to login page:
-      // window.location.href = '/login';
     }
   }, []);
 
   useEffect(() => {
     fetchProfile();
-    // eslint-disable-next-line
   }, []);
 
-  // File upload handlers (no backend)
+  // File upload handlers
   const handleAvatarUpload = (e) => {
     const file = e.target.files[0];
     if (!file) {
@@ -439,81 +398,63 @@ const MusicianProfileEditInline = () => {
     setCoverPreview('');
   };
 
-  // Save all changes
-  const saveChanges = () => {
-    const newFormData = {
-      ...formData,
-      name: editableData.name,
-      country: editableData.country,
-      tags: [...editableData.tags],
-      about: editableData.about,
-      links: [...editableData.links],
-      genres: [...editableData.genres],
-      skills: [...editableData.skills],
-      tools: [...editableData.tools],
-      tracks: [...editableData.tracks],
-      avatar: avatarPreview || formData.avatar,
-      coverImage: coverPreview || formData.coverImage
-    };
-    
-    setFormData(newFormData);
-    setIsEditing(false);
-    showNotification('Profile updated successfully', 'success');
-  };
-
-
   // Save the entire profile (with backend API call)
-const handleSaveProfile = async () => {
-  setLoading(true);
-  const token = localStorage.getItem('token');
-  if (!token) {
-    setNotification({ open: true, message: 'You must be logged in to save your profile', severity: 'error' });
-    setLoading(false);
-    return;
-  }
-
-  const formDataToSend = new FormData();
-
-  // Add text fields (stringify arrays/objects)
-  formDataToSend.append('name', editableData.name);
-  formDataToSend.append('country', editableData.country);
-  formDataToSend.append('about', editableData.about);
-  formDataToSend.append('tags', JSON.stringify(editableData.tags));
-  formDataToSend.append('links', JSON.stringify(editableData.links));
-  formDataToSend.append('genres', JSON.stringify(editableData.genres));
-  formDataToSend.append('skills', JSON.stringify(editableData.skills));
-  formDataToSend.append('tools', JSON.stringify(editableData.tools));
-  formDataToSend.append('tracks', JSON.stringify(editableData.tracks));
-
-  // Add files if selected
-  if (newAvatarFile) formDataToSend.append('avatar', newAvatarFile);
-  if (newCoverFile) formDataToSend.append('coverImage', newCoverFile);
-  if (newGalleryFile) formDataToSend.append('gallery', newGalleryFile);
-  if (newAudioFile) formDataToSend.append('track', newAudioFile);
-
-  try {
-    const response = await fetch('http://localhost:5001/api/musician/profile', {
-      method: 'PUT',
-      headers: {
-        'x-auth-token': token
-        // Do NOT set Content-Type for FormData; browser will set it
-      },
-      body: formDataToSend
-    });
-    const data = await response.json();
-    if (data.success) {
-      setNotification({ open: true, message: 'Profile saved successfully!', severity: 'success' });
-      // Optionally update local state with backend data:
-      // setFormData(data.musician);
-    } else {
-      setNotification({ open: true, message: data.message || 'Failed to save profile', severity: 'error' });
+  const handleSaveProfile = async () => {
+    setLoading(true);
+    const token = localStorage.getItem('token');
+    if (!token) {
+      setNotification({ open: true, message: 'You must be logged in to save your profile', severity: 'error' });
+      setLoading(false);
+      return;
     }
-  } catch (err) {
-    setNotification({ open: true, message: 'Server error', severity: 'error' });
-  } finally {
-    setTimeout(() => setLoading(false), 3000); // <-- Always show loading for at least 3 seconds
-  }
-};
+
+    const formDataToSend = new FormData();
+
+    // Add text fields (stringify arrays/objects)
+    formDataToSend.append('name', editableData.name);
+    formDataToSend.append('country', editableData.country);
+    formDataToSend.append('about', editableData.about);
+    formDataToSend.append('tags', JSON.stringify(editableData.tags));
+    formDataToSend.append('links', JSON.stringify(editableData.links));
+    formDataToSend.append('genres', JSON.stringify(editableData.genres));
+    formDataToSend.append('skills', JSON.stringify(editableData.skills));
+    formDataToSend.append('tools', JSON.stringify(editableData.tools));
+    formDataToSend.append('tracks', JSON.stringify(editableData.tracks));
+
+    // Add files if selected
+    if (newAvatarFile) formDataToSend.append('avatar', newAvatarFile);
+    if (newCoverFile) formDataToSend.append('coverImage', newCoverFile);
+    if (newGalleryFile) formDataToSend.append('gallery', newGalleryFile);
+    if (newAudioFile) formDataToSend.append('track', newAudioFile);
+
+    try {
+      const response = await fetch('http://localhost:5000/api/musician/profile', {
+        method: 'PUT',
+        headers: {
+          'x-auth-token': token
+        },
+        body: formDataToSend
+      });
+
+      if (!response.ok) {
+        throw new Error(`Server responded with status ${response.status}`);
+      }
+
+      const data = await response.json();
+      if (data.success) {
+        setNotification({ open: true, message: 'Profile saved successfully!', severity: 'success' });
+        setIsEditing(false);
+        // Update local state with backend data
+        fetchProfile();
+      } else {
+        setNotification({ open: true, message: data.message || 'Failed to save profile', severity: 'error' });
+      }
+    } catch (err) {
+      setNotification({ open: true, message: 'Unable to connect to the server. Please try again later.', severity: 'error' });
+    } finally {
+      setTimeout(() => setLoading(false), 3000);
+    }
+  };
 
   // Handle input changes for editable fields
   const handleEditableChange = (e) => {
@@ -708,7 +649,7 @@ const handleSaveProfile = async () => {
     } catch (err) {
       setNotification({ open: true, message: 'Server error', severity: 'error' });
     } finally {
-      setTimeout(() => setLoading(false), 3000); // <-- Always show loading for at least 3 seconds
+      setTimeout(() => setLoading(false), 3000);
     }
   };
 
@@ -721,7 +662,7 @@ const handleSaveProfile = async () => {
         {/* Hero Section with Larger Cover Image */}
         <Box sx={{ position: 'relative', mb: 4 }}>
           <HeroSection>
-            <ProfileOverlay bgimage={coverPreview || formData.coverImage} />
+            <ProfileOverlay bgimage={formData.coverImage || coverPreview || ProImg} />
             
             {isEditing && (
               <Box sx={{ 
@@ -760,7 +701,7 @@ const handleSaveProfile = async () => {
             }}>
               <Box sx={{ position: 'relative', mb: { xs: 2, md: 0 } }}>
                 <LargeAvatar 
-                  src={avatarPreview || formData.avatar} 
+                  src={formData.avatar || avatarPreview || ProImg} 
                   alt="Profile Avatar"
                 />
                 
@@ -1345,9 +1286,9 @@ const handleSaveProfile = async () => {
                             {track.uploadDate}
                           </Typography>
                         </Box>
-                        {track.audioUrl && (
+                        {track.audioFile && (
                           <audio controls style={{ width: '100%', marginTop: '8px' }}>
-                            <source src={track.audioUrl} type="audio/mpeg" />
+                            <source src={track.audioFile} type="audio/mpeg" />
                             Your browser does not support the audio element.
                           </audio>
                         )}
@@ -1435,14 +1376,6 @@ const handleSaveProfile = async () => {
                 size="large"
               >
                 Save Changes
-              </Button>
-              <Button
-                variant="contained"
-                color="primary"
-                startIcon={<Check />}
-                onClick={handleSaveProfile}
-              >
-                Save Profile
               </Button>
             </EditControls>
           )}
