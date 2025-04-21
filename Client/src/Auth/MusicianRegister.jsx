@@ -357,14 +357,14 @@ const MusicianRegistrationForm = () => {
         },
         body: JSON.stringify(formData),
       });
-  
+
       const data = await response.json();
-  
+
       if (response.ok) {
         console.log('Registration successful:', data);
-        
+
         // Redirect based on role
-        switch(formData.role) {
+        switch (formData.role) {
           case 'Music Producer':
             window.location.href = '/musicpro/dashboard';
             break;
@@ -377,10 +377,16 @@ const MusicianRegistrationForm = () => {
           case 'Lyricist':
             window.location.href = '/lyricist/dashboard';
             break;
+          default:
+            window.location.href = '/dashboard';
         }
+      } else {
+        console.error('Registration failed:', data.message || 'Unknown error');
+        alert(data.message || 'Failed to register. Please check your input.');
       }
     } catch (error) {
       console.error('Error during form submission:', error);
+      alert('An unexpected error occurred. Please try again later.');
     }
   };
 
