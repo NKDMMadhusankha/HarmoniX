@@ -1,4 +1,5 @@
 const Musician = require('../models/Musician');
+const { generateSignedUrl } = require('../utils/s3');
 
 const getProfile = async (req, res) => {
   try {
@@ -6,7 +7,43 @@ const getProfile = async (req, res) => {
     if (!musician) {
       return res.status(404).json({ success: false, message: 'Musician not found' });
     }
-    res.json({ success: true, musician });
+
+    // Convert to plain object to modify
+    const musicianData = musician.toObject();
+
+    // Generate signed URLs for images
+    if (musicianData.profileImage) {
+      musicianData.profileImage = await generateSignedUrl(musicianData.profileImage);
+    }
+    if (musicianData.coverImage) {
+      musicianData.coverImage = await generateSignedUrl(musicianData.coverImage);
+    }
+
+    // Generate signed URLs for gallery images
+    if (musicianData.galleryImages && musicianData.galleryImages.length > 0) {
+      musicianData.galleryImages = await Promise.all(
+        musicianData.galleryImages.map(async (image) => {
+          return await generateSignedUrl(image);
+        })
+      );
+    }
+
+    // Generate signed URLs for track audio files
+    if (musicianData.featuredTracks && musicianData.featuredTracks.length > 0) {
+      musicianData.featuredTracks = await Promise.all(
+        musicianData.featuredTracks.map(async (track) => {
+          if (track.audioUrl) {
+            return {
+              ...track,
+              audioUrl: await generateSignedUrl(track.audioUrl)
+            };
+          }
+          return track;
+        })
+      );
+    }
+
+    res.json({ success: true, musician: musicianData });
   } catch (err) {
     console.error(err);
     res.status(500).json({ success: false, message: 'Server error' });
@@ -34,14 +71,14 @@ const updateProfile = async (req, res) => {
 
     // Handle images and audio uploads
     if (req.files && req.files['avatar']) {
-      musician.profileImage = req.files['avatar'][0].location;
+      musician.profileImage = req.files['avatar'][0].key; // Store the S3 key, not the full URL
     }
     if (req.files && req.files['coverImage']) {
-      musician.coverImage = req.files['coverImage'][0].location;
+      musician.coverImage = req.files['coverImage'][0].key; // Store the S3 key
     }
     if (req.files && req.files['gallery']) {
-      const galleryUrls = req.files['gallery'].map(f => f.location);
-      musician.galleryImages = musician.galleryImages.concat(galleryUrls);
+      const galleryKeys = req.files['gallery'].map(f => f.key);
+      musician.galleryImages = musician.galleryImages.concat(galleryKeys);
     }
     if (req.files && req.files['track']) {
       // Expect track info in req.body.tracks as JSON stringified array
@@ -52,13 +89,44 @@ const updateProfile = async (req, res) => {
           title: meta.title || file.originalname,
           duration: meta.duration || '',
           uploadDate: new Date().toISOString(),
-          audioUrl: file.location,
+          audioUrl: file.key, // Store the S3 key
         });
       });
     }
 
     await musician.save();
-    res.json({ success: true, musician });
+    
+    // Return the updated profile with signed URLs
+    const updatedMusician = musician.toObject();
+    
+    if (updatedMusician.profileImage) {
+      updatedMusician.profileImage = await generateSignedUrl(updatedMusician.profileImage);
+    }
+    if (updatedMusician.coverImage) {
+      updatedMusician.coverImage = await generateSignedUrl(updatedMusician.coverImage);
+    }
+    if (updatedMusician.galleryImages && updatedMusician.galleryImages.length > 0) {
+      updatedMusician.galleryImages = await Promise.all(
+        updatedMusician.galleryImages.map(async (image) => {
+          return await generateSignedUrl(image);
+        })
+      );
+    }
+    if (updatedMusician.featuredTracks && updatedMusician.featuredTracks.length > 0) {
+      updatedMusician.featuredTracks = await Promise.all(
+        updatedMusician.featuredTracks.map(async (track) => {
+          if (track.audioUrl) {
+            return {
+              ...track,
+              audioUrl: await generateSignedUrl(track.audioUrl)
+            };
+          }
+          return track;
+        })
+      );
+    }
+
+    res.json({ success: true, musician: updatedMusician });
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: 'Server error' });
