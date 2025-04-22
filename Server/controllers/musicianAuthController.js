@@ -61,8 +61,12 @@ const register = async (req, res) => {
     await newMusician.save();
     
     // Create JWT token
-    const token = jwt.sign({ id: newMusician._id, role: 'musician' }, process.env.JWT_SECRET, { 
-      expiresIn: '1h' 
+    const token = jwt.sign({ 
+      id: newMusician._id, 
+      role: 'musician',
+      userId: newMusician.userId // Include the userId in the token
+    }, process.env.JWT_SECRET, { 
+      expiresIn: '7d' 
     });
 
     res.status(201).json({ 
@@ -70,10 +74,14 @@ const register = async (req, res) => {
       message: 'Musician registration successful!',
       token,
       musician: {
+        userId: newMusician.userId, // Include userId in response
         id: newMusician._id,
         fullName: newMusician.fullName,
         email: newMusician.email,
-        role: newMusician.role
+        role: newMusician.role,
+        // Include any other relevant fields
+        genres: newMusician.genres,
+        experience: newMusician.experience
       }
     });
   } catch (error) {
@@ -126,4 +134,16 @@ const refreshToken = async (req, res) => {
   }
 };
 
-module.exports = { register, login, refreshToken };
+const getCurrentMusician = async (req, res) => {
+  try {
+    const musician = await Musician.findById(req.user.id).select('-password');
+    if (!musician) {
+      return res.status(404).json({ message: 'Musician not found' });
+    }
+    res.json(musician);
+  } catch (error) {
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+module.exports = { register, login, refreshToken, getCurrentMusician };

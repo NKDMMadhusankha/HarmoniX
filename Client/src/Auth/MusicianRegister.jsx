@@ -348,7 +348,7 @@ const MusicianRegistrationForm = () => {
 
   const handleSubmit = async () => {
     try {
-      console.log('Submitting form data:', formData); // Log formData for debugging
+      console.log('Submitting form data:', formData);
 
       const response = await fetch('http://localhost:5000/api/musician/register', {
         method: 'POST',
@@ -362,24 +362,34 @@ const MusicianRegistrationForm = () => {
 
       if (response.ok) {
         console.log('Registration successful:', data);
+        
+        // Store all authentication and user data
+        localStorage.setItem('authToken', data.token);
+        localStorage.setItem('token', data.token);
+        localStorage.setItem('userType', 'musician');
+        localStorage.setItem('userData', JSON.stringify(data.musician));
+        localStorage.setItem('userId', data.musician.userId); // Store userId separately if needed
 
-        // Redirect based on role
-        switch (formData.role) {
+        // Determine dashboard route based on role
+        let dashboardRoute = '/musician/dashboard'; // Default fallback
+        
+        switch(data.musician.role) { // Use the role from response
           case 'Music Producer':
-            window.location.href = '/musicpro/dashboard';
+            dashboardRoute = '/musicpro/dashboard';
             break;
           case 'Mixing Engineer':
-            window.location.href = '/mixing/dashboard';
+            dashboardRoute = '/mixing/dashboard';
             break;
           case 'Mastering Engineer':
-            window.location.href = '/mastering/dashboard';
+            dashboardRoute = '/mastering/dashboard';
             break;
           case 'Lyricist':
-            window.location.href = '/lyricist/dashboard';
+            dashboardRoute = '/lyricist/dashboard';
             break;
-          default:
-            window.location.href = '/dashboard';
         }
+        
+        // Force a full page reload to ensure all state is cleared
+        window.location.href = dashboardRoute;
       } else {
         console.error('Registration failed:', data.message || 'Unknown error');
         alert(data.message || 'Failed to register. Please check your input.');

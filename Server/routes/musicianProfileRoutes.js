@@ -4,6 +4,8 @@ const authMiddleware = require('../middleware/authMiddleware');
 const upload = require('../utils/upload');
 const { updateProfile } = require('../controllers/musicianProfileController');
 const { getProfile } = require('../controllers/musicianProfileController');
+const { deleteGalleryImage } = require('../controllers/musicianProfileController');
+const { deleteTrack } = require('../controllers/musicianProfileController');
 
 const router = express.Router();
 
@@ -21,5 +23,17 @@ router.put(
 
 // GET /api/musician/profile
 router.get('/profiles', authMiddleware(['musician']), getProfile);
+
+router.delete(
+  '/gallery/:imageKey',
+  authMiddleware(['musician']),
+  deleteGalleryImage
+);
+
+router.delete(
+  '/track/:trackIndex',
+  authMiddleware(['musician']),
+  deleteTrack
+);
 
 module.exports = router;

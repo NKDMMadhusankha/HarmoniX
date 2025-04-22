@@ -1,5 +1,5 @@
 const Musician = require('../models/Musician');
-const { generateSignedUrl } = require('../utils/s3');
+const { generateSignedUrl, s3, deleteFromS3 } = require('../utils/s3');
 
 const getProfile = async (req, res) => {
   try {
@@ -69,6 +69,14 @@ const updateProfile = async (req, res) => {
     if (req.body.tools) musician.tools = JSON.parse(req.body.tools);
     if (req.body.tracks) musician.tracks = JSON.parse(req.body.tracks);
 
+    // Update portfolioLinks and socialMedia
+    if (req.body.portfolioLinks) {
+      musician.portfolioLinks = JSON.parse(req.body.portfolioLinks);
+    }
+    if (req.body.socialMedia) {
+      musician.socialMedia = JSON.parse(req.body.socialMedia);
+    }
+
     // Handle images and audio uploads
     if (req.files && req.files['avatar']) {
       musician.profileImage = req.files['avatar'][0].key; // Store the S3 key, not the full URL
@@ -81,7 +89,6 @@ const updateProfile = async (req, res) => {
       musician.galleryImages = musician.galleryImages.concat(galleryKeys);
     }
     if (req.files && req.files['track']) {
-      // Expect track info in req.body.tracks as JSON stringified array
       const tracksMeta = JSON.parse(req.body.tracks || '[]');
       req.files['track'].forEach((file, idx) => {
         const meta = tracksMeta[idx] || {};
@@ -133,4 +140,58 @@ const updateProfile = async (req, res) => {
   }
 };
 
-module.exports = { getProfile, updateProfile };
+const deleteGalleryImage = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const imageKey = decodeURIComponent(req.params.imageKey);
+
+    // Remove image from S3
+    await s3.send(
+      new (require('@aws-sdk/client-s3').DeleteObjectCommand)({
+        Bucket: process.env.AWS_BUCKET_NAME,
+        Key: imageKey,
+      })
+    );
+
+    // Remove image reference from MongoDB
+    const musician = await Musician.findById(userId);
+    if (!musician) return res.status(404).json({ success: false, message: 'Musician not found' });
+
+    musician.galleryImages = musician.galleryImages.filter(img => img !== imageKey);
+    await musician.save();
+
+    res.json({ success: true, message: 'Image deleted successfully', imageKey });
+  } catch (err) {
+    console.error('Delete gallery image error:', err);
+    res.status(500).json({ success: false, message: 'Failed to delete image' });
+  }
+};
+
+const deleteTrack = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const trackIndex = parseInt(req.params.trackIndex, 10);
+
+    const musician = await Musician.findById(userId);
+    if (!musician) return res.status(404).json({ success: false, message: 'Musician not found' });
+
+    if (trackIndex < 0 || trackIndex >= musician.featuredTracks.length) {
+      return res.status(400).json({ success: false, message: 'Invalid track index' });
+    }
+
+    const track = musician.featuredTracks[trackIndex];
+    if (track.audioUrl) {
+      await deleteFromS3(track.audioUrl);
+    }
+
+    musician.featuredTracks.splice(trackIndex, 1);
+    await musician.save();
+
+    res.json({ success: true, message: 'Track deleted successfully' });
+  } catch (err) {
+    console.error('Delete track error:', err);
+    res.status(500).json({ success: false, message: 'Failed to delete track' });
+  }
+};
+
+module.exports = { getProfile, updateProfile, deleteGalleryImage, deleteTrack };

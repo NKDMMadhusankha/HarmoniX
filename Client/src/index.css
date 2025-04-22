@@ -38,3 +38,34 @@ html, body {
   scrollbar-width: thin;  /* Thin scrollbar */
   scrollbar-color: #444 #222;  /* Thumb color and track color (dark theme) */
 }
+
+
+
+
+.rhap_container {
+  background: transparent !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+}
+
+.rhap_progress-filled {
+  background-color: #1976d2 !important;
+}
+
+.rhap_progress-indicator {
+  background-color: #1976d2 !important;
+  box-shadow: none !important;
+}
+
+.rhap_button-clear {
+  color: #1976d2 !important;
+}
+
+.rhap_time {
+  color: #ffffff !important;
+  font-size: 14px !important;
+}
+
+.rhap_controls-section {
+  margin-top: 0 !important;
+}

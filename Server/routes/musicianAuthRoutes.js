@@ -1,5 +1,5 @@
 const express = require('express');
-const { register, login } = require('../controllers/musicianAuthController');
+const { register, login, getCurrentMusician } = require('../controllers/musicianAuthController');
 const authMiddleware = require('../middleware/authMiddleware');
 
 const router = express.Router();
@@ -14,5 +14,8 @@ router.post('/login', login);
 router.get('/profile', authMiddleware(['musician']), (req, res) => {
   res.json({ msg: 'This is a protected musician route' });
 });
+
+// Route to fetch the current musician's details
+router.get('/current', authMiddleware(['musician']), getCurrentMusician);
 
 module.exports = router;
