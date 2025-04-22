@@ -103,7 +103,7 @@ const LargeAvatar = styled(Avatar)(({ theme }) => ({
 }));
 
 const GradientCard = styled(Card)(({ theme }) => ({
-  backgroundColor: 'rgba(22, 38, 53, 0.85)', // Darker background
+  backgroundColor: 'rgba(19, 38, 57, 0.85)', // Darker background
   backdropFilter: 'blur(10px)',
   marginBottom: theme.spacing(3),
   borderRadius: theme.shape.borderRadius,
