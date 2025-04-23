@@ -17,6 +17,7 @@ import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import Navbar from '../Components/Navbar';
 import Footer from '../Components/Footer';
 import Loader from '../Components/Loader';
+import { Link as RouterLink, useNavigate } from 'react-router-dom'; // Add useNavigate
 
 const ProducerCard = ({ image, producerInfo, onSeeMore }) => {
   const theme = useTheme();
@@ -133,6 +134,7 @@ const MusicProducersPage = () => {
   const theme = useTheme();
   const [producers, setProducers] = useState([]);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate(); // Add this line
   
   // Media queries for responsive design
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
@@ -157,8 +159,8 @@ const MusicProducersPage = () => {
   }, []);
 
   const handleSeeMore = (producerInfo) => {
-    // Implement navigation or modal display
-    alert(`See more about ${producerInfo.fullName}`);
+    // Navigate to the profile page using the producer's id
+    navigate(`/music/producer/${producerInfo.id}`);
   };
 
   // Show loader while loading
@@ -289,6 +291,8 @@ const MusicProducersPage = () => {
               Sign up free to browse our artist network & connect
             </Typography>
             <Button
+              component={RouterLink}
+              to="/catogary"
               variant="contained"
               sx={{
                 px: { xs: 2, sm: 2.5, md: 3 },

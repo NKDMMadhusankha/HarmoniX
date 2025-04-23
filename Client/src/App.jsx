@@ -5,13 +5,15 @@ import Login from "./Components/Login";
 import Home from "./Home";
 import AboutUs from "./Components/AboutUs";
 import ContactUs from "./Components/ContactUs";
-import MusicPro from "./Profiles/MusicPro";
 import RegistationCatogary from "./Auth/RegistationCatogary";
 import MusicianRegistrationForm from "./Auth/MusicianRegister";
 import ForgotPassword from "./Components/FogotPass";
 import MusicProducers from "./Pages/MusicProducers";
 import Mastering from "./Pages/Mastering";
 import Mixing from "./Pages/Mixing";
+
+import MusicProfile from "./Profiles/MusicProfile";
+
 
 import MusicProDashbord from "./Dashboard/MusicProDashboard";
 import MixingDashboard from "./Dashboard/MixingDashboard";
@@ -28,9 +30,12 @@ const App = () => {
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/about" element={<AboutUs />} />
         <Route path="/contact" element={<ContactUs />} />
-        <Route path="/musicpro" element={<MusicPro />} />
         <Route path="/catogary" element={<RegistationCatogary />} />
         <Route path="/musician/register" element={<MusicianRegistrationForm />} />
+
+        {/* Musicians Profile */}
+        <Route path="/musicpro" element={<MusicProfile />} />
+        <Route path="/music/producer/:id" element={<MusicProfile />} />
 
         {/* Musicians Pages */}
         <Route path="/music/producer" element={<MusicProducers />} />

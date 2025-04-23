@@ -2,7 +2,7 @@
 const express = require('express');
 const authMiddleware = require('../middleware/authMiddleware');
 const upload = require('../utils/upload');
-const { updateProfile, getProfile, deleteGalleryImage, deleteTrack, getAllProducers } = require('../controllers/musicianProfileController');
+const { updateProfile, getProfile, deleteGalleryImage, deleteTrack, getAllProducers, getProducerProfileById } = require('../controllers/musicianProfileController');
 
 const router = express.Router();
 
@@ -35,5 +35,8 @@ router.delete(
 
 // Public route: Get all producers (no auth required for listing)
 router.get('/producers', getAllProducers);
+
+// Public route: Get a single producer by ID
+router.get('/producers/:id', getProducerProfileById);
 
 module.exports = router;

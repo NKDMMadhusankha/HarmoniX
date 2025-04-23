@@ -198,7 +198,6 @@ const deleteTrack = async (req, res) => {
   }
 };
 
-// Add new getAllProducers function
 const getAllProducers = async (req, res) => {
   try {
     // Only fetch users with role 'Music Producer'
@@ -227,10 +226,45 @@ const getAllProducers = async (req, res) => {
   }
 };
 
+const getProducerProfileById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const producer = await Musician.findById(id);
+    if (!producer || producer.role !== 'Music Producer') {
+      return res.status(404).json({ success: false, message: 'Producer not found' });
+    }
+    const obj = producer.toObject();
+
+    // Generate signed URLs for images and tracks
+    if (obj.profileImage) obj.profileImage = await generateSignedUrl(obj.profileImage);
+    if (obj.coverImage) obj.coverImage = await generateSignedUrl(obj.coverImage);
+    if (obj.galleryImages && obj.galleryImages.length > 0) {
+      obj.galleryImages = await Promise.all(
+        obj.galleryImages.map(async (image) => await generateSignedUrl(image))
+      );
+    }
+    if (obj.featuredTracks && obj.featuredTracks.length > 0) {
+      obj.featuredTracks = await Promise.all(
+        obj.featuredTracks.map(async (track) => {
+          if (track.audioUrl) {
+            return { ...track, audioUrl: await generateSignedUrl(track.audioUrl) };
+          }
+          return track;
+        })
+      );
+    }
+    res.json({ success: true, producer: obj });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+};
+
 module.exports = { 
   getProfile, 
   updateProfile, 
   deleteGalleryImage, 
   deleteTrack,
-  getAllProducers 
+  getAllProducers,
+  getProducerProfileById
 };
