@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import axios from 'axios'; // Add axios for API requests
 import { 
   Box, 
   Typography, 
@@ -17,52 +18,15 @@ import Navbar from '../Components/Navbar';
 import Footer from '../Components/Footer';
 import Loader from '../Components/Loader';
 
-// Card images
-import card7 from '../assets/card7.jpg';
-import card8 from '../assets/card8.jpg';
-import card9 from '../assets/card9.jpg';
-import card10 from '../assets/card10.jpg';
-import card11 from '../assets/card11.jpg';
-import card12 from '../assets/card11.jpg';
-
-// Producer data with unique details for each card
-const producerData = [
-  {
-    name: "Adam Theis",
-    location: "Oakland, CA",
-    description: "A versatile music producer with expertise across multiple genres, specializing in country music. With a keen ear for authentic sound and rich instrumentation, he has worked with various artists to craft high-quality productions that bring songs to life. Whether it's a classic country ballad or a modern crossover hit, he delivers exceptional music that resonates."
-  },
-  {
-    name: "Michael Rodriguez",
-    location: "Nashville, TN",
-    description: "An award-winning producer known for his innovative approach to contemporary music production. With over 15 years of experience working with both established and emerging artists, Michael brings a unique perspective to every project, balancing technical precision with creative vision."
-  },
-  {
-    name: "Sarah Johnson",
-    location: "Los Angeles, CA",
-    description: "A boundary-pushing producer specializing in electronic and pop music. Her distinctive production style combines analog warmth with cutting-edge digital techniques. Artists seek her out for her ability to create immersive sonic landscapes that connect with audiences."
-  },
-  {
-    name: "Daniel Kim",
-    location: "Seattle, WA",
-    description: "A multi-instrumentalist and producer with a background in classical composition. Daniel's productions are known for their intricate arrangements and emotional depth. His methodical approach ensures every element in the mix serves the song's core message."
-  },
-  {
-    name: "Leila Martinez",
-    location: "Miami, FL",
-    description: "A dynamic producer with expertise in Latin, R&B, and hip-hop genres. Having worked with Grammy-winning artists, Leila brings both technical excellence and cultural authenticity to her productions. Her rhythmic sensibility sets her work apart."
-  },
-  {
-    name: "James Wilson",
-    location: "Austin, TX",
-    description: "An experienced producer specializing in indie rock and alternative genres. With a focus on capturing authentic performances, James creates productions that maintain the energy and character of live music while achieving studio-quality sound. His collaborative approach puts artists at ease."
-  }
-];
-
-const ProducerCard = ({ image, producerInfo, index }) => {
+const ProducerCard = ({ image, producerInfo, onSeeMore }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   
+  // Truncate about to 150 chars
+  const truncatedAbout = producerInfo.about?.length > 150
+    ? producerInfo.about.slice(0, 150) + '...'
+    : producerInfo.about;
+
   return (
     <Grid item xs={12} sm={6} md={4}>
       <Card sx={{ 
@@ -73,7 +37,6 @@ const ProducerCard = ({ image, producerInfo, index }) => {
         overflow: 'hidden',
         boxShadow: 'none',
         backgroundColor: '#FFFFFF',
-        // border: '1px solid white',
         boxShadow: '0px 10px 30px rgba(0, 102, 255, 0.31)',
         transition: 'transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out',
         '&:hover': {
@@ -85,7 +48,7 @@ const ProducerCard = ({ image, producerInfo, index }) => {
           component="img"
           height={{ xs: 180, sm: 200, md: 240 }}
           image={image}
-          alt={producerInfo.name}
+          alt={producerInfo.fullName}
           sx={{
             objectFit: 'cover',
           }}
@@ -107,7 +70,7 @@ const ProducerCard = ({ image, producerInfo, index }) => {
               lineHeight: 1.2
             }}
           >
-            {producerInfo.name}
+            {producerInfo.fullName}
           </Typography>
           <Typography 
             variant="body2" 
@@ -118,7 +81,7 @@ const ProducerCard = ({ image, producerInfo, index }) => {
               fontWeight: 500
             }}
           >
-            {producerInfo.location}
+            {producerInfo.country}
           </Typography>
           <Typography 
             variant="body2" 
@@ -133,7 +96,7 @@ const ProducerCard = ({ image, producerInfo, index }) => {
               textOverflow: 'ellipsis'
             }}
           >
-            {producerInfo.description}
+            {truncatedAbout}
           </Typography>
         </CardContent>
         <CardActions sx={{ 
@@ -144,6 +107,7 @@ const ProducerCard = ({ image, producerInfo, index }) => {
         }}>
           <Button 
             size="small" 
+            onClick={() => onSeeMore(producerInfo)}
             sx={{ 
               color: '#0078FF',
               fontWeight: 'bold',
@@ -167,7 +131,7 @@ const ProducerCard = ({ image, producerInfo, index }) => {
 
 const MusicProducersPage = () => {
   const theme = useTheme();
-  const cardImages = [card7, card8, card9, card10, card11, card12];
+  const [producers, setProducers] = useState([]);
   const [loading, setLoading] = useState(true);
   
   // Media queries for responsive design
@@ -178,13 +142,24 @@ const MusicProducersPage = () => {
   useEffect(() => {
     window.scrollTo(0, 0);
     
-    // Simulate loading time - replace with your actual data fetching if needed
-    const timer = setTimeout(() => {
-      setLoading(false);
-    }, 1500); // Show loader for 1.5 seconds
-    
-    return () => clearTimeout(timer); // Clean up timer on unmount
+    // Fetch producers from backend
+    axios.get('http://localhost:5000/api/musician/producers')
+      .then(res => {
+        if (res.data.success) {
+          setProducers(res.data.producers);
+        }
+        setLoading(false);
+      })
+      .catch(err => {
+        console.error('Error fetching producers:', err);
+        setLoading(false);
+      });
   }, []);
+
+  const handleSeeMore = (producerInfo) => {
+    // Implement navigation or modal display
+    alert(`See more about ${producerInfo.fullName}`);
+  };
 
   // Show loader while loading
   if (loading) {
@@ -415,12 +390,12 @@ const MusicProducersPage = () => {
             width: { xs: 'calc(100% + 16px)', sm: 'calc(100% + 24px)', md: 'calc(100% + 32px)' }
           }}
         >
-          {cardImages.map((image, index) => (
+          {producers.map((producer) => (
             <ProducerCard 
-              key={index} 
-              image={image} 
-              producerInfo={producerData[index]}
-              index={index} 
+              key={producer.id} 
+              image={producer.profileImage} 
+              producerInfo={producer}
+              onSeeMore={handleSeeMore}
             />
           ))}
         </Grid>

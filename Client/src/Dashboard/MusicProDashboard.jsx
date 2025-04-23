@@ -58,6 +58,10 @@ import { authFetch } from '../utils/authFetch';
 
 import AudioPlayer from 'react-h5-audio-player';
 import 'react-h5-audio-player/lib/styles.css';
+import CoverImageCropper from '../Components/CoverImageCropper';
+import ProfileImageCropper from '../Components/ProfileImageCropper';
+
+
 
 // Styled components
 const GradientBackground = styled(Box)(({ theme }) => ({
@@ -68,7 +72,7 @@ const GradientBackground = styled(Box)(({ theme }) => ({
 
 const HeroSection = styled(Box)(({ theme }) => ({
   position: 'relative',
-  height: '500px',
+  height: '550px',
   backgroundImage: 'linear-gradient(90deg, rgba(0,10,50,0.6) 0%, rgba(0,0,0,0.7) 100%)',
   overflow: 'hidden',
   display: 'flex',
@@ -311,6 +315,7 @@ const MusicianProfileEditInline = () => {
   const [newAvatarFile, setNewAvatarFile] = useState(null);
   const [newCoverFile, setNewCoverFile] = useState(null);
   const [newGalleryFile, setNewGalleryFile] = useState(null);
+  const [newGalleryFiles, setNewGalleryFiles] = useState([]); // Array of files
   const [newAudioFile, setNewAudioFile] = useState(null);
   
   // File preview URLs
@@ -325,6 +330,10 @@ const MusicianProfileEditInline = () => {
   });
 
   const [loading, setLoading] = useState(false);
+  const [cropperOpen, setCropperOpen] = useState(false);
+  const [rawCoverImage, setRawCoverImage] = useState(null);
+  const [profileCropperOpen, setProfileCropperOpen] = useState(false);
+  const [rawProfileImage, setRawProfileImage] = useState(null);
 
   useEffect(() => {
     const userData = localStorage.getItem('userData');
@@ -378,40 +387,54 @@ const MusicianProfileEditInline = () => {
       showNotification('Image size should be less than 5MB', 'error');
       return;
     }
-    setNewAvatarFile(file);
     const reader = new FileReader();
     reader.onloadend = () => {
-      setAvatarPreview(reader.result);
-      showNotification('Profile image preview updated', 'success');
+      setRawProfileImage(reader.result);
+      setProfileCropperOpen(true);
     };
     reader.readAsDataURL(file);
+  };
+
+  const handleProfileCropComplete = (croppedBlob) => {
+    setNewAvatarFile(new File([croppedBlob], "avatar.jpg", { type: "image/jpeg" }));
+    const previewUrl = URL.createObjectURL(croppedBlob);
+    setAvatarPreview(previewUrl);
+    setProfileCropperOpen(false);
   };
 
   const handleCoverUpload = (e) => {
     const file = e.target.files[0];
     if (file) {
-      setNewCoverFile(file);
       const reader = new FileReader();
       reader.onloadend = () => {
-        setCoverPreview(reader.result);
-        showNotification('Cover image preview updated', 'success');
+        setRawCoverImage(reader.result);
+        setCropperOpen(true); // Open cropper dialog
       };
       reader.readAsDataURL(file);
     }
   };
 
+  const handleCropComplete = (croppedBlob) => {
+    setNewCoverFile(new File([croppedBlob], "cover.jpg", { type: "image/jpeg" }));
+    const previewUrl = URL.createObjectURL(croppedBlob);
+    setCoverPreview(previewUrl);
+    setCropperOpen(false);
+  };
+
   const handleGalleryUpload = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setNewGalleryFile(file);
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        const newGallery = [...formData.galleryImages, reader.result];
-        setFormData({ ...formData, galleryImages: newGallery });
-        showNotification('New image added to gallery', 'success');
-      };
-      reader.readAsDataURL(file);
-    }
+    const files = Array.from(e.target.files);
+    if (files.length === 0) return;
+
+    setNewGalleryFiles(files); // Save for upload
+
+    // Optional: Show previews immediately
+    const previews = files.map(file => URL.createObjectURL(file));
+    setFormData(prev => ({
+      ...prev,
+      galleryImages: [...prev.galleryImages, ...previews]
+    }));
+
+    showNotification(`${files.length} new image(s) added to gallery`, 'success');
   };
 
   const handleAudioUpload = (e) => {
@@ -481,7 +504,11 @@ const MusicianProfileEditInline = () => {
     // Only send new avatar/cover/gallery if changed
     if (newAvatarFile) formDataToSend.append('avatar', newAvatarFile);
     if (newCoverFile) formDataToSend.append('coverImage', newCoverFile);
-    if (newGalleryFile) formDataToSend.append('gallery', newGalleryFile);
+    if (newGalleryFiles && newGalleryFiles.length > 0) {
+      newGalleryFiles.forEach(file => {
+        formDataToSend.append('gallery', file); // Multer will handle as array
+      });
+    }
 
     // Only send 'track' and its metadata if a new audio file is selected
     if (newAudioFile) {
@@ -666,16 +693,14 @@ const MusicianProfileEditInline = () => {
   };
 
   const handleDeleteGalleryImage = async (imageUrlOrKey, index) => {
+    let imageKey = imageUrlOrKey;
+    if (imageUrlOrKey.startsWith('https://')) {
+      const url = new URL(imageUrlOrKey);
+      imageKey = url.pathname.slice(1); // Remove leading '/'
+    }
+
     setLoading(true);
     try {
-      // Extract the S3 key from the signed URL or use the stored key if available
-      let imageKey = imageUrlOrKey;
-      if (imageUrlOrKey.startsWith('https://')) {
-        // Extract the key from the signed URL (assuming the key comes after the bucket name)
-        const url = new URL(imageUrlOrKey);
-        imageKey = url.pathname.slice(1); // Remove leading '/'
-      }
-
       const token = localStorage.getItem('token');
       const response = await fetch(
         `http://localhost:5000/api/musician/gallery/${encodeURIComponent(imageKey)}`,
@@ -996,7 +1021,7 @@ const MusicianProfileEditInline = () => {
                         <Chip 
                           key={index} 
                           label={tag} 
-                          size="small"
+                          size="small" 
                           sx={{ backgroundColor: 'rgba(25, 118, 210, 0.4)' }}
                         />
                       ))}
@@ -1765,10 +1790,11 @@ const MusicianProfileEditInline = () => {
                       size="small"
                       sx={{ ml: 2 }}
                     >
-                      Add Image
+                      Add Images
                       <VisuallyHiddenInput 
                         type="file" 
                         accept="image/*"
+                        multiple // Allow multiple selection
                         onChange={handleGalleryUpload}
                       />
                     </Button>
@@ -1861,6 +1887,20 @@ const MusicianProfileEditInline = () => {
             <CircularProgress size={80} color="primary" />
           </Box>
         )}
+
+        <CoverImageCropper
+          open={cropperOpen}
+          imageSrc={rawCoverImage}
+          onClose={() => setCropperOpen(false)}
+          onCropComplete={handleCropComplete}
+        />
+
+        <ProfileImageCropper
+          open={profileCropperOpen}
+          imageSrc={rawProfileImage}
+          onClose={() => setProfileCropperOpen(false)}
+          onCropComplete={handleProfileCropComplete}
+        />
       </GradientBackground>
     </ThemeProvider>
   );

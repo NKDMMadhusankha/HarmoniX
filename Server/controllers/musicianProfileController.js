@@ -26,6 +26,7 @@ const getProfile = async (req, res) => {
           return await generateSignedUrl(image);
         })
       );
+      musicianData.galleryImageKeys = musician.galleryImages; // These are the S3 keys
     }
 
     // Generate signed URLs for track audio files
@@ -86,7 +87,10 @@ const updateProfile = async (req, res) => {
     }
     if (req.files && req.files['gallery']) {
       const galleryKeys = req.files['gallery'].map(f => f.key);
-      musician.galleryImages = musician.galleryImages.concat(galleryKeys);
+      // Only add keys that are not already present
+      musician.galleryImages = musician.galleryImages.concat(
+        galleryKeys.filter(key => !musician.galleryImages.includes(key))
+      );
     }
     if (req.files && req.files['track']) {
       const tracksMeta = JSON.parse(req.body.tracks || '[]');
@@ -194,4 +198,39 @@ const deleteTrack = async (req, res) => {
   }
 };
 
-module.exports = { getProfile, updateProfile, deleteGalleryImage, deleteTrack };
+// Add new getAllProducers function
+const getAllProducers = async (req, res) => {
+  try {
+    // Only fetch users with role 'Music Producer'
+    const producers = await Musician.find({ role: 'Music Producer' });
+
+    // Map and generate signed URLs for profile images
+    const producersData = await Promise.all(producers.map(async (producer) => {
+      const obj = producer.toObject();
+      if (obj.profileImage) {
+        obj.profileImage = await generateSignedUrl(obj.profileImage);
+      }
+      // Only send needed fields
+      return {
+        id: obj._id,
+        fullName: obj.fullName,
+        country: obj.country,
+        about: obj.about,
+        profileImage: obj.profileImage,
+      };
+    }));
+
+    res.json({ success: true, producers: producersData });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+};
+
+module.exports = { 
+  getProfile, 
+  updateProfile, 
+  deleteGalleryImage, 
+  deleteTrack,
+  getAllProducers 
+};
