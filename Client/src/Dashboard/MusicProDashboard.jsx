@@ -53,7 +53,6 @@ import {
 } from '@mui/icons-material';
 import Navbar from '../Components/Navbar';
 import Footer from '../Components/Footer';
-import ProImg from '../assets/procover.jpg';
 import { authFetch } from '../utils/authFetch';
 
 import AudioPlayer from 'react-h5-audio-player';
