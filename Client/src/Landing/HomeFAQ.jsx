@@ -11,8 +11,10 @@ import {
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import RemoveIcon from '@mui/icons-material/Remove';
+import { Link as RouterLink, useNavigate } from 'react-router-dom';
 
 const MusicCollaborationFAQs = () => {
+  const navigate = useNavigate();
   const [expanded, setExpanded] = useState(false);
 
   const handleChange = (panel) => (event, isExpanded) => {
@@ -69,6 +71,7 @@ const MusicCollaborationFAQs = () => {
                 <Button 
                   variant="contained" 
                   color="primary"
+                  onClick={() => window.location.href = '/contact'}
                   sx={{ borderRadius: 20 , padding: '10px 20px' }}    
                 >
                   Contact Us

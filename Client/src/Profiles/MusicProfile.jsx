@@ -45,7 +45,7 @@ import {
 import Navbar from '../Components/Navbar'; // Assuming you have a Navbar component
 import Footer from '../Components/Footer'; // Assuming you have a Footer component
 
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom'; // Add useNavigate
 import AudioPlayer from 'react-h5-audio-player';
 import 'react-h5-audio-player/lib/styles.css';
 
@@ -402,6 +402,7 @@ const darkTheme = createTheme({
 
 const MusicProducerProfile = () => {
   const { id } = useParams();
+  const navigate = useNavigate(); // Add this line
 
   const [profile, setProfile] = useState(null);
   const [tracks, setTracks] = useState([]);
@@ -430,6 +431,9 @@ const MusicProducerProfile = () => {
   const progressInterval = useRef(null);
 
   useEffect(() => {
+    // Scroll to top when component mounts
+    window.scrollTo(0, 0);
+    
     // Fetch profile data by ID
     fetch(`http://localhost:5000/api/musician/producers/${id}`)
       .then(res => res.json())
@@ -556,6 +560,10 @@ const MusicProducerProfile = () => {
 
   const handleSnackbarClose = () => {
     setSnackbarOpen(false);
+  };
+
+  const handleSeeMore = (producerInfo) => {
+    navigate(`/music/producer/${producerInfo.id}`);
   };
 
   return (
@@ -1138,7 +1146,7 @@ const MusicProducerProfile = () => {
             <ContactForm component="form" onSubmit={handleSubmitContact}>
               <ContactTextField
                 fullWidth
-                label="Your Name *"
+                label="Your Name"
                 variant="outlined"
                 name="name"
                 value={contactForm.name}
@@ -1149,7 +1157,7 @@ const MusicProducerProfile = () => {
               
               <ContactTextField
                 fullWidth
-                label="Your Email *"
+                label="Your Email"
                 variant="outlined"
                 type="email"
                 name="email"
@@ -1161,7 +1169,7 @@ const MusicProducerProfile = () => {
               
               <ContactTextField
                 fullWidth
-                label="Your Message *"
+                label="Your Message"
                 variant="outlined"
                 multiline
                 rows={4}

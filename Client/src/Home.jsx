@@ -3,7 +3,7 @@ import { Box } from '@mui/material';
 import Navbar from './Components/Navbar';
 import HomeBanner from './Landing/HomeBanner';
 import Footer from './Components/Footer';
-import LogoScrollBar from './Components/LogoBar';
+import LogoScrollBar from './Landing/LogoBar';
 import { Home } from '@mui/icons-material';
 import HomeCards from './Landing/HomeCards';
 import HomeStep from './Landing/HomeStep';

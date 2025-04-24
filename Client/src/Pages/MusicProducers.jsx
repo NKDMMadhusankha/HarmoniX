@@ -17,12 +17,27 @@ import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import Navbar from '../Components/Navbar';
 import Footer from '../Components/Footer';
 import Loader from '../Components/Loader';
-import { Link as RouterLink, useNavigate } from 'react-router-dom'; // Add useNavigate
+import { Link as RouterLink, useNavigate, useLocation } from 'react-router-dom'; // Add useNavigate and useLocation
+
+function ScrollToTop() {
+  const { pathname } = useLocation();
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
+
+  return null;
+}
 
 const ProducerCard = ({ image, producerInfo, onSeeMore }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-  
+
+  const handleCardClick = () => {
+    // Show loader before navigation
+    onSeeMore(producerInfo);
+  };
+
   // Truncate about to 150 chars
   const truncatedAbout = producerInfo.about?.length > 150
     ? producerInfo.about.slice(0, 150) + '...'
@@ -30,21 +45,30 @@ const ProducerCard = ({ image, producerInfo, onSeeMore }) => {
 
   return (
     <Grid item xs={12} sm={6} md={4}>
-      <Card sx={{ 
-        height: '100%', 
-        display: 'flex', 
-        flexDirection: 'column',
-        borderRadius: { xs: 1.5, sm: 2 },
-        overflow: 'hidden',
-        boxShadow: 'none',
-        backgroundColor: '#FFFFFF',
-        boxShadow: '0px 10px 30px rgba(0, 102, 255, 0.31)',
-        transition: 'transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out',
-        '&:hover': {
-          boxShadow: '0px 4px 20px rgba(0, 120, 255, 0.5)',
-          transform: 'translateY(-8px)',
-        }
-      }}>
+      <Card
+        onClick={handleCardClick}
+        role="button"
+        tabIndex={0}
+        onKeyPress={(e) => {
+          if (e.key === 'Enter') handleCardClick();
+        }}
+        sx={{
+          height: '100%',
+          display: 'flex',
+          flexDirection: 'column',
+          borderRadius: { xs: 1.5, sm: 2 },
+          overflow: 'hidden',
+          boxShadow: 'none',
+          backgroundColor: '#FFFFFF',
+          cursor: 'pointer',
+          boxShadow: '0px 10px 30px rgba(0, 102, 255, 0.31)',
+          transition: 'transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out',
+          '&:hover': {
+            boxShadow: '0px 4px 20px rgba(0, 120, 255, 0.5)',
+            transform: 'translateY(-8px)',
+          },
+        }}
+      >
         <CardMedia
           component="img"
           height={{ xs: 180, sm: 200, md: 240 }}
@@ -54,62 +78,69 @@ const ProducerCard = ({ image, producerInfo, onSeeMore }) => {
             objectFit: 'cover',
           }}
         />
-        <CardContent sx={{ 
-          flexGrow: 1, 
-          p: { xs: 1.5, sm: 2, md: 3 },
-          pb: { xs: 0.5, sm: 1 },
-        }}>
-          <Typography 
-            gutterBottom 
-            variant="h5" 
-            component="div" 
-            color="#0078FF" 
+        <CardContent
+          sx={{
+            flexGrow: 1,
+            p: { xs: 1.5, sm: 2, md: 3 },
+            pb: { xs: 0.5, sm: 1 },
+          }}
+        >
+          <Typography
+            gutterBottom
+            variant="h5"
+            component="div"
+            color="#0078FF"
             fontWeight="bold"
             sx={{
               fontSize: { xs: '1.1rem', sm: '1.25rem', md: '1.5rem' },
               mb: { xs: 0.25, sm: 0.5 },
-              lineHeight: 1.2
+              lineHeight: 1.2,
             }}
           >
             {producerInfo.fullName}
           </Typography>
-          <Typography 
-            variant="body2" 
-            color="#999" 
+          <Typography
+            variant="body2"
+            color="#999"
             mb={{ xs: 1, sm: 1.5, md: 2 }}
-            sx={{ 
+            sx={{
               fontSize: { xs: '0.8rem', sm: '0.875rem', md: '1rem' },
-              fontWeight: 500
+              fontWeight: 500,
             }}
           >
             {producerInfo.country}
           </Typography>
-          <Typography 
-            variant="body2" 
+          <Typography
+            variant="body2"
             color="black"
-            sx={{ 
+            sx={{
               fontSize: { xs: '0.8rem', sm: '0.875rem', md: '1rem' },
               lineHeight: { xs: 1.4, sm: 1.5, md: 1.6 },
               display: '-webkit-box',
               overflow: 'hidden',
               WebkitBoxOrient: 'vertical',
               WebkitLineClamp: { xs: 4, sm: 5, md: 6 },
-              textOverflow: 'ellipsis'
+              textOverflow: 'ellipsis',
             }}
           >
             {truncatedAbout}
           </Typography>
         </CardContent>
-        <CardActions sx={{ 
-          justifyContent: 'flex-start', 
-          px: { xs: 1.5, sm: 2, md: 3 },
-          pb: { xs: 1.5, sm: 2 }, 
-          pt: { xs: 0.5, sm: 0.75 }
-        }}>
-          <Button 
-            size="small" 
-            onClick={() => onSeeMore(producerInfo)}
-            sx={{ 
+        <CardActions
+          sx={{
+            justifyContent: 'flex-start',
+            px: { xs: 1.5, sm: 2, md: 3 },
+            pb: { xs: 1.5, sm: 2 },
+            pt: { xs: 0.5, sm: 0.75 },
+          }}
+        >
+          <Button
+            size="small"
+            onClick={(e) => {
+              e.stopPropagation(); // Prevent card click
+              onSeeMore(producerInfo);
+            }}
+            sx={{
               color: '#0078FF',
               fontWeight: 'bold',
               p: 0,
@@ -119,7 +150,7 @@ const ProducerCard = ({ image, producerInfo, onSeeMore }) => {
                 backgroundColor: 'transparent',
                 textDecoration: 'underline',
                 color: '#0056b3',
-              }
+              },
             }}
           >
             SEE MORE
@@ -134,46 +165,50 @@ const MusicProducersPage = () => {
   const theme = useTheme();
   const [producers, setProducers] = useState([]);
   const [loading, setLoading] = useState(true);
-  const navigate = useNavigate(); // Add this line
-  
-  // Media queries for responsive design
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-  const isTablet = useMediaQuery(theme.breakpoints.between('sm', 'md'));
-  const isLargeScreen = useMediaQuery(theme.breakpoints.up('lg'));
+  const navigate = useNavigate();
 
   useEffect(() => {
-    window.scrollTo(0, 0);
-    
+    window.scrollTo(0, 0); // Scroll to top when component mounts
+
     // Fetch producers from backend
-    axios.get('http://localhost:5000/api/musician/producers')
-      .then(res => {
+    axios
+      .get('http://localhost:5000/api/musician/producers')
+      .then((res) => {
         if (res.data.success) {
           setProducers(res.data.producers);
         }
         setLoading(false);
       })
-      .catch(err => {
+      .catch((err) => {
         console.error('Error fetching producers:', err);
         setLoading(false);
       });
   }, []);
 
   const handleSeeMore = (producerInfo) => {
-    // Navigate to the profile page using the producer's id
-    navigate(`/music/producer/${producerInfo.id}`);
+    // Force a page refresh when navigating
+    window.location.href = `/music/producer/${producerInfo.id}`;
   };
 
-  // Show loader while loading
   if (loading) {
     return (
-      <Box sx={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', backgroundColor: '#0D0D0D' }}>
+      <Box
+        sx={{
+          minHeight: '100vh',
+          display: 'flex',
+          flexDirection: 'column',
+          backgroundColor: '#0D0D0D',
+        }}
+      >
         <Navbar />
-        <Box sx={{ 
-          flex: 1, 
-          display: 'flex', 
-          justifyContent: 'center', 
-          alignItems: 'center' 
-        }}>
+        <Box
+          sx={{
+            flex: 1,
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+          }}
+        >
           <Loader />
         </Box>
         <Footer />
@@ -181,9 +216,16 @@ const MusicProducersPage = () => {
     );
   }
 
-  // Show actual content when loading is complete
   return (
-    <Box sx={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', backgroundColor: '#0D0D0D' }}>
+    <Box
+      sx={{
+        minHeight: '100vh',
+        display: 'flex',
+        flexDirection: 'column',
+        backgroundColor: '#0D0D0D',
+      }}
+    >
+      <ScrollToTop /> {/* Add ScrollToTop here */}
       <Navbar />
       
       {/* Banner Section with Video Background */}
