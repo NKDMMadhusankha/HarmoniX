@@ -5,10 +5,13 @@ import {
   Box, 
   Button
 } from '@mui/material';
+import { useNavigate } from 'react-router-dom';
 import Navbar from './Navbar';
 import Footer from './Footer';
 
 const AboutUs = () => {
+  const navigate = useNavigate();
+
   // For typing effect
   const [text, setText] = useState('');
   const fullText = 'Have Any Questions ?';
@@ -105,6 +108,10 @@ const AboutUs = () => {
       if (contactSectionRef.current) observer.unobserve(contactSectionRef.current);
     };
   }, []);
+
+  const handleContactClick = () => {
+    window.location.href = '/contact';
+  };
 
   return (
     <Box 
@@ -349,6 +356,7 @@ const AboutUs = () => {
           
           <Button 
             variant="outlined"
+            onClick={handleContactClick}
             sx={{
               color: '#2196f3',
               borderColor: '#2196f3',

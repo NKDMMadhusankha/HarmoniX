@@ -260,11 +260,40 @@ const getProducerProfileById = async (req, res) => {
   }
 };
 
+const getAllMixingEngineers = async (req, res) => {
+  try {
+    // Only fetch users with role 'Mixing Engineer'
+    const engineers = await Musician.find({ role: 'Mixing Engineer' });
+
+    // Map and generate signed URLs for profile images
+    const engineersData = await Promise.all(engineers.map(async (engineer) => {
+      const obj = engineer.toObject();
+      if (obj.profileImage) {
+        obj.profileImage = await generateSignedUrl(obj.profileImage);
+      }
+      // Only send needed fields
+      return {
+        id: obj._id,
+        fullName: obj.fullName,
+        country: obj.country,
+        about: obj.about,
+        profileImage: obj.profileImage,
+      };
+    }));
+
+    res.json({ success: true, engineers: engineersData });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+};
+
 module.exports = { 
   getProfile, 
   updateProfile, 
   deleteGalleryImage, 
   deleteTrack,
   getAllProducers,
-  getProducerProfileById
+  getProducerProfileById,
+  getAllMixingEngineers
 };
