@@ -18,7 +18,10 @@ import {
   Modal,
   Dialog,
   DialogContent,
-  DialogActions
+  DialogActions,
+  TextField,
+  Snackbar,
+  Alert
 } from '@mui/material';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import { 
@@ -34,11 +37,18 @@ import {
   Album,
   AlbumOutlined,
   Image,
-  Close
+  Close,
+  Send,
+  Twitter,
+  LinkedIn // Make sure this is imported
 } from '@mui/icons-material';
 import Navbar from '../Components/Navbar'; // Assuming you have a Navbar component
 import Footer from '../Components/Footer'; // Assuming you have a Footer component
-import ProImg from '../assets/procover.jpg'; // Assuming you have a profile image
+
+import { useParams, useNavigate } from 'react-router-dom'; // Add useNavigate
+import AudioPlayer from 'react-h5-audio-player';
+import 'react-h5-audio-player/lib/styles.css';
+
 
 // Custom styled components using Material UI's styled API
 const GradientBackground = styled(Box)(({ theme }) => ({
@@ -49,7 +59,7 @@ const GradientBackground = styled(Box)(({ theme }) => ({
 
 const HeroSection = styled(Box)(({ theme }) => ({
   position: 'relative',
-  height: '450px',
+  height: '550px',
   backgroundImage: 'linear-gradient(90deg, rgba(0,10,50,0.6) 0%, rgba(0,0,0,0.7) 100%)',
   overflow: 'hidden',
   display: 'flex',
@@ -57,18 +67,17 @@ const HeroSection = styled(Box)(({ theme }) => ({
   padding: theme.spacing(3),
 }));
 
-const ProfileOverlay = styled(Box)(({ theme }) => ({
+const ProfileOverlay = styled(Box)(({ theme, cover }) => ({
   position: 'absolute',
   top: 0,
   left: 0,
   right: 0,
   bottom: 0,
-  
-  backgroundImage: `url(${ProImg})`,
   backgroundSize: 'cover',
   backgroundPosition: 'center',
   opacity: 0.7,
   mixBlendMode: 'normal',
+  backgroundImage: `url(${cover})`,
 }));
 
 const LargeAvatar = styled(Avatar)(({ theme }) => ({
@@ -83,7 +92,6 @@ const LargeAvatar = styled(Avatar)(({ theme }) => ({
   },
 }));
 
-// New TrackContainer style for the updated track listing
 const TrackContainer = styled(Box)(({ theme }) => ({
   display: 'flex',
   alignItems: 'center',
@@ -96,7 +104,7 @@ const TrackContainer = styled(Box)(({ theme }) => ({
     backgroundColor: 'rgba(0, 0, 0, 0.8)',
   }
 }));
-
+        
 const PlayButton = styled(IconButton)(({ theme }) => ({
   backgroundColor: 'rgba(0, 0, 0, 0.6)',
   color: theme.palette.common.white,
@@ -157,7 +165,7 @@ const SocialButton = styled(Button)(({ theme }) => ({
 }));
 
 const GradientCard = styled(Card)(({ theme }) => ({
-  backgroundColor: 'rgba(10, 25, 41, 0.7)',
+  backgroundColor: 'rgba(19, 38, 57, 0.85)',
   backdropFilter: 'blur(10px)',
   marginBottom: theme.spacing(3),
   borderRadius: theme.shape.borderRadius,
@@ -238,6 +246,39 @@ const GalleryImage = styled(Box)(({ theme }) => ({
   },
 }));
 
+const ContactCard = styled(Card)(({ theme }) => ({
+  backgroundColor: '#000000',
+  border: '1px solid rgba(255, 255, 255, 0.1)',
+  borderRadius: '8px',
+  boxShadow: '0 4px 20px rgba(0, 0, 0, 0.3)',
+  marginBottom: theme.spacing(3),
+}));
+
+const ContactButton = styled(Button)(({ theme }) => ({
+  backgroundColor: '#1976d2',
+  color: 'white',
+  fontWeight: 'bold',
+  padding: '10px 24px',
+  borderRadius: '4px',
+  '&:hover': {
+    backgroundColor: '#1565c0',
+    boxShadow: '0 4px 12px rgba(25, 118, 210, 0.4)',
+  },
+}));
+
+const ContactCancelButton = styled(Button)(({ theme }) => ({
+  backgroundColor: 'transparent',
+  color: '#1976d2',
+  border: '1px solid #1976d2',
+  fontWeight: 'bold',
+  padding: '10px 24px',
+  borderRadius: '4px',
+  marginRight: theme.spacing(2),
+  '&:hover': {
+    backgroundColor: 'rgba(25, 118, 210, 0.1)',
+  },
+}));
+
 const GradientDivider = styled(Box)(({ theme }) => ({
   height: '1px',
   background: 'linear-gradient(to right, rgba(25, 118, 210, 0.5), transparent)',
@@ -276,6 +317,57 @@ const CloseButton = styled(IconButton)(({ theme }) => ({
   },
 }));
 
+const ContactFormModal = styled(Dialog)(({ theme }) => ({
+  '& .MuiDialog-paper': {
+    backgroundColor: 'rgba(10, 25, 41, 0.95)',
+    backdropFilter: 'blur(10px)',
+    borderRadius: theme.shape.borderRadius,
+    border: '1px solid rgba(25, 118, 210, 0.3)',
+    padding: theme.spacing(2),
+    maxWidth: '500px',
+    width: '100%',
+  },
+}));
+
+const ContactForm = styled(Box)(({ theme }) => ({
+  display: 'flex',
+  flexDirection: 'column',
+  gap: theme.spacing(3),
+  padding: theme.spacing(2),
+}));
+
+const ContactTextField = styled(TextField)(({ theme }) => ({
+  '& .MuiOutlinedInput-root': {
+    '& fieldset': {
+      borderColor: 'rgba(255, 255, 255, 0.1)',
+    },
+    '&:hover fieldset': {
+      borderColor: 'rgba(25, 118, 210, 0.5)',
+    },
+    '&.Mui-focused fieldset': {
+      borderColor: theme.palette.primary.main,
+    },
+  },
+  '& .MuiInputLabel-root': {
+    color: 'rgba(255, 255, 255, 0.7)',
+  },
+  '& .MuiInputBase-input': {
+    color: '#fff',
+  },
+}));
+
+const SendButton = styled(Button)(({ theme }) => ({
+  background: 'linear-gradient(45deg, #1976d2 0%, #7c4dff 100%)',
+  color: 'white',
+  fontWeight: 'bold',
+  padding: theme.spacing(1.5),
+  borderRadius: theme.shape.borderRadius,
+  '&:hover': {
+    background: 'linear-gradient(45deg, #1565c0 0%, #651fff 100%)',
+    boxShadow: '0 4px 12px rgba(25, 118, 210, 0.4)',
+  },
+}));
+
 // Create a dark theme
 const darkTheme = createTheme({
   palette: {
@@ -309,78 +401,88 @@ const darkTheme = createTheme({
 });
 
 const MusicProducerProfile = () => {
+  const { id } = useParams();
+  const navigate = useNavigate(); // Add this line
+
+  const [profile, setProfile] = useState(null);
+  const [tracks, setTracks] = useState([]);
+  const [galleryImages, setGalleryImages] = useState([]);
+  const [genres, setGenres] = useState([]);
+  const [skills, setSkills] = useState([]);
+  const [tools, setTools] = useState([]);
+  const [links, setLinks] = useState([]);
+  const [coverImage, setCoverImage] = useState('');
+  const [avatar, setAvatar] = useState('');
+
   const [currentTrack, setCurrentTrack] = useState(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [progress, setProgress] = useState(0);
   const [selectedImage, setSelectedImage] = useState(null);
+  const [openContact, setOpenContact] = useState(false);
+  const [contactForm, setContactForm] = useState({
+    name: '',
+    email: '',
+    message: ''
+  });
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState('');
+  const [snackbarSeverity, setSnackbarSeverity] = useState('success');
   const audioRef = useRef(null);
+  const audioRefs = useRef([]);
   const progressInterval = useRef(null);
-  
-  // New tracks data that matches the format in the image
-  const tracks = [
-    {
-      id: 1,
-      title: "Goddam ft. Olivia Ruff | Jazz Mafia (co-written & produced by Adam Theis)",
-      duration: "04:25",
-      uploadDate: "Mar 26, 2024"
-    },
-    {
-      id: 2,
-      title: "The Situation ft. Lateef The Truthspeaker | Jazz Mafia (produced by Adam Theis)",
-      duration: "05:17",
-      uploadDate: "Mar 26, 2024"
-    },
-    {
-      id: 3,
-      title: "Kill Em With Kindness | Cosa Nostra Strings (written & produced by Adam Theis)",
-      duration: "07:57",
-      uploadDate: "Mar 26, 2024"
-    },
-    {
-      id: 4,
-      title: "China Cat Sunflower | Grateful Brass (prod, arr, ft. Adam Theis)",
-      duration: "06:25",
-      uploadDate: "Mar 26, 2024"
-    },
-    {
-      id: 5,
-      title: "Stone Cold Lovin | Jazz Mafia (co-written, produced by Adam Theis)",
-      duration: "04:20",
-      uploadDate: "Mar 26, 2024"
-    },
-    {
-      id: 6,
-      title: "Rock and Clap | Jazz Mafia (written & produced by Adam Theis)",
-      duration: "05:20",
-      uploadDate: "Mar 26, 2024"
+
+  useEffect(() => {
+    if (!id) {
+      console.error('Mixing Engineer ID is undefined');
+      return;
     }
-  ];
 
-  const galleryImages = [
-    "https://picsum.photos/800/600?random=20",
-    "https://picsum.photos/800/600?random=21",
-    "https://picsum.photos/800/600?random=22",
-    "https://picsum.photos/800/600?random=23",
-    "https://picsum.photos/800/600?random=24",
-    "https://picsum.photos/800/600?random=25",
-  ];
+    fetch(`http://localhost:5000/api/musician/mixing-engineers/${id}`)
+      .then(res => {
+        if (!res.ok) throw new Error('Mixing Engineer not found');
+        return res.json();
+      })
+      .then(data => {
+        if (data.success && data.engineer) {
+          // Update state with engineer data
+          setProfile(data.engineer);
+          setTracks(data.engineer.featuredTracks || []);
+          setGalleryImages(data.engineer.galleryImages || []);
+          setGenres(data.engineer.genres || []);
+          setSkills(data.engineer.skills || []);
+          setTools(data.engineer.tools || []);
 
-  const genres = [
-    "Electronic", "Hip Hop", "House", "Cinematic", "Ambient", 
-    "Pop", "R&B", "Trap", "Lo-fi", "Synthwave", "Future Bass"
-  ];
+          const combinedLinks = [
+            ...(data.engineer.links || []),
+            ...(data.engineer.socialMedia?.instagram ? [{
+              platform: 'Instagram',
+              url: `https://instagram.com/${data.engineer.socialMedia.instagram}`,
+              type: 'instagram'
+            }] : []),
+            ...(data.engineer.socialMedia?.twitter ? [{
+              platform: 'Twitter',
+              url: `https://twitter.com/${data.engineer.socialMedia.twitter}`,
+              type: 'twitter'
+            }] : []),
+            ...(data.engineer.portfolioLinks?.spotify ? [{
+              platform: 'Spotify',
+              url: data.engineer.portfolioLinks.spotify,
+              type: 'spotify'
+            }] : []),
+            ...(data.engineer.portfolioLinks?.youtube ? [{
+              platform: 'YouTube',
+              url: data.engineer.portfolioLinks.youtube,
+              type: 'youtube'
+            }] : []),
+          ];
 
-  const skills = [
-    "Music Production", "Mixing", "Mastering", "Sound Design",
-    "Composition", "Arrangement", "Vocal Tuning", "Audio Engineering",
-    "MIDI Programming", "Soundtrack Production"
-  ];
-
-  const tools = [
-    "Ableton Live", "Logic Pro", "Pro Tools", "Native Instruments",
-    "FL Studio", "Serum", "Omnisphere", "Kontakt", "Waves Plugins",
-    "iZotope", "Melodyne", "Auto-Tune"
-  ];
+          setLinks(combinedLinks);
+          setCoverImage(data.engineer.coverImage || '');
+          setAvatar(data.engineer.profileImage || '');
+        }
+      })
+      .catch(err => console.error('Error:', err));
+  }, [id]);
 
   useEffect(() => {
     return () => {
@@ -416,12 +518,67 @@ const MusicProducerProfile = () => {
     }
   };
 
+  const handleAudioPlay = (currentIdx) => {
+    audioRefs.current.forEach((player, idx) => {
+      if (player && idx !== currentIdx) {
+        player.audio.current.pause();
+        player.audio.current.currentTime = 0;
+      }
+    });
+    setCurrentTrack(currentIdx);
+    setIsPlaying(true);
+  };
+
   const handleImageClick = (image) => {
     setSelectedImage(image);
   };
 
   const handleCloseModal = () => {
     setSelectedImage(null);
+  };
+
+  const handleOpenContact = () => {
+    setOpenContact(true);
+  };
+
+  const handleCloseContact = () => {
+    setOpenContact(false);
+  };
+
+  const handleContactChange = (e) => {
+    const { name, value } = e.target;
+    setContactForm(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const handleSubmitContact = (e) => {
+    e.preventDefault();
+    // Here you would typically send the form data to a backend
+    // For this frontend example, we'll just show a success message
+    console.log('Form submitted:', contactForm);
+    
+    // Show success message
+    setSnackbarMessage('Your message has been sent successfully!');
+    setSnackbarSeverity('success');
+    setSnackbarOpen(true);
+    
+    // Reset form and close modal
+    setContactForm({
+      name: '',
+      email: '',
+      message: ''
+    });
+    handleCloseContact();
+  };
+
+  const handleSnackbarClose = () => {
+    setSnackbarOpen(false);
+  };
+
+  const handleSeeMore = (producerInfo) => {
+    navigate(`/music/producer/${producerInfo.id}`);
   };
 
   return (
@@ -432,7 +589,7 @@ const MusicProducerProfile = () => {
         
         {/* Hero Section with Larger Cover Image */}
         <HeroSection>
-          <ProfileOverlay />
+          <ProfileOverlay cover={coverImage} />
           
           {/* Producer Info Overlay */}
           <Box sx={{ 
@@ -445,8 +602,8 @@ const MusicProducerProfile = () => {
           }}>
             <Box sx={{ position: 'relative', mb: { xs: 2, md: 0 } }}>
               <LargeAvatar 
-                src="https://img.freepik.com/free-photo/medium-shot-man-playing-guitar-studio_23-2150232123.jpg?t=st=1744101142~exp=1744104742~hmac=dd039b0e837d5847a9cf25a79c4fc73db3aa76a68129ff1ca1d67bea0a9f5d9a&w=996" 
-                alt="SOUNDWAVE"
+                src={avatar} 
+                alt={profile?.fullName || ''}
               />
             </Box>
             
@@ -464,35 +621,40 @@ const MusicProducerProfile = () => {
                   fontSize: { xs: '2rem', md: '3rem' }
                 }}
               >
-                Mithila Madhusankha
+                {profile?.fullName}
               </Typography>
               
               <Typography variant="subtitle1" color="white" sx={{ mt: 0.5 }}>
-                Los Angeles, CA · United States
+                {profile?.country}
               </Typography>
               
               <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mt: 2 }}>
-                <Chip 
-                  label="Producer" 
-                  size="small"
-                  sx={{ backgroundColor: 'rgba(25, 118, 210, 0.4)' }}
-                />
-                <Chip 
-                  label="Composer" 
-                  size="small" 
-                  sx={{ backgroundColor: 'rgba(25, 118, 210, 0.4)' }}
-                />
-                <Chip 
-                  label="Mixing Engineer" 
-                  size="small" 
-                  sx={{ backgroundColor: 'rgba(25, 118, 210, 0.4)' }}
-                />
+                {profile?.roles?.map((role, idx) => (
+                  <Chip 
+                    key={idx}
+                    label={role} 
+                    size="small"
+                    sx={{ backgroundColor: 'rgba(25, 118, 210, 0.4)' }}
+                  />
+                ))}
+              </Box>
+
+              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1,  }}>
+                {profile?.tags?.map((tag, idx) => (
+                  <Chip 
+                    key={idx}
+                    label={tag} 
+                    size="small"
+                    sx={{ backgroundColor: 'rgba(25, 118, 210, 0.4)' }}
+                  />
+                ))}
               </Box>
             </Box>
             
             <Button 
               variant="contained" 
               color="primary"
+              onClick={handleOpenContact}
               sx={{ 
                 px: 3, 
                 py: 1.5, 
@@ -538,18 +700,7 @@ const MusicProducerProfile = () => {
                         whiteSpace: 'pre-line', 
                         fontWeight: 'normal' 
                         }}>
-                    {`Enter the immersive sonic universe of SOUNDWAVE, where electronic elements 
-                    blend with organic textures to create memorable auditory experiences.
-
-                    With over 10 years in the industry, SOUNDWAVE has crafted sounds for films, 
-                    commercials, and chart-topping artists. His unique approach to music production 
-                    combines traditional composition techniques with cutting-edge digital tools.
-
-                    Specializing in atmospheric electronic, hip-hop fusion, and cinematic compositions, 
-                    SOUNDWAVE's unique approach has earned recognition across multiple platforms and continents.
-
-                    His work has been featured in major film festivals, international advertising campaigns, 
-                    and on platforms like Spotify, Apple Music, and SoundCloud with millions of streams.`}
+                    {profile?.about}
                   </Typography>
                 </Box>
         
@@ -566,32 +717,235 @@ const MusicProducerProfile = () => {
                     Links
                   </SectionTitle>
                   
-                  <Stack direction="row" spacing={2} flexWrap="wrap">
-                    <SocialButton 
-                      variant="contained" 
-                      startIcon={<LinkIcon sx={{ color: '#1DB954' }} />} 
-                      size="medium"
-                      sx={{ mb: 1 }}
-                    >
-                      Spotify
-                    </SocialButton>
-                    <SocialButton 
-                      variant="contained" 
-                      startIcon={<YouTube sx={{ color: '#FF0000' }} />} 
-                      size="medium"
-                      sx={{ mb: 1 }}
-                    >
-                      YouTube
-                    </SocialButton>
-                    <SocialButton 
-                      variant="contained" 
-                      startIcon={<Instagram sx={{ color: '#E1306C' }} />}
-                      size="medium"
-                      sx={{ mb: 1 }}
-                    >
-                      Instagram
-                    </SocialButton>
-                  </Stack>
+                  {profile && (
+                    <Grid container spacing={2}>
+                      {/* Spotify */}
+                      {profile.portfolioLinks?.spotify && (
+                        <Grid item xs={6} sm={6} md={6}>
+                          <Button 
+                            fullWidth
+                            variant="contained"
+                            startIcon={<LinkIcon sx={{ 
+                              color: '#1DB954',
+                              transition: 'color 0.3s ease',
+                              '&:hover': { color: '#fff' }
+                            }} />}
+                            sx={{ 
+                              backgroundColor: 'rgba(20, 20, 20, 0.8)',
+                              color: '#fff',
+                              textTransform: 'uppercase',
+                              transition: 'background-color 0.3s ease',
+                              '&:hover': { 
+                                backgroundColor: '#1DB954',
+                                '& .MuiSvgIcon-root': {
+                                  color: '#fff !important'
+                                }
+                              }
+                            }}
+                            href={profile.portfolioLinks.spotify}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            SPOTIFY
+                          </Button>
+                        </Grid>
+                      )}
+
+                      {/* SoundCloud */}
+                      {profile.portfolioLinks?.soundcloud && (
+                        <Grid item xs={6} sm={6} md={6}>
+                          <Button 
+                            fullWidth
+                            variant="contained"
+                            startIcon={<LinkIcon sx={{ 
+                              color: '#FF7700',
+                              transition: 'color 0.3s ease',
+                              '&:hover': { color: '#fff' }
+                            }} />}
+                            sx={{ 
+                              backgroundColor: 'rgba(20, 20, 20, 0.8)',
+                              color: '#fff',
+                              textTransform: 'uppercase',
+                              transition: 'background-color 0.3s ease',
+                              '&:hover': { 
+                                backgroundColor: '#FF7700',
+                                '& .MuiSvgIcon-root': {
+                                  color: '#fff !important'
+                                }
+                              }
+                            }}
+                            href={profile.portfolioLinks.soundcloud}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            SOUNDCLOUD
+                          </Button>
+                        </Grid>
+                      )}
+
+                      {/* YouTube */}
+                      {profile.portfolioLinks?.youtube && (
+                        <Grid item xs={6} sm={6} md={6}>
+                          <Button 
+                            fullWidth
+                            variant="contained"
+                            startIcon={<YouTube sx={{ 
+                              color: '#FF0000',
+                              transition: 'color 0.3s ease',
+                              '&:hover': { color: '#fff' }
+                            }} />}
+                            sx={{ 
+                              backgroundColor: 'rgba(20, 20, 20, 0.8)',
+                              color: '#fff',
+                              textTransform: 'uppercase',
+                              transition: 'background-color 0.3s ease',
+                              '&:hover': { 
+                                backgroundColor: '#FF0000',
+                                '& .MuiSvgIcon-root': {
+                                  color: '#fff !important'
+                                }
+                              }
+                            }}
+                            href={profile.portfolioLinks.youtube}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            YOUTUBE
+                          </Button>
+                        </Grid>
+                      )}
+
+                      {/* Apple Music */}
+                      {profile.portfolioLinks?.appleMusic && (
+                        <Grid item xs={6} sm={6} md={6}>
+                          <Button 
+                            fullWidth
+                            variant="contained"
+                            startIcon={<LinkIcon sx={{ 
+                              color: '#FA57C1',
+                              transition: 'color 0.3s ease',
+                              '&:hover': { color: '#fff' }
+                            }} />}
+                            sx={{ 
+                              backgroundColor: 'rgba(20, 20, 20, 0.8)',
+                              color: '#fff',
+                              textTransform: 'uppercase',
+                              transition: 'background-color 0.3s ease',
+                              '&:hover': { 
+                                backgroundColor: '#FA57C1',
+                                '& .MuiSvgIcon-root': {
+                                  color: '#fff !important'
+                                }
+                              }
+                            }}
+                            href={profile.portfolioLinks.appleMusic}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            APPLE MUSIC
+                          </Button>
+                        </Grid>
+                      )}
+
+                      {/* Instagram */}
+                      {profile.socialMedia?.instagram && (
+                        <Grid item xs={6} sm={6} md={6}>
+                          <Button 
+                            fullWidth
+                            variant="contained"
+                            startIcon={<Instagram sx={{ 
+                              color: '#E4405F',
+                              transition: 'color 0.3s ease',
+                              '&:hover': { color: '#fff' }
+                            }} />}
+                            sx={{ 
+                              backgroundColor: 'rgba(20, 20, 20, 0.8)',
+                              color: '#fff',
+                              textTransform: 'uppercase',
+                              transition: 'background-color 0.3s ease',
+                              '&:hover': { 
+                                backgroundColor: '#E4405F',
+                                '& .MuiSvgIcon-root': {
+                                  color: '#fff !important'
+                                }
+                              }
+                            }}
+                            href={`https://instagram.com/${profile.socialMedia.instagram}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            INSTAGRAM
+                          </Button>
+                        </Grid>
+                      )}
+
+                      {/* Twitter */}
+                      {profile.socialMedia?.twitter && (
+                        <Grid item xs={6} sm={6} md={6}>
+                          <Button 
+                            fullWidth
+                            variant="contained"
+                            startIcon={<Twitter sx={{ 
+                              color: '#1DA1F2',
+                              transition: 'color 0.3s ease',
+                              '&:hover': { color: '#fff' }
+                            }} />}
+                            sx={{ 
+                              backgroundColor: 'rgba(20, 20, 20, 0.8)',
+                              color: '#fff',
+                              textTransform: 'uppercase',
+                              transition: 'background-color 0.3s ease',
+                              '&:hover': { 
+                                backgroundColor: '#1DA1F2',
+                                '& .MuiSvgIcon-root': {
+                                  color: '#fff !important'
+                                }
+                              }
+                            }}
+                            href={`https://twitter.com/${profile.socialMedia.twitter}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            TWITTER
+                          </Button>
+                        </Grid>
+                      )}
+
+                      {/* LinkedIn */}
+                      {profile.socialMedia?.linkedin && (
+                        <Grid item xs={6} sm={6} md={6}>
+                          <Button 
+                            fullWidth
+                            variant="contained"
+                            startIcon={<LinkedIn sx={{ 
+                              color: '#0A66C2',
+                              transition: 'color 0.3s ease',
+                              '&:hover': { color: '#fff' }
+                            }} />}
+                            sx={{ 
+                              backgroundColor: 'rgba(20, 20, 20, 0.8)',
+                              color: '#fff',
+                              textTransform: 'uppercase',
+                              transition: 'background-color 0.3s ease',
+                              '&:hover': { 
+                                backgroundColor: '#0A66C2',
+                                '& .MuiSvgIcon-root': {
+                                  color: '#fff !important'
+                                }
+                              }
+                            }}
+                            href={profile.socialMedia.linkedin.includes('linkedin.com') ? 
+                                  profile.socialMedia.linkedin : 
+                                  `https://linkedin.com/in/${profile.socialMedia.linkedin}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            LINKEDIN
+                          </Button>
+                        </Grid>
+                      )}
+                    </Grid>
+                  )}
                 </CardContent>
               </GradientCard>
               
@@ -692,66 +1046,34 @@ const MusicProducerProfile = () => {
               
               {/* NEW FEATURED TRACKS SECTION - UPDATED */}
               <Stack spacing={1}>
-                {tracks.map(track => (
-                  <TrackContainer key={track.id}>
-                    {/* Play Button */}
-                    <PlayButton 
-                      onClick={() => handlePlayPause(track.id)}
-                      size="medium"
-                    >
-                      {isPlaying && currentTrack === track.id ? (
-                        <Pause sx={{ fontSize: 24 }} />
-                      ) : (
-                        <PlayArrow sx={{ fontSize: 24 }} />
-                      )}
-                    </PlayButton>
-                    
-                    {/* Track Information */}
-                    <Box sx={{ 
-                      display: 'flex', 
-                      flexDirection: 'column', 
-                      flex: 1, 
-                      ml: 2 
-                    }}>
-                      <Typography 
-                        variant="body1" 
-                        sx={{ 
-                          fontWeight: 500,
-                          color: 'white'
-                        }}
-                      >
-                        {track.title}
-                      </Typography>
-                      
-                      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mt: 0.5 }}>
-                        <Typography variant="body2" color="text.secondary">
-                          {track.duration}
-                        </Typography>
-                        
-                        <Typography variant="body2" color="text.secondary">
-                          {track.uploadDate}
-                        </Typography>
-                      </Box>
-                      
-                      {/* Progress Bar */}
-                      {currentTrack === track.id && (
-                        <LinearProgress 
-                          variant="determinate" 
-                          value={progress} 
-                          sx={{ 
-                            mt: 1.5,
-                            height: 4,
-                            borderRadius: 2,
-                            backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                            '& .MuiLinearProgress-bar': {
-                              background: 'linear-gradient(to right, #1976d2, #7c4dff)',
-                              borderRadius: 2,
-                            }
-                          }} 
-                        />
-                      )}
-                    </Box>
-                  </TrackContainer>
+                {tracks.map((track, idx) => (
+                  <TrackItem key={track._id || idx}>
+                    <Typography variant="body1" sx={{ fontWeight: 500, color: 'white' }}>
+                      {track.title}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      {track.duration}
+                    </Typography>
+                    <AudioPlayer
+                      ref={el => audioRefs.current[idx] = el}
+                      style={{
+                        background: 'transparent',
+                        boxShadow: 'none',
+                        borderRadius: 0,
+                        padding: 0,
+                        marginTop: 8,
+                      }}
+                      src={track.audioUrl}
+                      showJumpControls={false}
+                      layout="horizontal"
+                      customVolumeControls={[]} // Hides volume controller!
+                      customAdditionalControls={[]} // Optional: hides loop button etc.
+                      showFilledVolume={false} // Optional: disables volume fill
+                      onPlay={() => handleAudioPlay(idx)}
+                      onPause={() => setIsPlaying(false)}
+                      onEnded={() => setIsPlaying(false)}
+                    />
+                  </TrackItem>
                 ))}
               </Stack>
               
@@ -821,6 +1143,94 @@ const MusicProducerProfile = () => {
             </ExpandedImageContent>
           </ExpandedImageModal>
         </Modal>
+
+        {/* Contact Form Modal */}
+        <ContactFormModal
+          open={openContact}
+          onClose={handleCloseContact}
+          aria-labelledby="contact-form-modal"
+          maxWidth="sm"
+          fullWidth
+        >
+          <DialogContent sx={{ backgroundColor: '#000', padding: '24px' }}>
+            <Typography variant="h5" component="h2" gutterBottom sx={{ 
+              fontWeight: 'bold', 
+              mb: 3,
+              color: '#fff',
+              textAlign: 'center'
+            }}>
+              Contact {profile?.fullName}
+            </Typography>
+            
+            <ContactForm component="form" onSubmit={handleSubmitContact}>
+              <ContactTextField
+                fullWidth
+                label="Your Name"
+                variant="outlined"
+                name="name"
+                value={contactForm.name}
+                onChange={handleContactChange}
+                required
+                sx={{ mb: 3 }}
+              />
+              
+              <ContactTextField
+                fullWidth
+                label="Your Email"
+                variant="outlined"
+                type="email"
+                name="email"
+                value={contactForm.email}
+                onChange={handleContactChange}
+                required
+                sx={{ mb: 3 }}
+              />
+              
+              <ContactTextField
+                fullWidth
+                label="Your Message"
+                variant="outlined"
+                multiline
+                rows={4}
+                name="message"
+                value={contactForm.message}
+                onChange={handleContactChange}
+                required
+                sx={{ mb: 3 }}
+              />
+              
+              <DialogActions sx={{ justifyContent: 'flex-end', mt: 2 }}>
+                <ContactCancelButton
+                  onClick={handleCloseContact} 
+                >
+                  CANCEL
+                </ContactCancelButton>
+                <ContactButton
+                  type="submit"
+                  variant="contained"
+                >
+                  SEND MESSAGE
+                </ContactButton>
+              </DialogActions>
+            </ContactForm>
+          </DialogContent>
+        </ContactFormModal>
+
+        {/* Snackbar for success/error messages */}
+        <Snackbar
+          open={snackbarOpen}
+          autoHideDuration={6000}
+          onClose={handleSnackbarClose}
+          anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+        >
+          <Alert 
+            onClose={handleSnackbarClose} 
+            severity={snackbarSeverity}
+            sx={{ width: '100%' }}
+          >
+            {snackbarMessage}
+          </Alert>
+        </Snackbar>
       </GradientBackground>
     </ThemeProvider>
   );

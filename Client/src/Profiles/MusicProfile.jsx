@@ -428,6 +428,7 @@ const MusicProducerProfile = () => {
   const [snackbarMessage, setSnackbarMessage] = useState('');
   const [snackbarSeverity, setSnackbarSeverity] = useState('success');
   const audioRef = useRef(null);
+  const audioRefs = useRef([]);
   const progressInterval = useRef(null);
 
   useEffect(() => {
@@ -512,6 +513,17 @@ const MusicProducerProfile = () => {
       setIsPlaying(true);
       setProgress(0);
     }
+  };
+
+  const handleAudioPlay = (currentIdx) => {
+    audioRefs.current.forEach((player, idx) => {
+      if (player && idx !== currentIdx) {
+        player.audio.current.pause();
+        player.audio.current.currentTime = 0;
+      }
+    });
+    setCurrentTrack(currentIdx);
+    setIsPlaying(true);
   };
 
   const handleImageClick = (image) => {
@@ -1040,6 +1052,7 @@ const MusicProducerProfile = () => {
                       {track.duration}
                     </Typography>
                     <AudioPlayer
+                      ref={el => audioRefs.current[idx] = el}
                       style={{
                         background: 'transparent',
                         boxShadow: 'none',
@@ -1050,9 +1063,12 @@ const MusicProducerProfile = () => {
                       src={track.audioUrl}
                       showJumpControls={false}
                       layout="horizontal"
-                      customVolumeControls={[]} // Hides volume controller!
-                      customAdditionalControls={[]} // Optional: hides loop button etc.
-                      showFilledVolume={false} // Optional: disables volume fill
+                      customVolumeControls={[]}
+                      customAdditionalControls={[]}
+                      showFilledVolume={false}
+                      onPlay={() => handleAudioPlay(idx)}
+                      onPause={() => setIsPlaying(false)}
+                      onEnded={() => setIsPlaying(false)}
                     />
                   </TrackItem>
                 ))}

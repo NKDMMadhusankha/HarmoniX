@@ -13,6 +13,7 @@ import Mastering from "./Pages/Mastering";
 import Mixing from "./Pages/Mixing";
 
 import MusicProfile from "./Profiles/MusicProfile";
+import MixingProfile from "./Profiles/MixingProfile";
 
 
 import MusicProDashbord from "./Dashboard/MusicProDashboard";
@@ -36,6 +37,10 @@ const App = () => {
         {/* Musicians Profile */}
         <Route path="/musicpro" element={<MusicProfile />} />
         <Route path="/music/producer/:id" element={<MusicProfile />} />
+
+        <Route path="/mixingpro" element={<MixingProfile />} />
+        <Route path="/music/mixing-engineer/:id" element={<MixingProfile />} />
+
 
         {/* Musicians Pages */}
         <Route path="/music/producer" element={<MusicProducers />} />

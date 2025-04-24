@@ -1,5 +1,6 @@
 const Musician = require('../models/Musician');
 const { generateSignedUrl, s3, deleteFromS3 } = require('../utils/s3');
+const mongoose = require('mongoose');
 
 const getProfile = async (req, res) => {
   try {
@@ -229,6 +230,12 @@ const getAllProducers = async (req, res) => {
 const getProducerProfileById = async (req, res) => {
   try {
     const { id } = req.params;
+
+    // Validate ObjectId
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ success: false, message: 'Invalid ID format' });
+    }
+
     const producer = await Musician.findById(id);
     if (!producer || producer.role !== 'Music Producer') {
       return res.status(404).json({ success: false, message: 'Producer not found' });
@@ -288,6 +295,44 @@ const getAllMixingEngineers = async (req, res) => {
   }
 };
 
+const getMixingEngineerProfileById = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ success: false, message: 'Invalid ID format' });
+    }
+
+    const engineer = await Musician.findById(id);
+    if (!engineer || engineer.role !== 'Mixing Engineer') {
+      return res.status(404).json({ success: false, message: 'Mixing engineer not found' });
+    }
+
+    const obj = engineer.toObject();
+    // Generate signed URLs
+    if (obj.profileImage) obj.profileImage = await generateSignedUrl(obj.profileImage);
+    if (obj.coverImage) obj.coverImage = await generateSignedUrl(obj.coverImage);
+    if (obj.galleryImages?.length > 0) {
+      obj.galleryImages = await Promise.all(
+        obj.galleryImages.map(async (image) => await generateSignedUrl(image))
+      );
+    }
+    if (obj.featuredTracks?.length > 0) {
+      obj.featuredTracks = await Promise.all(
+        obj.featuredTracks.map(async (track) => ({
+          ...track,
+          audioUrl: track.audioUrl ? await generateSignedUrl(track.audioUrl) : ''
+        }))
+      );
+    }
+    
+    res.json({ success: true, engineer: obj });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+};
+
 module.exports = { 
   getProfile, 
   updateProfile, 
@@ -295,5 +340,6 @@ module.exports = {
   deleteTrack,
   getAllProducers,
   getProducerProfileById,
-  getAllMixingEngineers
+  getAllMixingEngineers,
+  getMixingEngineerProfileById
 };
