@@ -320,6 +320,7 @@ const MusicianProfileEditInline = () => {
   // File preview URLs
   const [avatarPreview, setAvatarPreview] = useState('');
   const [coverPreview, setCoverPreview] = useState('');
+  const [galleryPreviews, setGalleryPreviews] = useState([]); // For local preview only
 
   // Alert notifications
   const [notification, setNotification] = useState({
@@ -426,12 +427,9 @@ const MusicianProfileEditInline = () => {
 
     setNewGalleryFiles(files); // Save for upload
 
-    // Optional: Show previews immediately
+    // Show previews immediately, but keep them separate
     const previews = files.map(file => URL.createObjectURL(file));
-    setFormData(prev => ({
-      ...prev,
-      galleryImages: [...prev.galleryImages, ...previews]
-    }));
+    setGalleryPreviews(prev => [...prev, ...previews]);
 
     showNotification(`${files.length} new image(s) added to gallery`, 'success');
   };
@@ -498,7 +496,6 @@ const MusicianProfileEditInline = () => {
     formDataToSend.append('tools', JSON.stringify(editableData.tools));
     formDataToSend.append('portfolioLinks', JSON.stringify(editableData.portfolioLinks));
     formDataToSend.append('socialMedia', JSON.stringify(editableData.socialMedia));
-    formDataToSend.append('galleryImages', JSON.stringify(formData.galleryImages));
 
     // Only send new avatar/cover/gallery if changed
     if (newAvatarFile) formDataToSend.append('avatar', newAvatarFile);
@@ -528,9 +525,9 @@ const MusicianProfileEditInline = () => {
       if (data.success) {
         setNotification({ open: true, message: 'Profile saved successfully!', severity: 'success' });
         setIsEditing(false);
-        setNewGalleryFile(null);
-        setNewAudioFile(null); // Clear audio file after save
-        fetchProfile();
+        setNewGalleryFiles([]);      // Clear upload queue
+        setGalleryPreviews([]);      // Clear local previews
+        fetchProfile();              // Reload real images from backend
       } else {
         setNotification({ open: true, message: data.message || 'Failed to save profile', severity: 'error' });
       }
@@ -861,6 +858,12 @@ const MusicianProfileEditInline = () => {
           newTool: '',
           newTrack: { title: '' }
         }));
+        setFormData(prev => ({
+          ...prev,
+          galleryImages: data.musician.galleryImages || []
+        }));
+        // Clear any existing previews when fetching new data
+        setGalleryPreviews([]);
       } else {
         setNotification({ open: true, message: data.message || 'Failed to fetch profile', severity: 'error' });
       }
@@ -1802,14 +1805,37 @@ const MusicianProfileEditInline = () => {
                 </Typography>
                 
                 <Grid container spacing={2}>
+                  {/* Existing images from backend */}
                   {formData.galleryImages.map((image, index) => (
-                    <Grid item xs={12} sm={6} md={4} key={index}>
+                    <Grid item xs={12} sm={6} md={4} key={`existing-${index}`}>
                       <GalleryImage>
                         <img src={image} alt={`Gallery Image ${index + 1}`} />
                         {isEditing && (
                           <Box className="overlay">
                             <IconButton
                               onClick={() => handleDeleteGalleryImage(formData.galleryImages[index], index)}
+                              sx={{ backgroundColor: 'rgba(0,0,0,0.5)', color: 'white' }}
+                            >
+                              <Delete />
+                            </IconButton>
+                          </Box>
+                        )}
+                      </GalleryImage>
+                    </Grid>
+                  ))}
+                  
+                  {/* New previews (not yet uploaded) */}
+                  {galleryPreviews.map((preview, index) => (
+                    <Grid item xs={12} sm={6} md={4} key={`preview-${index}`}>
+                      <GalleryImage>
+                        <img src={preview} alt={`New Gallery Preview ${index + 1}`} style={{ opacity: 0.7 }} />
+                        {isEditing && (
+                          <Box className="overlay">
+                            <IconButton
+                              onClick={() => {
+                                setGalleryPreviews(prev => prev.filter((_, i) => i !== index));
+                                setNewGalleryFiles(prev => prev.filter((_, i) => i !== index));
+                              }}
                               sx={{ backgroundColor: 'rgba(0,0,0,0.5)', color: 'white' }}
                             >
                               <Delete />
