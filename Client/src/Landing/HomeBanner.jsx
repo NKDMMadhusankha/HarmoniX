@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { Box, Typography, Button, Container } from '@mui/material';
-import { ArrowDownwardOutlined } from '@mui/icons-material';
+import { Box, Typography, Button, Container, Stack } from '@mui/material';
+import { ArrowDownwardOutlined, PersonAddOutlined } from '@mui/icons-material';
+import { useNavigate } from 'react-router-dom';
 import '@fontsource/saira';
 
 const HomeBanner = () => {
@@ -10,6 +11,7 @@ const HomeBanner = () => {
   
   const bannerRef = useRef(null);
   const videoRef = useRef(null);
+  const navigate = useNavigate();
 
   // Text animation effect
   useEffect(() => {
@@ -144,24 +146,66 @@ const HomeBanner = () => {
           </Typography>
         </Box>
         
-        <Button
-          variant="outlined"
-          size="large"
-          endIcon={<ArrowDownwardOutlined />}
-          sx={{
-            borderRadius: '20px',
-            px: 4,
-            py: 1,
-            borderColor: '#FFFFFF',
-            color: '#FFFFFF',
-            '&:hover': {
-              borderColor: '#CCCCCC',
-              backgroundColor: 'rgba(255, 255, 255, 0.1)',
-            },
-          }}
+        <Stack 
+          direction={{ xs: 'column', sm: 'row' }} 
+          spacing={3} 
+          justifyContent="center"
+          alignItems="center"
         >
-          Our Services
-        </Button>
+          <Button
+            variant="outlined"
+            size="large"
+            endIcon={<ArrowDownwardOutlined />}
+            sx={{
+              borderRadius: '20px',
+              px: 4,
+              py: 1,
+              borderColor: '#FFFFFF',
+              color: '#FFFFFF',
+              '&:hover': {
+                borderColor: '#CCCCCC',
+                backgroundColor: 'rgba(255, 255, 255, 0.1)',
+              },
+            }}
+            onClick={() => {
+              const el = document.getElementById('additionalServicesSection');
+              if (el) {
+                el.scrollIntoView({ behavior: 'smooth' });
+              }
+            }}
+          >
+            Our Services
+          </Button>
+          
+          {/* Updated Sign Up Free Button with transparent background */}
+          <Button
+            variant="outlined"
+            size="large"
+            startIcon={<PersonAddOutlined />}
+            sx={{
+              borderRadius: '20px',
+              px: 4,
+              py: 1,
+              backgroundColor: 'transparent',
+              borderColor: '#FFFFFF',
+              color: '#FFFFFF',
+              fontWeight: 'bold',
+              transition: 'all 0.3s ease',
+              '&:hover': {
+                backgroundColor: 'rgba(12, 82, 132, 0.3)',
+                borderColor: '#0078FF',
+              },
+              '&:active': {
+                transform: 'translateY(0)',
+              },
+            }}
+            onClick={() => {
+              navigate('/catogary'); // Navigate to RegistrationCategory.jsx
+            }}
+          >
+            SIGN UP FREE
+          </Button>
+        </Stack>
       </Container>
 
       {/* Custom Styles */}
@@ -185,4 +229,4 @@ const HomeBanner = () => {
   );
 };
 
-export default HomeBanner;
+export default HomeBanner; 

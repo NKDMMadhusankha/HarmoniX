@@ -333,6 +333,64 @@ const getMixingEngineerProfileById = async (req, res) => {
   }
 };
 
+// Get all Mastering Engineers
+const getAllMasteringEngineers = async (req, res) => {
+  try {
+    const engineers = await Musician.find({ role: 'Mastering Engineer' });
+    const engineersData = await Promise.all(engineers.map(async (engineer) => {
+      const obj = engineer.toObject();
+      if (obj.profileImage) {
+        obj.profileImage = await generateSignedUrl(obj.profileImage);
+      }
+      return {
+        id: obj._id,
+        fullName: obj.fullName,
+        country: obj.country,
+        about: obj.about,
+        profileImage: obj.profileImage,
+      };
+    }));
+    res.json({ success: true, engineers: engineersData });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+};
+
+// Get a single Mastering Engineer by ID
+const getMasteringEngineerProfileById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ success: false, message: 'Invalid ID format' });
+    }
+    const engineer = await Musician.findById(id);
+    if (!engineer || engineer.role !== 'Mastering Engineer') {
+      return res.status(404).json({ success: false, message: 'Mastering engineer not found' });
+    }
+    const obj = engineer.toObject();
+    if (obj.profileImage) obj.profileImage = await generateSignedUrl(obj.profileImage);
+    if (obj.coverImage) obj.coverImage = await generateSignedUrl(obj.coverImage);
+    if (obj.galleryImages?.length > 0) {
+      obj.galleryImages = await Promise.all(
+        obj.galleryImages.map(async (image) => await generateSignedUrl(image))
+      );
+    }
+    if (obj.featuredTracks?.length > 0) {
+      obj.featuredTracks = await Promise.all(
+        obj.featuredTracks.map(async (track) => ({
+          ...track,
+          audioUrl: track.audioUrl ? await generateSignedUrl(track.audioUrl) : ''
+        }))
+      );
+    }
+    res.json({ success: true, engineer: obj });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+};
+
 module.exports = { 
   getProfile, 
   updateProfile, 
@@ -341,5 +399,7 @@ module.exports = {
   getAllProducers,
   getProducerProfileById,
   getAllMixingEngineers,
-  getMixingEngineerProfileById
+  getMixingEngineerProfileById,
+  getAllMasteringEngineers,
+  getMasteringEngineerProfileById
 };
