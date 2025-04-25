@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import axios from 'axios'; // Add axios for API requests
 import { 
   Box, 
   Typography, 
@@ -16,135 +17,130 @@ import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import Navbar from '../Components/Navbar';
 import Footer from '../Components/Footer';
 import Loader from '../Components/Loader';
+import { Link as RouterLink, useNavigate, useLocation } from 'react-router-dom'; // Add useNavigate and useLocation
 
-// Card images
-import card7 from '../assets/card7.jpg';
-import card8 from '../assets/card8.jpg';
-import card9 from '../assets/card9.jpg';
-import card10 from '../assets/card10.jpg';
-import card11 from '../assets/card11.jpg';
-import card12 from '../assets/card11.jpg';
+function ScrollToTop() {
+  const { pathname } = useLocation();
 
-// Producer data with unique details for each card
-const producerData = [
-  {
-    name: "Adam Theis",
-    location: "Oakland, CA",
-    description: "A versatile music producer with expertise across multiple genres, specializing in country music. With a keen ear for authentic sound and rich instrumentation, he has worked with various artists to craft high-quality productions that bring songs to life. Whether it's a classic country ballad or a modern crossover hit, he delivers exceptional music that resonates."
-  },
-  {
-    name: "Michael Rodriguez",
-    location: "Nashville, TN",
-    description: "An award-winning producer known for his innovative approach to contemporary music production. With over 15 years of experience working with both established and emerging artists, Michael brings a unique perspective to every project, balancing technical precision with creative vision."
-  },
-  {
-    name: "Sarah Johnson",
-    location: "Los Angeles, CA",
-    description: "A boundary-pushing producer specializing in electronic and pop music. Her distinctive production style combines analog warmth with cutting-edge digital techniques. Artists seek her out for her ability to create immersive sonic landscapes that connect with audiences."
-  },
-  {
-    name: "Daniel Kim",
-    location: "Seattle, WA",
-    description: "A multi-instrumentalist and producer with a background in classical composition. Daniel's productions are known for their intricate arrangements and emotional depth. His methodical approach ensures every element in the mix serves the song's core message."
-  },
-  {
-    name: "Leila Martinez",
-    location: "Miami, FL",
-    description: "A dynamic producer with expertise in Latin, R&B, and hip-hop genres. Having worked with Grammy-winning artists, Leila brings both technical excellence and cultural authenticity to her productions. Her rhythmic sensibility sets her work apart."
-  },
-  {
-    name: "James Wilson",
-    location: "Austin, TX",
-    description: "An experienced producer specializing in indie rock and alternative genres. With a focus on capturing authentic performances, James creates productions that maintain the energy and character of live music while achieving studio-quality sound. His collaborative approach puts artists at ease."
-  }
-];
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
 
-const ProducerCard = ({ image, producerInfo, index }) => {
+  return null;
+}
+
+const ProducerCard = ({ image, producerInfo, onSeeMore }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-  
+
+  const handleCardClick = () => {
+    // Show loader before navigation
+    onSeeMore(producerInfo);
+  };
+
+  // Truncate about to 150 chars
+  const truncatedAbout = producerInfo.about?.length > 150
+    ? producerInfo.about.slice(0, 150) + '...'
+    : producerInfo.about;
+
   return (
     <Grid item xs={12} sm={6} md={4}>
-      <Card sx={{ 
-        height: '100%', 
-        display: 'flex', 
-        flexDirection: 'column',
-        borderRadius: { xs: 1.5, sm: 2 },
-        overflow: 'hidden',
-        boxShadow: 'none',
-        backgroundColor: '#FFFFFF',
-        // border: '1px solid white',
-        boxShadow: '0px 10px 30px rgba(0, 102, 255, 0.31)',
-        transition: 'transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out',
-        '&:hover': {
-          boxShadow: '0px 4px 20px rgba(0, 120, 255, 0.5)',
-          transform: 'translateY(-8px)',
-        }
-      }}>
+      <Card
+        onClick={handleCardClick}
+        role="button"
+        tabIndex={0}
+        onKeyPress={(e) => {
+          if (e.key === 'Enter') handleCardClick();
+        }}
+        sx={{
+          height: '100%',
+          display: 'flex',
+          flexDirection: 'column',
+          borderRadius: { xs: 1.5, sm: 2 },
+          overflow: 'hidden',
+          boxShadow: 'none',
+          backgroundColor: '#FFFFFF',
+          cursor: 'pointer',
+          boxShadow: '0px 10px 30px rgba(0, 102, 255, 0.31)',
+          transition: 'transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out',
+          '&:hover': {
+            boxShadow: '0px 4px 20px rgba(0, 120, 255, 0.5)',
+            transform: 'translateY(-8px)',
+          },
+        }}
+      >
         <CardMedia
           component="img"
           height={{ xs: 180, sm: 200, md: 240 }}
           image={image}
-          alt={producerInfo.name}
+          alt={producerInfo.fullName}
           sx={{
             objectFit: 'cover',
           }}
         />
-        <CardContent sx={{ 
-          flexGrow: 1, 
-          p: { xs: 1.5, sm: 2, md: 3 },
-          pb: { xs: 0.5, sm: 1 },
-        }}>
-          <Typography 
-            gutterBottom 
-            variant="h5" 
-            component="div" 
-            color="#0078FF" 
+        <CardContent
+          sx={{
+            flexGrow: 1,
+            p: { xs: 1.5, sm: 2, md: 3 },
+            pb: { xs: 0.5, sm: 1 },
+          }}
+        >
+          <Typography
+            gutterBottom
+            variant="h5"
+            component="div"
+            color="#0078FF"
             fontWeight="bold"
             sx={{
               fontSize: { xs: '1.1rem', sm: '1.25rem', md: '1.5rem' },
               mb: { xs: 0.25, sm: 0.5 },
-              lineHeight: 1.2
+              lineHeight: 1.2,
             }}
           >
-            {producerInfo.name}
+            {producerInfo.fullName}
           </Typography>
-          <Typography 
-            variant="body2" 
-            color="#999" 
+          <Typography
+            variant="body2"
+            color="#999"
             mb={{ xs: 1, sm: 1.5, md: 2 }}
-            sx={{ 
+            sx={{
               fontSize: { xs: '0.8rem', sm: '0.875rem', md: '1rem' },
-              fontWeight: 500
+              fontWeight: 500,
             }}
           >
-            {producerInfo.location}
+            {producerInfo.country}
           </Typography>
-          <Typography 
-            variant="body2" 
+          <Typography
+            variant="body2"
             color="black"
-            sx={{ 
+            sx={{
               fontSize: { xs: '0.8rem', sm: '0.875rem', md: '1rem' },
               lineHeight: { xs: 1.4, sm: 1.5, md: 1.6 },
               display: '-webkit-box',
               overflow: 'hidden',
               WebkitBoxOrient: 'vertical',
               WebkitLineClamp: { xs: 4, sm: 5, md: 6 },
-              textOverflow: 'ellipsis'
+              textOverflow: 'ellipsis',
             }}
           >
-            {producerInfo.description}
+            {truncatedAbout}
           </Typography>
         </CardContent>
-        <CardActions sx={{ 
-          justifyContent: 'flex-start', 
-          px: { xs: 1.5, sm: 2, md: 3 },
-          pb: { xs: 1.5, sm: 2 }, 
-          pt: { xs: 0.5, sm: 0.75 }
-        }}>
-          <Button 
-            size="small" 
-            sx={{ 
+        <CardActions
+          sx={{
+            justifyContent: 'flex-start',
+            px: { xs: 1.5, sm: 2, md: 3 },
+            pb: { xs: 1.5, sm: 2 },
+            pt: { xs: 0.5, sm: 0.75 },
+          }}
+        >
+          <Button
+            size="small"
+            onClick={(e) => {
+              e.stopPropagation(); // Prevent card click
+              onSeeMore(producerInfo);
+            }}
+            sx={{
               color: '#0078FF',
               fontWeight: 'bold',
               p: 0,
@@ -154,7 +150,7 @@ const ProducerCard = ({ image, producerInfo, index }) => {
                 backgroundColor: 'transparent',
                 textDecoration: 'underline',
                 color: '#0056b3',
-              }
+              },
             }}
           >
             SEE MORE
@@ -165,38 +161,53 @@ const ProducerCard = ({ image, producerInfo, index }) => {
   );
 };
 
-const MusicProducersPage = () => {
+const MixingEngineersPage = () => {
   const theme = useTheme();
-  const cardImages = [card7, card8, card9, card10, card11, card12];
+  const [masteringEngineers, setMasteringEngineers] = useState([]);
   const [loading, setLoading] = useState(true);
-  
-  // Media queries for responsive design
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-  const isTablet = useMediaQuery(theme.breakpoints.between('sm', 'md'));
-  const isLargeScreen = useMediaQuery(theme.breakpoints.up('lg'));
+  const navigate = useNavigate();
 
   useEffect(() => {
-    window.scrollTo(0, 0);
-    
-    // Simulate loading time - replace with your actual data fetching if needed
-    const timer = setTimeout(() => {
-      setLoading(false);
-    }, 1500); // Show loader for 1.5 seconds
-    
-    return () => clearTimeout(timer); // Clean up timer on unmount
+    window.scrollTo(0, 0); // Scroll to top when component mounts
+
+    // Fetch mastering engineers from backend
+    axios
+      .get('http://localhost:5000/api/musician/mastering-engineers')
+      .then((res) => {
+        if (res.data.success) {
+          setMasteringEngineers(res.data.engineers);
+        }
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error('Error fetching mastering engineers:', err);
+        setLoading(false);
+      });
   }, []);
 
-  // Show loader while loading
+  const handleSeeMore = (engineerInfo) => {
+    window.location.href = `/music/mastering-engineer/${engineerInfo.id}`;
+  };
+
   if (loading) {
     return (
-      <Box sx={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', backgroundColor: '#0D0D0D' }}>
+      <Box
+        sx={{
+          minHeight: '100vh',
+          display: 'flex',
+          flexDirection: 'column',
+          backgroundColor: '#0D0D0D',
+        }}
+      >
         <Navbar />
-        <Box sx={{ 
-          flex: 1, 
-          display: 'flex', 
-          justifyContent: 'center', 
-          alignItems: 'center' 
-        }}>
+        <Box
+          sx={{
+            flex: 1,
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+          }}
+        >
           <Loader />
         </Box>
         <Footer />
@@ -204,9 +215,16 @@ const MusicProducersPage = () => {
     );
   }
 
-  // Show actual content when loading is complete
   return (
-    <Box sx={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', backgroundColor: '#0D0D0D' }}>
+    <Box
+      sx={{
+        minHeight: '100vh',
+        display: 'flex',
+        flexDirection: 'column',
+        backgroundColor: '#0D0D0D',
+      }}
+    >
+      <ScrollToTop /> {/* Add ScrollToTop here */}
       <Navbar />
       
       {/* Banner Section with Video Background */}
@@ -273,7 +291,7 @@ const MusicProducersPage = () => {
               maxWidth: { xs: '100%', sm: '85%', md: '75%', lg: '65%' }
             }}
           >
-            <Typography
+             <Typography
               variant="h2"
               component="h1"
               sx={{
@@ -315,6 +333,8 @@ const MusicProducersPage = () => {
               Sign up free to browse our artist network & connect
             </Typography>
             <Button
+              component={RouterLink}
+              to="/catogary"
               variant="contained"
               sx={{
                 px: { xs: 2, sm: 2.5, md: 3 },
@@ -406,7 +426,7 @@ const MusicProducersPage = () => {
           </Button>
         </Box>
 
-        {/* Producer Cards */}
+        {/* Mastering Engineer Cards */}
         <Grid 
           container 
           spacing={{ xs: 1.5, sm: 2, md: 3, lg: 4 }} 
@@ -416,12 +436,12 @@ const MusicProducersPage = () => {
             width: { xs: 'calc(100% + 16px)', sm: 'calc(100% + 24px)', md: 'calc(100% + 32px)' }
           }}
         >
-          {cardImages.map((image, index) => (
+          {masteringEngineers.map((engineer) => (
             <ProducerCard 
-              key={index} 
-              image={image} 
-              producerInfo={producerData[index]}
-              index={index} 
+              key={engineer.id} 
+              image={engineer.profileImage} 
+              producerInfo={engineer}
+              onSeeMore={handleSeeMore}
             />
           ))}
         </Grid>
@@ -434,4 +454,4 @@ const MusicProducersPage = () => {
   );
 };
 
-export default MusicProducersPage;
+export default MixingEngineersPage;
