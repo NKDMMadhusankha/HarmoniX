@@ -187,7 +187,7 @@ const HomeBanner = () => {
               px: 4,
               py: 1,
               backgroundColor: 'transparent',
-              borderColor: '#FFFFFF',
+              border: '3px solid #133321',
               color: '#FFFFFF',
               fontWeight: 'bold',
               transition: 'all 0.3s ease',
