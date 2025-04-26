@@ -258,7 +258,10 @@ const HarmoniXNavbar = () => {
                             navigate('/music/mastering');  // Navigate to your mastering page
                             setMobileMenuOpen(false);
                           } else if (option === 'Mixing Engineer') {
-                            navigate('/music/mixing');  // Navigate to your mastering page
+                            navigate('/music/mixing');  // Navigate to your mising page
+                            setMobileMenuOpen(false);
+                          } else if (option === 'lyricist') {
+                            navigate('/music/lyricists');  // Navigate to your lyricist page
                             setMobileMenuOpen(false);
                           }
                         }}
@@ -486,8 +489,11 @@ const HarmoniXNavbar = () => {
                               navigate('/music/mastering');  // Navigate to your mastering page
                               setFeaturesAnchorEl(null);
                             } else if (option === 'Mixing Engineer') {
-                              navigate('/music/mixing');  // Navigate to your mastering page
+                              navigate('/music/mixing');  // Navigate to your mixing page
                               setFeaturesAnchorEl(null);
+                            } else if (option === 'lyricist') {
+                              navigate('/music/lyricists');  // Navigate to your lyricist page
+                              setMobileMenuOpen(false);
                             }
                           }}
                           sx={{

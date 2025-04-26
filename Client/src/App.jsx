@@ -8,9 +8,11 @@ import ContactUs from "./Components/ContactUs";
 import RegistationCatogary from "./Auth/RegistationCatogary";
 import MusicianRegistrationForm from "./Auth/MusicianRegister";
 import ForgotPassword from "./Components/FogotPass";
+
 import MusicProducers from "./Pages/MusicProducers";
 import Mastering from "./Pages/Mastering";
 import Mixing from "./Pages/Mixing";
+import Lyricists from "./Pages/Lyricists";
 
 import MusicProfile from "./Profiles/MusicProfile";
 import MixingProfile from "./Profiles/MixingProfile";
@@ -20,6 +22,7 @@ import MasteringProfile from "./Profiles/MasteringProfile";
 import MusicProDashbord from "./Dashboard/MusicProDashboard";
 import MixingDashboard from "./Dashboard/MixingDashboard";
 import MasteringDashboard from "./Dashboard/MasteringDashboard";
+import LyricistDashboard from "./Dashboard/LyricistsDashboard";
 
 const App = () => {
   return (
@@ -34,6 +37,7 @@ const App = () => {
         <Route path="/contact" element={<ContactUs />} />
         <Route path="/catogary" element={<RegistationCatogary />} />
         <Route path="/musician/register" element={<MusicianRegistrationForm />} />
+
 
         {/* Musicians Profile */}
         <Route path="/musicpro" element={<MusicProfile />} />
@@ -50,12 +54,15 @@ const App = () => {
         <Route path="/music/producer" element={<MusicProducers />} />
         <Route path="/music/mastering" element={<Mastering />} />
         <Route path="/music/mixing" element={<Mixing />} />
+        <Route path="/music/lyricists" element={<Lyricists />} />
+
+
 
         {/* Dashbords for editing thire Profile */}
         <Route path="/musicpro/dashboard" element={<MusicProDashbord />} />
         <Route path="/mixing/dashboard" element={<MixingDashboard />} />
         <Route path="/mastering/dashboard" element={<MasteringDashboard />} />
-        {/* <Route path="/lyricist/dashboard" element={<LyricistDashboard />} /> */}
+        <Route path="/lyricist/dashboard" element={<LyricistDashboard />} />
         
         
       </Routes>

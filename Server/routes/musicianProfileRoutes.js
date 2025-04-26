@@ -12,7 +12,9 @@ const {
   getAllMixingEngineers, 
   getMixingEngineerProfileById,
   getAllMasteringEngineers,
-  getMasteringEngineerProfileById
+  getMasteringEngineerProfileById,
+  getAllLyricists,
+  getLyricistProfileById
 } = require('../controllers/musicianProfileController');
 
 const router = express.Router();
@@ -61,5 +63,11 @@ router.get('/mastering-engineers', getAllMasteringEngineers);
 
 // Public route: Get a single mastering engineer by ID
 router.get('/mastering-engineers/:id', getMasteringEngineerProfileById);
+
+// Public route: Get all lyricists (no auth required for listing)
+router.get('/lyricists', getAllLyricists);
+
+// Public route: Get a single lyricist by ID
+router.get('/lyricists/:id', getLyricistProfileById);
 
 module.exports = router;
