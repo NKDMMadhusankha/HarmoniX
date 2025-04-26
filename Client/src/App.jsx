@@ -25,6 +25,9 @@ import MixingDashboard from "./Dashboard/MixingDashboard";
 import MasteringDashboard from "./Dashboard/MasteringDashboard";
 import LyricistDashboard from "./Dashboard/LyricistsDashboard";
 
+
+import AboutProducing from "./Landing/AboutProducing";
+
 const App = () => {
   return (
     <Router>
@@ -38,6 +41,10 @@ const App = () => {
         <Route path="/contact" element={<ContactUs />} />
         <Route path="/catogary" element={<RegistationCatogary />} />
         <Route path="/musician/register" element={<MusicianRegistrationForm />} />
+
+        <Route path="/about-producing" element={<AboutProducing />} />
+
+
 
 
         {/* Musicians Profile */}

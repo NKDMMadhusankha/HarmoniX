@@ -67,7 +67,11 @@ const MusicServices = () => {
       id: 1,
       title: 'Music Producing',
       description: 'Collaborate with top music producers to bring your unique sound to life. Our platform connects you with professionals who understand your vision and can craft the perfect track.',
-      link: '/about-producing'
+      link: '/about-producing',
+      onClick: () => {
+        navigate('/about-producing');
+        window.location.reload();
+      }
     },
     {
       id: 2,
@@ -81,7 +85,7 @@ const MusicServices = () => {
       description: 'Achieve a polished final product with our professional mastering services tailored to your specific needs. Ensure your music is ready for release.',
       link: '/about-mastering'
     }
-  ], []);
+  ], [navigate]);
 
   const additionalServices = useMemo(() => [
     {
@@ -347,8 +351,7 @@ const MusicServices = () => {
                   alignItems: 'center',
                 }}>
                   <Button 
-                    component={Link} 
-                    to={service.link} 
+                    onClick={service.onClick || (() => navigate(service.link))}
                     sx={{
                       color: 'white',
                       textTransform: 'none',
