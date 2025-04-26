@@ -285,6 +285,7 @@ const Card3D = ({ children }) => {
 const MusicProducingPage = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  const isSmallScreen = useMediaQuery(theme.breakpoints.down('sm'));
   const mainRef = useRef(null);
   const { scrollYProgress } = useScroll({ target: mainRef });
   
@@ -329,15 +330,14 @@ const MusicProducingPage = () => {
       
       <Container maxWidth={false} sx={{ 
         py: 8,
-        px: { xs: 2, sm: 4, md: 8, lg: 12 },
+        px: isSmallScreen ? 2 : isMobile ? 4 : 8,
         maxWidth: '1300px',
         mx: 'auto'
       }}>
-        {/* What is Music Production Section - Starting with this section instead of the header */}
-        <Box my={8}>
+        {/* What is Music Production Section */}
+        <Box my={isMobile ? 6 : 8}>
           <ScrollSection direction="up">
-            
-            <Grid container alignItems="center" spacing={6} mb={6}>
+            <Grid container alignItems="center" spacing={isMobile ? 4 : 6} mb={isMobile ? 4 : 6}>
               {isMobile ? (
                 <>
                   <Grid item xs={12}>
@@ -349,8 +349,11 @@ const MusicProducingPage = () => {
                   </Grid>
                   <Grid item xs={12}>
                     <ScrollSection direction="right" delay={0.2}>
-                      <Typography variant="body1" sx={{ fontSize: '1.1rem', lineHeight: 1.7 }}>
-                        Music production is the process of creating, recording, mixing, and mastering audio to produce a finished musical piece. It involves both technical skills and artistic creativity as producers work with artists to realize their musical vision. A music producer oversees all aspects of a recording project, from pre-production planning through final mastering, acting as both a technical expert and creative collaborator.
+                      <Typography variant={isSmallScreen ? "h6" : "h5"} mb={2} color="#3a9bdc">
+                        <TextReveal>What Is Music Producing?</TextReveal>
+                      </Typography>
+                      <Typography variant="body1" sx={{ fontSize: isSmallScreen ? '1rem' : '1.1rem', lineHeight: 1.7 }}>
+                        Music producing is the art and process of creating a complete piece of music from scratch or from a basic idea. A music producer is like both a director and a creative partner — they guide the overall sound, style, and feel of a song. They work on everything from composing melodies and building beats to arranging instruments and helping artists bring their vision to life.<br/><br/>Good music producing is not just about technical skills; it's about having a strong sense of musicality, creativity, and the ability to turn raw ideas into something polished and professional. Whether it's a pop song, a rap track, an acoustic ballad, or an electronic anthem, the producer shapes the journey from idea to reality.
                       </Typography>
                     </ScrollSection>
                   </Grid>
@@ -359,12 +362,12 @@ const MusicProducingPage = () => {
                 <>
                   <Grid item md={6}>
                     <ScrollSection direction="right" delay={0.2}>
-                    <Typography variant="h5" mb={2} color="#3a9bdc">
-                        <TextReveal>What Ia Music Producing ?</TextReveal>
+                      <Typography variant="h5" mb={2} color="#3a9bdc">
+                        <TextReveal>What Is Music Producing?</TextReveal>
                       </Typography>
                       <Typography variant="body1" sx={{ fontSize: '1.1rem', lineHeight: 1.7 }}>
-                      Music producing is the art and process of creating a complete piece of music from scratch or from a basic idea. A music producer is like both a director and a creative partner — they guide the overall sound, style, and feel of a song. They work on everything from composing melodies and building beats to arranging instruments and helping artists bring their vision to life.<br/><br/>Good music producing is not just about technical skills; it’s about having a strong sense of musicality, creativity, and the ability to turn raw ideas into something polished and professional. Whether it's a pop song, a rap track, an acoustic ballad, or an electronic anthem, the producer shapes the journey from idea to reality.
-                        </Typography>
+                        Music producing is the art and process of creating a complete piece of music from scratch or from a basic idea. A music producer is like both a director and a creative partner — they guide the overall sound, style, and feel of a song. They work on everything from composing melodies and building beats to arranging instruments and helping artists bring their vision to life.<br/><br/>Good music producing is not just about technical skills; it's about having a strong sense of musicality, creativity, and the ability to turn raw ideas into something polished and professional. Whether it's a pop song, a rap track, an acoustic ballad, or an electronic anthem, the producer shapes the journey from idea to reality.
+                      </Typography>
                     </ScrollSection>
                   </Grid>
                   <Grid item md={6}>
@@ -381,14 +384,17 @@ const MusicProducingPage = () => {
         </Box>
 
         {/* Music Production Equipment Section with 3D card effect */}
-        <Box my={16}>
+        <Box my={isMobile ? 10 : 16}>
           <ScrollSection direction="up">
-            
-            
-            <Grid container alignItems="center" spacing={6} mb={6}>
+            <Grid container alignItems="center" spacing={isMobile ? 4 : 6} mb={isMobile ? 4 : 6}>
               {isMobile ? (
                 <>
                   <Grid item xs={12}>
+                    <ScrollSection direction="left" delay={0.3}>
+                      <Typography variant={isSmallScreen ? "h6" : "h5"} mb={2} color="#3a9bdc">
+                        <TextReveal>1. Song Creation and Composition</TextReveal>
+                      </Typography>
+                    </ScrollSection>
                     <Card3D>
                       <EnhancedImage 
                         src={musicEquipment} 
@@ -396,6 +402,12 @@ const MusicProducingPage = () => {
                         index={1}
                       />
                     </Card3D>
+                    <ScrollSection direction="right" delay={0.4}>
+                      <Typography variant="body1" sx={{ fontSize: isSmallScreen ? '1rem' : '1.1rem', lineHeight: 1.7, mt: 2 }}>
+                        This is the first stage, where the basic idea of the song is born. The producer helps create melodies, chord progressions, rhythms, and the overall vibe of the track. Sometimes the producer will start from scratch, building the song from a small idea, a lyric, or even just a mood. <br/><br/>
+                        • They might work closely with artists, songwriters, or instrumentalists to develop the song's core elements.<br/><br/>• They decide on the key, tempo, style, and emotional tone.<br/><br/>In some cases, the producer themselves plays instruments or programs beats to form the early version of the song (called a demo).<br/><br/>At this stage, it's all about creativity and exploring different possibilities for how the song could sound.
+                      </Typography>
+                    </ScrollSection>
                   </Grid>
                 </>
               ) : (
@@ -406,8 +418,8 @@ const MusicProducingPage = () => {
                         <TextReveal>1. Song Creation and Composition</TextReveal>
                       </Typography>
                       <Typography variant="body1" sx={{ fontSize: '1.1rem', lineHeight: 1.7 }}>
-                      This is the first stage, where the basic idea of the song is born. The producer helps create melodies, chord progressions, rhythms, and the overall vibe of the track. Sometimes the producer will start from scratch, building the song from a small idea, a lyric, or even just a mood. <br/><br/>
-                      • They might work closely with artists, songwriters, or instrumentalists to develop the song’s core elements.<br/><br/>• They decide on the key, tempo, style, and emotional tone.<br/><br/>In some cases, the producer themselves plays instruments or programs beats to form the early version of the song (called a demo).<br/><br/>At this stage, it's all about creativity and exploring different possibilities for how the song could sound.
+                        This is the first stage, where the basic idea of the song is born. The producer helps create melodies, chord progressions, rhythms, and the overall vibe of the track. Sometimes the producer will start from scratch, building the song from a small idea, a lyric, or even just a mood. <br/><br/>
+                        • They might work closely with artists, songwriters, or instrumentalists to develop the song's core elements.<br/><br/>• They decide on the key, tempo, style, and emotional tone.<br/><br/>In some cases, the producer themselves plays instruments or programs beats to form the early version of the song (called a demo).<br/><br/>At this stage, it's all about creativity and exploring different possibilities for how the song could sound.
                       </Typography>
                     </ScrollSection>
                   </Grid>
@@ -427,35 +439,48 @@ const MusicProducingPage = () => {
         </Box>
 
         {/* Digital Audio Workstations Section */}
-        <Box my={16}>
+        <Box my={isMobile ? 10 : 16}>
           <ScrollSection direction="scale">
-            
-            
-            <Grid container alignItems="center" spacing={6} mb={6}>
+            <Grid container alignItems="center" spacing={isMobile ? 4 : 6} mb={isMobile ? 4 : 6}>
               {isMobile ? (
                 <>
                   <Grid item xs={12}>
+                    <ScrollSection direction="right" delay={0.3}>
+                      <Typography variant={isSmallScreen ? "h6" : "h5"} mb={2} color="#3a9bdc">
+                        <TextReveal>2. Arrangement and Sound Design</TextReveal>
+                      </Typography>
+                    </ScrollSection>
                     <EnhancedImage 
                       src={daw} 
                       alt="Digital Audio Workstation interface"
                       index={2}
                     />
+                    <ScrollSection direction="left" delay={0.4}>
+                      <Typography variant="body1" sx={{ fontSize: isSmallScreen ? '1rem' : '1.1rem', lineHeight: 1.7, mt: 2 }}>
+                        Once the basic idea is ready, the next part is arranging and designing the sounds. This is where the song starts to feel more full and structured.<br/><br/>
+                        • Arrangement means deciding where different parts of the song happen — like when the drums kick in, when the chorus arrives, or when an instrumental break happens.<br/><br/>
+                        • Producers think about the dynamics — how the song builds up and cools down to keep the listener interested.<br/><br/>
+                        • Sound design involves choosing or creating the right sounds — for example, picking a warm piano, a powerful drum kit, or crafting a unique synth lead.<br/><br/>
+                        • They might add additional layers like background vocals, electronic effects, or real-world sounds (like claps, snaps, or ambient textures).<br/><br/>
+                        The goal here is to make the song exciting, emotional, and to tell a story through sound.
+                      </Typography>
+                    </ScrollSection>
                   </Grid>
                 </>
-                  ) : (
+              ) : (
                 <>
                   <Grid item md={6}>
                     <ScrollSection direction="up" delay={0.3}>
                       <Typography variant="h5" mb={2} color="#3a9bdc">
-                    <TextReveal>2. Arrangement and Sound Design</TextReveal>
+                        <TextReveal>2. Arrangement and Sound Design</TextReveal>
                       </Typography>
                       <Typography variant="body1" sx={{ fontSize: '1.1rem', lineHeight: 1.7 }}>
-                    Once the basic idea is ready, the next part is arranging and designing the sounds. This is where the song starts to feel more full and structured.<br/><br/>
-                    • Arrangement means deciding where different parts of the song happen — like when the drums kick in, when the chorus arrives, or when an instrumental break happens.<br/><br/>
-                    • Producers think about the dynamics — how the song builds up and cools down to keep the listener interested.<br/><br/>
-                    • Sound design involves choosing or creating the right sounds — for example, picking a warm piano, a powerful drum kit, or crafting a unique synth lead.<br/><br/>
-                    • They might add additional layers like background vocals, electronic effects, or real-world sounds (like claps, snaps, or ambient textures).<br/><br/>
-                    The goal here is to make the song exciting, emotional, and to tell a story through sound.
+                        Once the basic idea is ready, the next part is arranging and designing the sounds. This is where the song starts to feel more full and structured.<br/><br/>
+                        • Arrangement means deciding where different parts of the song happen — like when the drums kick in, when the chorus arrives, or when an instrumental break happens.<br/><br/>
+                        • Producers think about the dynamics — how the song builds up and cools down to keep the listener interested.<br/><br/>
+                        • Sound design involves choosing or creating the right sounds — for example, picking a warm piano, a powerful drum kit, or crafting a unique synth lead.<br/><br/>
+                        • They might add additional layers like background vocals, electronic effects, or real-world sounds (like claps, snaps, or ambient textures).<br/><br/>
+                        The goal here is to make the song exciting, emotional, and to tell a story through sound.
                       </Typography>
                     </ScrollSection>
                   </Grid>
@@ -473,35 +498,48 @@ const MusicProducingPage = () => {
         </Box>
 
         {/* Mixing and Mastering Section */}
-        <Box my={16}>
+        <Box my={isMobile ? 10 : 16}>
           <ScrollSection direction="up">
-            
-            
-            <Grid container alignItems="center" spacing={6}>
+            <Grid container alignItems="center" spacing={isMobile ? 4 : 6}>
               {isMobile ? (
                 <>
                   <Grid item xs={12}>
+                    <ScrollSection direction="left" delay={0.3}>
+                      <Typography variant={isSmallScreen ? "h6" : "h5"} mb={2} color="#3a9bdc">
+                        <TextReveal>3. Production and Refinement</TextReveal>
+                      </Typography>
+                    </ScrollSection>
                     <EnhancedImage 
                       src={mixingConsole} 
                       alt="Audio mixing console"
                       index={3}
                     />
+                    <ScrollSection direction="right" delay={0.4}>
+                      <Typography variant="body1" sx={{ fontSize: isSmallScreen ? '1rem' : '1.1rem', lineHeight: 1.7, mt: 2 }}>
+                        In this final producing stage, everything gets cleaned up, polished, and finalized as much as possible before moving into technical processes like mixing.<br/><br/>
+                        • The producer listens carefully to how the elements blend together.<br/><br/>
+                        • They may fine-tune the volume of instruments, adjust how certain sounds interact, and make sure nothing feels too empty or too crowded.<br/><br/>
+                        • Sometimes, parts get added or removed to make the song tighter and more effective.<br/><br/>
+                        • This stage also involves making rough versions (called rough mixes) so the song can be shared with mixing engineers later.<br/><br/>
+                        At the end of the production phase, the song should already sound very close to a finished track — full, emotional, and professional — even before mixing and mastering happen.
+                      </Typography>
+                    </ScrollSection>
                   </Grid>
                 </>
-                  ) : (
+              ) : (
                 <>
                   <Grid item md={6} order={{ md: 2 }}>
                     <ScrollSection direction="right" delay={0.3}>
-                    <Typography variant="h5" mb={2} color="#3a9bdc">
-                    <TextReveal>3. Production and Refinement</TextReveal>
+                      <Typography variant="h5" mb={2} color="#3a9bdc">
+                        <TextReveal>3. Production and Refinement</TextReveal>
                       </Typography>
                       <Typography variant="body1" sx={{ fontSize: '1.1rem', lineHeight: 1.7 }}>
-                    In this final producing stage, everything gets cleaned up, polished, and finalized as much as possible before moving into technical processes like mixing.<br/><br/>
-                    • The producer listens carefully to how the elements blend together.<br/><br/>
-                    • They may fine-tune the volume of instruments, adjust how certain sounds interact, and make sure nothing feels too empty or too crowded.<br/><br/>
-                    • Sometimes, parts get added or removed to make the song tighter and more effective.<br/><br/>
-                    • This stage also involves making rough versions (called rough mixes) so the song can be shared with mixing engineers later.<br/><br/>
-                    At the end of the production phase, the song should already sound very close to a finished track — full, emotional, and professional — even before mixing and mastering happen.
+                        In this final producing stage, everything gets cleaned up, polished, and finalized as much as possible before moving into technical processes like mixing.<br/><br/>
+                        • The producer listens carefully to how the elements blend together.<br/><br/>
+                        • They may fine-tune the volume of instruments, adjust how certain sounds interact, and make sure nothing feels too empty or too crowded.<br/><br/>
+                        • Sometimes, parts get added or removed to make the song tighter and more effective.<br/><br/>
+                        • This stage also involves making rough versions (called rough mixes) so the song can be shared with mixing engineers later.<br/><br/>
+                        At the end of the production phase, the song should already sound very close to a finished track — full, emotional, and professional — even before mixing and mastering happen.
                       </Typography>
                     </ScrollSection>
                   </Grid>
@@ -519,7 +557,7 @@ const MusicProducingPage = () => {
         </Box>
         
         {/* Call to action section with floating elements */}
-        <Box my={16} position="relative" py={8}>
+        <Box my={isMobile ? 10 : 16} position="relative" py={isMobile ? 6 : 8}>
           <Box 
             sx={{ 
               position: 'absolute',
@@ -531,13 +569,13 @@ const MusicProducingPage = () => {
               zIndex: 0
             }}
           >
-            {[...Array(20)].map((_, i) => (
+            {[...Array(isMobile ? 10 : 20)].map((_, i) => (
               <motion.div
                 key={i}
                 style={{
                   position: 'absolute',
-                  width: Math.random() * 100 + 50,
-                  height: Math.random() * 100 + 50,
+                  width: Math.random() * (isMobile ? 50 : 100) + 50,
+                  height: Math.random() * (isMobile ? 50 : 100) + 50,
                   borderRadius: '50%',
                   background: `rgba(${Math.floor(Math.random() * 100 + 50)}, ${Math.floor(Math.random() * 100 + 100)}, ${Math.floor(Math.random() * 155 + 100)}, 0.1)`,
                   filter: 'blur(40px)',
@@ -560,17 +598,29 @@ const MusicProducingPage = () => {
           
           <Box position="relative" zIndex={1} textAlign="center">
             <ScrollSection direction="scale">
-              <Typography variant="h3" mb={4}>
+              <Typography variant={isMobile ? (isSmallScreen ? "h4" : "h3") : "h3"} mb={4} >
                 <TextReveal>Ready to start your music production journey?</TextReveal>
               </Typography>
               
-              <Typography variant="body1" mb={6} sx={{ maxWidth: '700px', mx: 'auto' }}>
+              <Typography variant="body1" mb={6} sx={{ 
+                maxWidth: '700px', 
+                mx: 'auto',
+                fontSize: isSmallScreen ? '1rem' : '1.1rem',
+                px: isMobile ? 2 : 0
+              }}>
                 From composing and arranging to mixing and mastering, music production is a rewarding creative pursuit that combines technical skill with artistic vision. Start creating your own professional tracks today.
               </Typography>
               
               <MagneticElement>
-                <LiquidButton sx={{ display: 'inline-block' }}>
-                  <Typography variant="button" sx={{ position: 'relative', zIndex: 1 }}>
+                <LiquidButton sx={{ 
+                  display: 'inline-block',
+                  padding: isSmallScreen ? '12px 24px' : '16px 32px'
+                }}>
+                  <Typography variant="button" sx={{ 
+                    position: 'relative', 
+                    zIndex: 1,
+                    fontSize: isSmallScreen ? '0.875rem' : '1rem'
+                  }}>
                     Get Started Now
                   </Typography>
                 </LiquidButton>
