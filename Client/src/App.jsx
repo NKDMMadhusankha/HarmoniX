@@ -28,6 +28,8 @@ import LyricistDashboard from "./Dashboard/LyricistsDashboard";
 
 import AboutProducing from "./Landing/AboutProducing";
 
+import ResetPassword from "./Components/ResetPassword";
+
 const App = () => {
   return (
     <Router>
@@ -43,6 +45,8 @@ const App = () => {
         <Route path="/musician/register" element={<MusicianRegistrationForm />} />
 
         <Route path="/about-producing" element={<AboutProducing />} />
+
+        <Route path="/reset-password/:token" element={<ResetPassword />} />
 
 
 

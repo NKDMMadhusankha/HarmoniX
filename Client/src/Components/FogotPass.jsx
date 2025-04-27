@@ -57,7 +57,7 @@ const ForgotPassword = () => {
         {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
 
         <Box component="form" onSubmit={handleSubmit}>
-          <Typography variant="subtitle1" sx={{ textAlign: 'left', mb: 1 }}>Email</Typography>
+          <Typography variant="subtitle1" sx={{ textAlign: 'left', mb: 1}}>Email</Typography>
           <TextField
             fullWidth
             placeholder="Enter your email"
@@ -65,7 +65,7 @@ const ForgotPassword = () => {
             onChange={(e) => setEmail(e.target.value)}
             variant="outlined"
             size="small"
-            sx={{ mb: 3, input: { color: 'white' } }}
+            sx={{ mb: 3, input: { color: 'white'} }}
           />
 
           <Button type="submit" fullWidth variant="contained" sx={{ mt: 1, py: 1.2 }} disabled={loading}>
