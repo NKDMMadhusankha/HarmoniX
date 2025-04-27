@@ -96,7 +96,7 @@ const HarmoniXNavbar = () => {
   const featuresButtonRef = useRef(null);
   const menuTimeoutRef = useRef(null);
   
-  const featureOptions = ['Mixing Engineer', 'Mastering Engineer', 'Music Producer', 'Recording Studio','lyricist', 'Singers & Vocalists'];
+  const featureOptions = ['Mixing Engineer', 'Mastering Engineer', 'Music Producer', 'Recording Studios','lyricist',]; //'Singers & Vocalists'
   const featureIcons = [<TuneIcon />, <GraphicEqIcon />, <QueueMusicIcon />, <HomeWorkIcon />, <LyricsIcon />, <PersonIcon />];
   
   const navItemsWithoutFeatures = ['Resources', 'Support', 'About Us', 'Contact'];

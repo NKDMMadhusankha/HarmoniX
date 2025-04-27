@@ -27,6 +27,8 @@ const ContactPage = () => {
   });
 
   const [loaded, setLoaded] = useState(false);
+  const [showError, setShowError] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
 
   useEffect(() => {
     setLoaded(true);
@@ -40,20 +42,56 @@ const ContactPage = () => {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
+    // Validation: Check if any field is empty or checkbox is not checked
+    if (
+      !formData.firstName.trim() ||
+      !formData.lastName.trim() ||
+      !formData.email.trim() ||
+      !formData.message.trim() ||
+      !formData.agreeTopolicies
+    ) {
+      setErrorMessage('Please fill in all fields and agree to the policies.');
+      setShowError(true);
+      setShowSuccess(false);
+      // Hide error after 3 seconds
+      setTimeout(() => setShowError(false), 3000);
+      return;
+    }
+
     // Add submit animation
     const formElement = e.target;
     formElement.classList.add('form-submitted');
-    
+
+    try {
+      // Replace with your backend call
+      const response = await fetch('http://localhost:5000/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      });
+
+      if (response.ok) {
+        setShowSuccess(true);
+        setShowError(false);
+        setTimeout(() => setShowSuccess(false), 3000);
+      } else {
+        setErrorMessage('Something went wrong. Please try again.');
+        setShowError(true);
+        setShowSuccess(false);
+        setTimeout(() => setShowError(false), 3000);
+      }
+    } catch (error) {
+      setErrorMessage('Network error. Please try again.');
+      setShowError(true);
+      setShowSuccess(false);
+      setTimeout(() => setShowError(false), 3000);
+    }
+
     setTimeout(() => {
       formElement.classList.remove('form-submitted');
-      console.log(formData);
-      
-      // Show success message animation
-      setShowSuccess(true);
-      setTimeout(() => setShowSuccess(false), 3000);
     }, 500);
   };
 
@@ -271,16 +309,30 @@ const ContactPage = () => {
                     }
                   }}
                 >
-                  {/* Success message animation */}
+                  {/* Success Message */}
                   <Zoom in={showSuccess} timeout={500} style={{ position: 'absolute', zIndex: 10, top: -50, left: 0, right: 0 }}>
-                    <Box sx={{ 
-                      backgroundColor: 'rgba(46, 125, 50, 0.9)', 
-                      p: 2, 
+                    <Box sx={{
+                      backgroundColor: 'rgba(46, 125, 50, 0.9)', // green
+                      p: 1,
                       borderRadius: 1,
                       boxShadow: '0 4px 20px rgba(0,0,0,0.2)',
                     }}>
                       <Typography variant="body1" align="center">
                         Message sent successfully!
+                      </Typography>
+                    </Box>
+                  </Zoom>
+
+                  {/* Error Message */}
+                  <Zoom in={showError} timeout={500} style={{ position: 'absolute', zIndex: 10, top: -50, left: 0, right: 0 }}>
+                    <Box sx={{
+                      backgroundColor: 'rgba(211, 47, 47, 0.9)', // red
+                      p: 1,
+                      borderRadius: 1,
+                      boxShadow: '0 4px 20px rgba(0,0,0,0.2)',
+                    }}>
+                      <Typography variant="body1" align="center">
+                        {errorMessage}
                       </Typography>
                     </Box>
                   </Zoom>

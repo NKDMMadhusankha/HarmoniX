@@ -5,6 +5,7 @@ const cors = require('cors');
 const authController = require('./controllers/authController');
 const authRoutes = require('./routes/authRoutes'); // Make sure this path is correct
 const musicianAuthRoutes = require('./routes/musicianAuthRoutes');
+const contactRoute = require('./routes/contact');
 
 // Load environment variables
 dotenv.config();
@@ -45,13 +46,10 @@ app.post('/api/auth/register', authController.register);
 app.use('/api/auth', authRoutes); // This must match your frontend request
 app.use('/api/musician', musicianAuthRoutes);
 
-
 const musicianProfileRoutes = require('./routes/musicianProfileRoutes');
 app.use('/api/musician', musicianProfileRoutes);
 
-
-
-
+app.use('/api/contact', contactRoute);
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
