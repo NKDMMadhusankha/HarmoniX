@@ -1,7 +1,12 @@
 import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+
+
 import Register from "./components/Register"; 
 import Login from "./Components/Login";
+import ResetPassword from "./Components/ResetPassword";
+
+
 import Home from "./Home";
 import AboutUs from "./Components/AboutUs";
 import ContactUs from "./Components/ContactUs";
@@ -9,10 +14,12 @@ import RegistationCatogary from "./Auth/RegistationCatogary";
 import MusicianRegistrationForm from "./Auth/MusicianRegister";
 import ForgotPassword from "./Components/FogotPass";
 
+
 import MusicProducers from "./Pages/MusicProducers";
 import Mastering from "./Pages/Mastering";
 import Mixing from "./Pages/Mixing";
 import Lyricists from "./Pages/Lyricists";
+
 
 import MusicProfile from "./Profiles/MusicProfile";
 import MixingProfile from "./Profiles/MixingProfile";
@@ -28,7 +35,7 @@ import LyricistDashboard from "./Dashboard/LyricistsDashboard";
 
 import AboutProducing from "./Landing/AboutProducing";
 
-import ResetPassword from "./Components/ResetPassword";
+
 
 const App = () => {
   return (
@@ -36,19 +43,18 @@ const App = () => {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/home" element={<Home />} />
+
         <Route path="/register" element={<Register />} />
         <Route path="/login" element={<Login />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password/:token" element={<ResetPassword />} />
+
         <Route path="/about" element={<AboutUs />} />
         <Route path="/contact" element={<ContactUs />} />
         <Route path="/catogary" element={<RegistationCatogary />} />
         <Route path="/musician/register" element={<MusicianRegistrationForm />} />
 
         <Route path="/about-producing" element={<AboutProducing />} />
-
-        <Route path="/reset-password/:token" element={<ResetPassword />} />
-
-
 
 
         {/* Musicians Profile */}
@@ -63,6 +69,10 @@ const App = () => {
 
         <Route path="/lyricistspro" element={<LyricistsProfile />} />
         <Route path="/music/lyricist/:id" element={<LyricistsProfile />} />
+
+
+        
+
 
 
         {/* Musicians Pages */}

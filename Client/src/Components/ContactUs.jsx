@@ -76,7 +76,18 @@ const ContactPage = () => {
       if (response.ok) {
         setShowSuccess(true);
         setShowError(false);
-        setTimeout(() => setShowSuccess(false), 3000);
+        // Reset form data
+        setFormData({
+          firstName: '',
+          lastName: '',
+          email: '',
+          message: '',
+          agreeTopolicies: false
+        });
+        // Refresh page after 3 seconds
+        setTimeout(() => {
+          window.location.reload();
+        }, 3000);
       } else {
         setErrorMessage('Something went wrong. Please try again.');
         setShowError(true);
