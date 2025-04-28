@@ -128,7 +128,7 @@ const MusicServices = () => {
       title: 'Lyricists',
       description: 'Hire professionals who specialize in writing lyrics across various genres, ensuring your song tells a compelling story.',
       image: ArtistBrandingImg,
-      link: '/artist-branding'
+      link: '/music/lyricists'
     }
   ], []);
 

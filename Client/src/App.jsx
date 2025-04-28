@@ -35,6 +35,8 @@ import LyricistDashboard from "./Dashboard/LyricistsDashboard";
 
 import AboutProducing from "./Landing/AboutProducing";
 
+import StudiosProfile from "./Profiles/StudiosProfile";
+
 
 
 const App = () => {
@@ -70,7 +72,7 @@ const App = () => {
         <Route path="/lyricistspro" element={<LyricistsProfile />} />
         <Route path="/music/lyricist/:id" element={<LyricistsProfile />} />
 
-
+        <Route path="/studiopro" element={<StudiosProfile />} />
         
 
 
