@@ -40,32 +40,34 @@ import { LocalizationProvider, DateCalendar } from '@mui/x-date-pickers';
 import Navbar from '../Components/Navbar';
 import Footer from '../Components/Footer';
 
-// Create a light theme with teal accents
-const lightTheme = createTheme({
+// Create a dark theme with teal accents
+const darkTheme = createTheme({
   palette: {
-    mode: 'light',
+    mode: 'dark',
     primary: {
-      main: '#009688', // Teal color
+      main: '#00BCD4', // Brighter cyan for better visibility on dark
     },
     secondary: {
-      main: '#00BCD4', // Cyan color for accents
+      main: '#4DD0E1', // Lighter cyan for accents
     },
     background: {
-      default: '#ffffff',
-      paper: '#ffffff',
+      default: '#000000', // Black background as requested
+      paper: '#121212', // Dark paper background
     },
     text: {
-      primary: '#333333',
-      secondary: '#666666',
+      primary: '#ffffff', // White text as requested
+      secondary: '#cccccc', // Light gray for secondary text
     },
   },
   typography: {
     fontFamily: "'Roboto', 'Helvetica', 'Arial', sans-serif",
     h4: {
       fontWeight: 600,
+      color: '#ffffff', // Ensuring headers are white
     },
     h5: {
       fontWeight: 500,
+      color: '#ffffff', // Ensuring headers are white
     }
   },
   components: {
@@ -80,7 +82,7 @@ const lightTheme = createTheme({
         containedPrimary: {
           background: 'linear-gradient(45deg, #009688 30%, #00BCD4 90%)',
           '&:hover': {
-            background: 'linear-gradient(45deg, #00897b 30%, #00ACC1 90%)',
+            background: 'linear-gradient(45deg, #00796b 30%, #0097A7 90%)',
           },
         },
       },
@@ -89,7 +91,8 @@ const lightTheme = createTheme({
       styleOverrides: {
         root: {
           borderRadius: 12,
-          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
+          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.5)',
+          backgroundColor: '#121212', // Dark card background
         }
       }
     },
@@ -97,6 +100,26 @@ const lightTheme = createTheme({
       styleOverrides: {
         root: {
           borderRadius: 12,
+          backgroundColor: '#121212', // Dark paper background
+        }
+      }
+    },
+    MuiOutlinedInput: {
+      styleOverrides: {
+        root: {
+          '& fieldset': {
+            borderColor: 'rgba(255, 255, 255, 0.23)', // Lighter border for inputs
+          },
+          '&:hover fieldset': {
+            borderColor: 'rgba(255, 255, 255, 0.5)', // Lighter border on hover
+          },
+        }
+      }
+    },
+    MuiDivider: {
+      styleOverrides: {
+        root: {
+          backgroundColor: 'rgba(255, 255, 255, 0.12)', // Lighter divider
         }
       }
     }
@@ -195,7 +218,7 @@ const StudioProfile = () => {
   };
   
   return (
-    <ThemeProvider theme={lightTheme}>
+    <ThemeProvider theme={darkTheme}>
       <Box sx={{ bgcolor: 'background.default', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
         <Navbar />
         <Container maxWidth="lg">
@@ -205,12 +228,12 @@ const StudioProfile = () => {
               MERASIC Recording Studio
             </Typography>
             <Box>
-              <IconButton aria-label="share" sx={{ color: 'text.secondary' }}>
+              {/* <IconButton aria-label="share" sx={{ color: 'text.secondary' }}>
                 <Share />
               </IconButton>
               <IconButton aria-label="save" sx={{ color: 'text.secondary' }}>
                 <Bookmark />
-              </IconButton>
+              </IconButton> */}
             </Box>
           </Box>
 
@@ -226,7 +249,7 @@ const StudioProfile = () => {
                 textDecoration: 'none',
                 '&:hover': {
                   textDecoration: 'underline',
-                  color: 'primary.main'
+                  color: 'primary.light'
                 }
               }}
             >
@@ -321,7 +344,7 @@ const StudioProfile = () => {
                   </Grid>
                 ))}
                 
-                {/* View all button with image background as requested - with darker overlay */}
+                {/* View all button with image background - with darker overlay */}
                 <Grid item xs={6} md={4}>
                   <Box
                     sx={{
@@ -344,7 +367,7 @@ const StudioProfile = () => {
                         left: 0,
                         right: 0,
                         bottom: 0,
-                        backgroundColor: 'rgba(0, 0, 0, 0.7)', // Darker overlay (0.7 instead of 0.5)
+                        backgroundColor: 'rgba(0, 0, 0, 0.7)', // Darker overlay
                       }
                     }}
                     onClick={() => openGallery(0)}
@@ -383,7 +406,7 @@ const StudioProfile = () => {
           <Grid container spacing={4}>
             {/* Left Column - Studio Info */}
             <Grid item xs={12} md={7}>
-              <Paper sx={{ p: 3, mb: 4, bgcolor: 'background.paper', boxShadow: '0 4px 12px rgba(0, 0, 0, 0.05)' }}>
+              <Paper sx={{ p: 3, mb: 4, bgcolor: 'background.paper', boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)' }}>
                 <Typography variant="h5" component="h2" sx={{ mb: 2, color: 'text.primary' }}>
                   About the Studio
                 </Typography>
@@ -460,7 +483,7 @@ const StudioProfile = () => {
             
             {/* Right Column - Booking Widget */}
             <Grid item xs={12} md={5}>
-              <Paper sx={{ p: 3, position: 'sticky', top: 20, bgcolor: 'background.paper', boxShadow: '0 4px 12px rgba(0, 0, 0, 0.05)',mb: 4 }}>
+              <Paper sx={{ p: 3, position: 'sticky', top: 20, bgcolor: 'background.paper', boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)', mb: 4 }}>
                 <Typography variant="h5" component="h2" sx={{ mb: 3, color: 'text.primary' }}>
                   For Booking
                 </Typography>
@@ -482,6 +505,16 @@ const StudioProfile = () => {
                         </InputAdornment>
                       )
                     }}
+                    sx={{
+                      '& .MuiOutlinedInput-root': {
+                        '& fieldset': {
+                          borderColor: 'rgba(255, 255, 255, 0.23)',
+                        },
+                        '&:hover fieldset': {
+                          borderColor: 'rgba(255, 255, 255, 0.5)',
+                        },
+                      }
+                    }}
                   />
                   
                   {showCalendar && (
@@ -494,6 +527,18 @@ const StudioProfile = () => {
                             setShowCalendar(false);
                           }}
                           disablePast
+                          sx={{
+                            color: 'text.primary',
+                            '& .MuiPickersDay-root': {
+                              color: 'text.primary',
+                            },
+                            '& .MuiPickersDay-today': {
+                              borderColor: 'primary.main',
+                            },
+                            '& .Mui-selected': {
+                              backgroundColor: 'primary.main',
+                            }
+                          }}
                         />
                       </LocalizationProvider>
                     </Paper>
@@ -509,6 +554,19 @@ const StudioProfile = () => {
                       fullWidth
                       value={selectedStartTime}
                       onChange={(e) => setSelectedStartTime(e.target.value)}
+                      sx={{
+                        '& .MuiInputLabel-root': {
+                          color: 'text.secondary',
+                        },
+                        '& .MuiOutlinedInput-root': {
+                          '& fieldset': {
+                            borderColor: 'rgba(255, 255, 255, 0.23)',
+                          },
+                          '&:hover fieldset': {
+                            borderColor: 'rgba(255, 255, 255, 0.5)',
+                          },
+                        }
+                      }}
                     >
                       {timeSlots.map((option) => (
                         <MenuItem key={option.value} value={option.value}>
@@ -525,6 +583,19 @@ const StudioProfile = () => {
                       value={selectedEndTime}
                       onChange={(e) => setSelectedEndTime(e.target.value)}
                       disabled={!selectedStartTime}
+                      sx={{
+                        '& .MuiInputLabel-root': {
+                          color: 'text.secondary',
+                        },
+                        '& .MuiOutlinedInput-root': {
+                          '& fieldset': {
+                            borderColor: 'rgba(255, 255, 255, 0.23)',
+                          },
+                          '&:hover fieldset': {
+                            borderColor: 'rgba(255, 255, 255, 0.5)',
+                          },
+                        }
+                      }}
                     >
                       {timeSlots
                         .filter((slot) => {
@@ -549,11 +620,11 @@ const StudioProfile = () => {
                     alignItems: 'center', 
                     mb: 3,
                     p: 1,
-                    bgcolor: 'rgba(255, 193, 7, 0.1)',
+                    bgcolor: 'rgba(255, 193, 7, 0.15)', // Darker yellow background for dark mode
                     borderRadius: 1
                   }}
                 >
-                  <Info sx={{ mr: 1, color: 'warning.main' }} />
+                  <Info sx={{ mr: 1, color: 'warning.light' }} /> {/* Lighter warning color for dark mode */}
                   <Typography variant="body2" sx={{ color: 'text.primary' }}>
                     2 hr minimum
                     <Typography variant="caption" display="block" sx={{ color: 'text.secondary' }}>
@@ -563,7 +634,7 @@ const StudioProfile = () => {
                 </Box>
                 
                 {/* Price Information */}
-                <Divider sx={{ mb: 2 }} />
+                <Divider sx={{ mb: 2, backgroundColor: 'rgba(255, 255, 255, 0.12)' }} />
                 <Box sx={{ mb: 2, display: 'flex', justifyContent: 'space-between' }}>
                   <Typography variant="body1" sx={{ color: 'text.primary' }}>
                     Rate
@@ -601,14 +672,14 @@ const StudioProfile = () => {
           </Grid>
         </Container>
         
-        {/* Full Screen Gallery Modal - Updated with actual images and darker backdrop */}
+        {/* Full Screen Gallery Modal - Already has dark theme */}
         <Dialog
           open={galleryOpen}
           onClose={closeGallery}
           maxWidth="lg"
           fullWidth
           BackdropProps={{
-            sx: { backgroundColor: 'rgba(0, 0, 0, 0.95)' } // Darker background
+            sx: { backgroundColor: 'rgba(0, 0, 0, 0.95)' } // Already dark
           }}
           PaperProps={{
             sx: { 
@@ -628,7 +699,7 @@ const StudioProfile = () => {
                 position: 'absolute', 
                 top: 16, 
                 right: 16, 
-                bgcolor: 'rgba(0,0,0,0.6)', // Darker button
+                bgcolor: 'rgba(0,0,0,0.6)',
                 color: 'white',
                 '&:hover': { bgcolor: 'rgba(0,0,0,0.8)' },
                 zIndex: 10
@@ -654,7 +725,7 @@ const StudioProfile = () => {
                 sx={{ 
                   position: 'absolute', 
                   left: 16, 
-                  bgcolor: 'rgba(0,0,0,0.6)', // Darker button
+                  bgcolor: 'rgba(0,0,0,0.6)',
                   color: 'white',
                   '&:hover': { bgcolor: 'rgba(0,0,0,0.8)' }
                 }}
@@ -667,7 +738,7 @@ const StudioProfile = () => {
                 sx={{ 
                   position: 'absolute', 
                   right: 16, 
-                  bgcolor: 'rgba(0,0,0,0.6)', // Darker button
+                  bgcolor: 'rgba(0,0,0,0.6)',
                   color: 'white',
                   '&:hover': { bgcolor: 'rgba(0,0,0,0.8)' }
                 }}
@@ -683,7 +754,7 @@ const StudioProfile = () => {
                   left: '50%', 
                   transform: 'translateX(-50%)', 
                   color: 'white',
-                  bgcolor: 'rgba(0,0,0,0.7)', // Darker counter background
+                  bgcolor: 'rgba(0,0,0,0.7)',
                   px: 2,
                   py: 0.5,
                   borderRadius: 1

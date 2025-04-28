@@ -70,7 +70,7 @@ const Loader = () => {
           fontWeight: "400", // Slightly lighter text for a modern feel
         }}
       >
-        Please wait...
+        Please wait ...
       </Typography>
 
       {/* Success Popup Message (Snackbar) */}
