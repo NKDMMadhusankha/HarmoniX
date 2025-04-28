@@ -19,6 +19,7 @@ import MusicProducers from "./Pages/MusicProducers";
 import Mastering from "./Pages/Mastering";
 import Mixing from "./Pages/Mixing";
 import Lyricists from "./Pages/Lyricists";
+import Studios from "./Pages/Studios";
 
 
 import MusicProfile from "./Profiles/MusicProfile";
@@ -82,6 +83,7 @@ const App = () => {
         <Route path="/music/mastering" element={<Mastering />} />
         <Route path="/music/mixing" element={<Mixing />} />
         <Route path="/music/lyricists" element={<Lyricists />} />
+        <Route path="/music/studios" element={<Studios />} />
 
 
 
