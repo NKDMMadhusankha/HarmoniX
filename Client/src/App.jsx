@@ -32,6 +32,7 @@ import MusicProDashbord from "./Dashboard/MusicProDashboard";
 import MixingDashboard from "./Dashboard/MixingDashboard";
 import MasteringDashboard from "./Dashboard/MasteringDashboard";
 import LyricistDashboard from "./Dashboard/LyricistsDashboard";
+import StudioDashboard from "./Dashboard/StudioDashboard";
 
 
 import AboutProducing from "./Landing/AboutProducing";
@@ -92,6 +93,7 @@ const App = () => {
         <Route path="/mixing/dashboard" element={<MixingDashboard />} />
         <Route path="/mastering/dashboard" element={<MasteringDashboard />} />
         <Route path="/lyricist/dashboard" element={<LyricistDashboard />} />
+        <Route path="/studios/dashboard" element={<StudioDashboard />} />
         
         
       </Routes>

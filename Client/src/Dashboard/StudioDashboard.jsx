@@ -1,0 +1,1406 @@
+import React, { useState } from 'react';
+import { 
+  Box, 
+  Typography, 
+  Grid, 
+  Paper, 
+  Button, 
+  Divider, 
+  Card, 
+  CardMedia, 
+  CardContent,
+  Container,
+  TextField,
+  IconButton,
+  MenuItem,
+  InputAdornment,
+  useTheme,
+  createTheme,
+  ThemeProvider,
+  Modal,
+  Dialog,
+  DialogContent,
+  Backdrop,
+  Link,
+  Tabs,
+  Tab,
+  Snackbar,
+  Alert,
+  Chip
+} from '@mui/material';
+import { 
+  ArrowBackIos, 
+  ArrowForwardIos, 
+  Share, 
+  Bookmark, 
+  EventAvailable, 
+  AccessTime, 
+  Info,
+  KeyboardArrowDown,
+  Close,
+  LocationOn,
+  Edit,
+  Save,
+  Cancel,
+  Add,
+  Delete
+} from '@mui/icons-material';
+import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
+import { LocalizationProvider, DateCalendar } from '@mui/x-date-pickers';
+import Navbar from '../Components/Navbar';
+import Footer from '../Components/Footer';
+
+// Create a dark theme with teal accents
+const darkTheme = createTheme({
+  palette: {
+    mode: 'dark',
+    primary: {
+      main: '#00BCD4', // Brighter cyan for better visibility on dark
+    },
+    secondary: {
+      main: '#4DD0E1', // Lighter cyan for accents
+    },
+    background: {
+      default: '#000000', // Black background as requested
+      paper: '#121212', // Dark paper background
+    },
+    text: {
+      primary: '#ffffff', // White text as requested
+      secondary: '#cccccc', // Light gray for secondary text
+    },
+  },
+  typography: {
+    fontFamily: "'Roboto', 'Helvetica', 'Arial', sans-serif",
+    h4: {
+      fontWeight: 600,
+      color: '#ffffff', // Ensuring headers are white
+    },
+    h5: {
+      fontWeight: 500,
+      color: '#ffffff', // Ensuring headers are white
+    }
+  },
+  components: {
+    MuiButton: {
+      styleOverrides: {
+        root: {
+          borderRadius: 8,
+          textTransform: 'none',
+          fontWeight: 600,
+          padding: '10px 24px',
+        },
+        containedPrimary: {
+          background: 'linear-gradient(45deg, #009688 30%, #00BCD4 90%)',
+          '&:hover': {
+            background: 'linear-gradient(45deg, #00796b 30%, #0097A7 90%)',
+          },
+        },
+      },
+    },
+    MuiCard: {
+      styleOverrides: {
+        root: {
+          borderRadius: 12,
+          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.5)',
+          backgroundColor: '#121212', // Dark card background
+        }
+      }
+    },
+    MuiPaper: {
+      styleOverrides: {
+        root: {
+          borderRadius: 12,
+          backgroundColor: '#121212', // Dark paper background
+        }
+      }
+    },
+    MuiOutlinedInput: {
+      styleOverrides: {
+        root: {
+          '& fieldset': {
+            borderColor: 'rgba(255, 255, 255, 0.23)', // Lighter border for inputs
+          },
+          '&:hover fieldset': {
+            borderColor: 'rgba(255, 255, 255, 0.5)', // Lighter border on hover
+          },
+        }
+      }
+    },
+    MuiDivider: {
+      styleOverrides: {
+        root: {
+          backgroundColor: 'rgba(255, 255, 255, 0.12)', // Lighter divider
+        }
+      }
+    }
+  }
+});
+
+// Updated studio images for gallery with online images
+const initialStudioImages = [
+  'https://img.freepik.com/free-photo/music-composer-showing-thumbs-up_107420-96142.jpg?t=st=1745860885~exp=1745864485~hmac=e3e336bf3ea449ed2226f7541c1af4bcff9d2683fa93404a9bb2882e6f4fc520&w=996',
+  'https://img.freepik.com/free-photo/male-audio-engineer-using-sound-mixer_107420-96112.jpg?t=st=1745860587~exp=1745864187~hmac=2bdd10df13166d72178711fd770d15390075182a96fe6a326ddf8e31ce0e4f08&w=996',
+  'https://img.freepik.com/free-photo/young-asian-duet-singers-with-microphone-recording-song-record-music-studio_627829-3771.jpg?t=st=1745861201~exp=1745864801~hmac=b42097dfa43f6a76109f7f60e98c163d9de20b3cddefc16db635d7af8db526a9&w=996',
+  'https://img.freepik.com/free-photo/male-audio-engineer-using-sound-mixer_107420-96112.jpg?t=st=1745860587~exp=1745864187~hmac=2bdd10df13166d72178711fd770d15390075182a96fe6a326ddf8e31ce0e4f08&w=996',
+  'https://img.freepik.com/free-photo/male-audio-engineer-using-sound-mixer_107420-96112.jpg?t=st=1745860587~exp=1745864187~hmac=2bdd10df13166d72178711fd770d15390075182a96fe6a326ddf8e31ce0e4f08&w=996'
+];
+
+// Available time slots
+const timeSlots = [
+  { value: '09:00', label: '9:00 AM' },
+  { value: '10:00', label: '10:00 AM' },
+  { value: '11:00', label: '11:00 AM' },
+  { value: '12:00', label: '12:00 PM' },
+  { value: '13:00', label: '1:00 PM' },
+  { value: '14:00', label: '2:00 PM' },
+  { value: '15:00', label: '3:00 PM' },
+  { value: '16:00', label: '4:00 PM' },
+  { value: '17:00', label: '5:00 PM' },
+  { value: '18:00', label: '6:00 PM' },
+  { value: '19:00', label: '7:00 PM' },
+  { value: '20:00', label: '8:00 PM' },
+  { value: '21:00', label: '9:00 PM' },
+  { value: '22:00', label: '10:00 PM' },
+];
+
+// Initial studio gear list
+const initialStudioGear = [
+  { category: 'Interface', items: ['UAD Apollo Twin X', 'SSL 2+'] },
+  { category: 'Microphones', items: ['Neumann TLM 103', 'Shure SM7B', 'AKG C414'] },
+  { category: 'Monitors', items: ['Yamaha HS8', 'Avantone Mixcubes'] },
+  { category: 'Preamps', items: ['Neve 1073 SPX', 'Warm Audio WA8000'] },
+  { category: 'Compressors', items: ['Tube-Tech CL1B', 'Wesaudio Dione', 'Neve 33609'] },
+  { category: 'EQ', items: ['Wesaudio Prometheus', 'Pultec EQP-1A'] },
+  { category: 'Reverb', items: ['Lexicon PCM96', 'Bricasti M7'] },
+  { category: 'Monitoring', items: ['Dangerous Music Monitor ST', 'Barefoot Footprint 01'] },
+];
+
+const StudioProfileDashboard = () => {
+  // State for edit mode
+  const [editMode, setEditMode] = useState(false);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [selectedDate, setSelectedDate] = useState(new Date());
+  const [selectedStartTime, setSelectedStartTime] = useState('');
+  const [selectedEndTime, setSelectedEndTime] = useState('');
+  const [showCalendar, setShowCalendar] = useState(false);
+  const [galleryOpen, setGalleryOpen] = useState(false);
+  const [galleryImageIndex, setGalleryImageIndex] = useState(0);
+  const [activeTab, setActiveTab] = useState(0);
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState('');
+  const [snackbarSeverity, setSnackbarSeverity] = useState('success');
+  
+  // Editable fields state
+  const [studioData, setStudioData] = useState({
+    name: 'MERASIC Recording Studio',
+    address: '149 Mill Road, Katubedda, Moratuwa',
+    description: `Welcome to AudioHaus, our modern recording studio located in the heart of Moratuwa. 
+    We've designed this space specifically for artists, musicians and producers looking to create 
+    high-quality projects. Our studio combines cutting-edge technology and analog equipment to provide an 
+    exceptional recording experience with a unique aesthetic.`,
+    services: [
+      'Recording: Our studio is perfectly equipped for vocal recording and composition.',
+      'Mixing: Use our facilities to mix your tracks with professional quality, with the help of our experienced sound engineers.',
+      'Mastering: Final polish for your tracks using our high-end equipment.'
+    ],
+    recordingBooths: `Soundproofed and acoustically treated booths available for capturing vocals with exceptional precision. 
+    Our isolation booth features acoustic treatment for clean recordings.`,
+    loungeArea: `A relaxation lounge with ambient lighting available for breaks between recording sessions, 
+    equipped with coffee machine, keyboard setup, comfortable seating, and amenities to keep you comfortable 
+    during long sessions.`,
+    features: [
+      'Professional acoustic treatment',
+      'LED mood lighting throughout the space',
+      'Climate controlled environment',
+      'High-speed internet',
+      'Instrument collection including guitars',
+      'Producer workstation with industry-standard software'
+    ],
+    hourlyRate: 5000,
+    minimumDuration: 2
+  });
+  
+  const [studioImages, setStudioImages] = useState(initialStudioImages);
+  const [studioGear, setStudioGear] = useState(initialStudioGear);
+  const [newImageUrl, setNewImageUrl] = useState('');
+  const [newGearCategory, setNewGearCategory] = useState('');
+  const [newGearItem, setNewGearItem] = useState('');
+  const [newService, setNewService] = useState('');
+  const [newFeature, setNewFeature] = useState('');
+
+  // Handle image navigation
+  const handleNextImage = () => {
+    setGalleryImageIndex((prevIndex) => 
+      prevIndex === studioImages.length - 1 ? 0 : prevIndex + 1
+    );
+  };
+  
+  const handlePrevImage = () => {
+    setGalleryImageIndex((prevIndex) => 
+      prevIndex === 0 ? studioImages.length - 1 : prevIndex - 1
+    );
+  };
+
+  // Open gallery modal with specific image
+  const openGallery = (index) => {
+    setGalleryImageIndex(index);
+    setGalleryOpen(true);
+  };
+
+  // Close gallery modal
+  const closeGallery = () => {
+    setGalleryOpen(false);
+  };
+
+  // Format date for display
+  const formatDate = (date) => {
+    if (!date) return '';
+    const options = { year: 'numeric', month: 'long', day: 'numeric' };
+    return date.toLocaleDateString('en-US', options);
+  };
+  
+  // Function to open Google Maps with the address
+  const openInGoogleMaps = () => {
+    const address = studioData.address;
+    const encodedAddress = encodeURIComponent(address);
+    window.open(`https://www.google.com/maps/search/?api=1&query=${encodedAddress}`, '_blank');
+  };
+  
+  // Handle tab change
+  const handleTabChange = (event, newValue) => {
+    setActiveTab(newValue);
+  };
+  
+  // Toggle edit mode
+  const toggleEditMode = () => {
+    setEditMode(!editMode);
+  };
+  
+  // Handle field changes
+  const handleFieldChange = (field, value) => {
+    setStudioData(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+  
+  // Handle service changes
+  const handleServiceChange = (index, value) => {
+    const newServices = [...studioData.services];
+    newServices[index] = value;
+    setStudioData(prev => ({
+      ...prev,
+      services: newServices
+    }));
+  };
+  
+  // Handle feature changes
+  const handleFeatureChange = (index, value) => {
+    const newFeatures = [...studioData.features];
+    newFeatures[index] = value;
+    setStudioData(prev => ({
+      ...prev,
+      features: newFeatures
+    }));
+  };
+  
+  // Add new service
+  const addService = () => {
+    if (newService.trim()) {
+      setStudioData(prev => ({
+        ...prev,
+        services: [...prev.services, newService]
+      }));
+      setNewService('');
+    }
+  };
+  
+  // Remove service
+  const removeService = (index) => {
+    const newServices = studioData.services.filter((_, i) => i !== index);
+    setStudioData(prev => ({
+      ...prev,
+      services: newServices
+    }));
+  };
+  
+  // Add new feature
+  const addFeature = () => {
+    if (newFeature.trim()) {
+      setStudioData(prev => ({
+        ...prev,
+        features: [...prev.features, newFeature]
+      }));
+      setNewFeature('');
+    }
+  };
+  
+  // Remove feature
+  const removeFeature = (index) => {
+    const newFeatures = studioData.features.filter((_, i) => i !== index);
+    setStudioData(prev => ({
+      ...prev,
+      features: newFeatures
+    }));
+  };
+  
+  // Add new image
+  const addImage = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      if (!file.type.match('image.*')) {
+        setSnackbarMessage('Please upload an image file (PNG, JPEG, etc)');
+        setSnackbarSeverity('error');
+        setSnackbarOpen(true);
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setStudioImages([...studioImages, e.target.result]);
+        setSnackbarMessage('Image added successfully!');
+        setSnackbarSeverity('success');
+        setSnackbarOpen(true);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+  
+  // Remove image
+  const removeImage = (index) => {
+    const newImages = studioImages.filter((_, i) => i !== index);
+    setStudioImages(newImages);
+    setSnackbarMessage('Image removed successfully!');
+    setSnackbarSeverity('info');
+    setSnackbarOpen(true);
+  };
+  
+  // Add new gear category
+  const addGearCategory = () => {
+    if (newGearCategory.trim()) {
+      setStudioGear([...studioGear, { category: newGearCategory, items: [] }]);
+      setNewGearCategory('');
+      setSnackbarMessage('Gear category added successfully!');
+      setSnackbarSeverity('success');
+      setSnackbarOpen(true);
+    }
+  };
+  
+  // Remove gear category
+  const removeGearCategory = (index) => {
+    const newGear = studioGear.filter((_, i) => i !== index);
+    setStudioGear(newGear);
+    setSnackbarMessage('Gear category removed successfully!');
+    setSnackbarSeverity('info');
+    setSnackbarOpen(true);
+  };
+  
+  // Add new gear item
+  const addGearItem = (categoryIndex) => {
+    if (newGearItem.trim()) {
+      const newGear = [...studioGear];
+      newGear[categoryIndex].items.push(newGearItem);
+      setStudioGear(newGear);
+      setNewGearItem('');
+      setSnackbarMessage('Gear item added successfully!');
+      setSnackbarSeverity('success');
+      setSnackbarOpen(true);
+    }
+  };
+  
+  // Remove gear item
+  const removeGearItem = (categoryIndex, itemIndex) => {
+    const newGear = [...studioGear];
+    newGear[categoryIndex].items = newGear[categoryIndex].items.filter((_, i) => i !== itemIndex);
+    setStudioGear(newGear);
+    setSnackbarMessage('Gear item removed successfully!');
+    setSnackbarSeverity('info');
+    setSnackbarOpen(true);
+  };
+  
+  // Save all changes
+  const saveChanges = () => {
+    // Here you would typically make an API call to save the changes
+    setEditMode(false);
+    setSnackbarMessage('All changes saved successfully!');
+    setSnackbarSeverity('success');
+    setSnackbarOpen(true);
+  };
+  
+  // Close snackbar
+  const handleSnackbarClose = () => {
+    setSnackbarOpen(false);
+  };
+
+  return (
+    <ThemeProvider theme={darkTheme}>
+      <Box sx={{ bgcolor: 'background.default', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+        <Navbar />
+        <Container maxWidth="lg">
+          {/* Edit Mode Toggle */}
+          <Box sx={{ pt: 4, display: 'flex', justifyContent: 'flex-end' }}>
+            <Button 
+              variant={editMode ? "outlined" : "contained"} 
+              color="info"
+              startIcon={editMode ? <Cancel /> : <Edit />}
+              onClick={toggleEditMode}
+              sx={{ mb: 2 }}
+            >
+              {editMode ? 'Cancel Editing' : 'Edit Profile'}
+            </Button>
+          </Box>
+          
+          {/* Studio Title & Actions */}
+          <Box sx={{ pb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            {editMode ? (
+              <TextField
+                fullWidth
+                value={studioData.name}
+                onChange={(e) => handleFieldChange('name', e.target.value)}
+                variant="outlined"
+                sx={{ 
+                  '& .MuiOutlinedInput-root': {
+                    '& fieldset': {
+                      borderColor: 'primary.main',
+                    },
+                    '&:hover fieldset': {
+                      borderColor: 'primary.light',
+                    },
+                  }
+                }}
+              />
+            ) : (
+              <Typography variant="h4" component="h1" sx={{ color: 'text.primary' }}>
+                {studioData.name}
+              </Typography>
+            )}
+            <Box>
+              {/* <IconButton aria-label="share" sx={{ color: 'text.secondary' }}>
+                <Share />
+              </IconButton>
+              <IconButton aria-label="save" sx={{ color: 'text.secondary' }}>
+                <Bookmark />
+              </IconButton> */}
+            </Box>
+          </Box>
+
+          {/* Location - Updated to be clickable */}
+          <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
+            <LocationOn sx={{ color: 'error.main', mr: 1 }} />
+            {editMode ? (
+              <TextField
+                fullWidth
+                value={studioData.address}
+                onChange={(e) => handleFieldChange('address', e.target.value)}
+                variant="outlined"
+                sx={{ 
+                  '& .MuiOutlinedInput-root': {
+                    '& fieldset': {
+                      borderColor: 'primary.main',
+                    },
+                    '&:hover fieldset': {
+                      borderColor: 'primary.light',
+                    },
+                  }
+                }}
+              />
+            ) : (
+              <Link 
+                component="button"
+                variant="subtitle1" 
+                onClick={openInGoogleMaps}
+                sx={{ 
+                  color: 'primary.main',
+                  textDecoration: 'none',
+                  '&:hover': {
+                    textDecoration: 'underline',
+                    color: 'primary.light'
+                  }
+                }}
+              >
+                {studioData.address}
+              </Link>
+            )}
+          </Box>
+          
+          {/* Edit Mode Tabs */}
+          {editMode && (
+            <Box sx={{ mb: 3 }}>
+              <Tabs 
+                value={activeTab} 
+                onChange={handleTabChange} 
+                variant="scrollable"
+                scrollButtons="auto"
+                aria-label="edit studio tabs"
+              >
+                <Tab label="Images" />
+                <Tab label="Basic Info" />
+                <Tab label="Gear List" />
+                <Tab label="Booking Settings" />
+              </Tabs>
+            </Box>
+          )}
+          
+          {/* Main Image Gallery - Photo Collage */}
+          <Grid container spacing={1} sx={{ mb: 4 }}>
+            {/* Main large image */}
+            <Grid item xs={12} md={8}>
+              <Box
+                sx={{
+                  position: 'relative',
+                  height: { xs: 300, md: 400 },
+                  borderRadius: 2,
+                  overflow: 'hidden',
+                  cursor: 'pointer',
+                }}
+                onClick={() => openGallery(0)}
+              >
+                <Box
+                  component="img"
+                  src={studioImages[0]} // Use actual image
+                  alt="Studio Main"
+                  sx={{
+                    width: '100%',
+                    height: '100%',
+                    objectFit: 'cover'
+                  }}
+                />
+                {editMode && activeTab === 0 && (
+                  <IconButton
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      removeImage(0);
+                    }}
+                    sx={{
+                      position: 'absolute',
+                      top: 8,
+                      right: 8,
+                      backgroundColor: 'rgba(0, 0, 0, 0.7)',
+                      color: 'error.main',
+                      '&:hover': {
+                        backgroundColor: 'rgba(0, 0, 0, 0.9)',
+                      }
+                    }}
+                  >
+                    <Delete />
+                  </IconButton>
+                )}
+              </Box>
+            </Grid>
+            
+            {/* Right column of smaller images */}
+            <Grid item xs={12} md={4}>
+              <Grid container spacing={1}>
+                {[1, 2].map((index) => (
+                  <Grid item xs={6} md={12} key={index}>
+                    <Box
+                      sx={{
+                        position: 'relative',
+                        height: { xs: 145, md: 197 },
+                        borderRadius: 2,
+                        overflow: 'hidden',
+                        cursor: 'pointer',
+                      }}
+                      onClick={() => openGallery(index)}
+                    >
+                      <Box
+                        component="img"
+                        src={studioImages[index]} // Use actual image
+                        alt={`Studio Image ${index}`}
+                        sx={{
+                          width: '100%',
+                          height: '100%',
+                          objectFit: 'cover'
+                        }}
+                      />
+                      {editMode && activeTab === 0 && (
+                        <IconButton
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            removeImage(index);
+                          }}
+                          sx={{
+                            position: 'absolute',
+                            top: 8,
+                            right: 8,
+                            backgroundColor: 'rgba(0, 0, 0, 0.7)',
+                            color: 'error.main',
+                            '&:hover': {
+                              backgroundColor: 'rgba(0, 0, 0, 0.9)',
+                            }
+                          }}
+                        >
+                          <Delete />
+                        </IconButton>
+                      )}
+                    </Box>
+                  </Grid>
+                ))}
+              </Grid>
+            </Grid>
+            
+            {/* Bottom row of smaller images */}
+            <Grid item xs={12}>
+              <Grid container spacing={1}>
+                {[3, 4].map((index) => (
+                  <Grid item xs={6} md={4} key={index}>
+                    <Box
+                      sx={{
+                        position: 'relative',
+                        height: 180,
+                        borderRadius: 2,
+                        overflow: 'hidden',
+                        cursor: 'pointer',
+                      }}
+                      onClick={() => openGallery(index)}
+                    >
+                      <Box
+                        component="img"
+                        src={studioImages[index]} // Use actual image
+                        alt={`Studio Image ${index}`}
+                        sx={{
+                          width: '100%',
+                          height: '100%',
+                          objectFit: 'cover'
+                        }}
+                      />
+                      {editMode && activeTab === 0 && (
+                        <IconButton
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            removeImage(index);
+                          }}
+                          sx={{
+                            position: 'absolute',
+                            top: 8,
+                            right: 8,
+                            backgroundColor: 'rgba(0, 0, 0, 0.7)',
+                            color: 'error.main',
+                            '&:hover': {
+                              backgroundColor: 'rgba(0, 0, 0, 0.9)',
+                            }
+                          }}
+                        >
+                          <Delete />
+                        </IconButton>
+                      )}
+                    </Box>
+                  </Grid>
+                ))}
+                
+                {/* View all button with image background - with darker overlay */}
+                <Grid item xs={6} md={4}>
+                  <Box
+                    sx={{
+                      position: 'relative',
+                      height: 180,
+                      borderRadius: 2,
+                      overflow: 'hidden',
+                      cursor: 'pointer',
+                      backgroundImage: studioImages.length > 5 ? `url(${studioImages[5]})` : 'none',
+                      backgroundSize: 'cover',
+                      backgroundPosition: 'center',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                      '&::before': {
+                        content: '""',
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        backgroundColor: 'rgba(0, 0, 0, 0.7)', // Darker overlay
+                      }
+                    }}
+                    onClick={() => openGallery(0)}
+                  >
+                    <Box 
+                      sx={{ 
+                        width: 40, 
+                        height: 40, 
+                        display: 'flex', 
+                        justifyContent: 'center', 
+                        alignItems: 'center',
+                        borderRadius: 1,
+                        mb: 1,
+                        bgcolor: 'rgba(255, 255, 255, 0.2)',
+                        border: '1px solid rgba(255, 255, 255, 0.3)',
+                        zIndex: 1
+                      }}
+                    >
+                      <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 0.5 }}>
+                        <Box sx={{ width: 8, height: 8, bgcolor: 'white', borderRadius: 0.5 }} />
+                        <Box sx={{ width: 8, height: 8, bgcolor: 'white', borderRadius: 0.5 }} />
+                        <Box sx={{ width: 8, height: 8, bgcolor: 'white', borderRadius: 0.5 }} />
+                        <Box sx={{ width: 8, height: 8, bgcolor: 'white', borderRadius: 0.5 }} />
+                      </Box>
+                    </Box>
+                    <Typography variant="button" sx={{ color: 'white', zIndex: 1, fontWeight: 'medium' }}>
+                      View all
+                    </Typography>
+                    {editMode && activeTab === 0 && studioImages.length > 5 && (
+                      <IconButton
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          removeImage(5);
+                        }}
+                        sx={{
+                          position: 'absolute',
+                          top: 8,
+                          right: 8,
+                          backgroundColor: 'rgba(0, 0, 0, 0.7)',
+                          color: 'error.main',
+                          '&:hover': {
+                            backgroundColor: 'rgba(0, 0, 0, 0.9)',
+                          }
+                        }}
+                      >
+                        <Delete />
+                      </IconButton>
+                    )}
+                  </Box>
+                </Grid>
+              </Grid>
+            </Grid>
+          </Grid>
+          
+          {/* Edit Images Section */}
+          {editMode && activeTab === 0 && (
+            <Paper sx={{ p: 3, mb: 4, bgcolor: 'background.paper', boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)' }}>
+              <Typography variant="h6" sx={{ mb: 2, color: 'text.primary' }}>
+                Add New Image
+              </Typography>
+              <Box sx={{ display: 'flex', gap: 2, mb: 3, alignItems: 'center' }}>
+                <Button
+                  variant="contained"
+                  color="info"
+                  component="label"
+                  startIcon={<Add />}
+                >
+                  Upload Image
+                  <input
+                    type="file"
+                    hidden
+                    accept="image/*"
+                    onChange={addImage}
+                  />
+                </Button>
+                <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                  Supports: PNG, JPEG, JPG
+                </Typography>
+              </Box>
+              <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                Current images: {studioImages.length} (Minimum 6 recommended)
+              </Typography>
+            </Paper>
+          )}
+          
+          {/* Main Content Area */}
+          <Grid container spacing={4}>
+            {/* Left Column - Studio Info */}
+            <Grid item xs={12} md={7}>
+              <Paper sx={{ p: 3, mb: 4, bgcolor: 'background.paper', boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)' }}>
+                <Typography variant="h5" component="h2" sx={{ mb: 2, color: 'text.primary' }}>
+                  About the Studio
+                </Typography>
+                
+                {editMode && activeTab === 1 ? (
+                  <TextField
+                    fullWidth
+                    multiline
+                    rows={6}
+                    value={studioData.description}
+                    onChange={(e) => handleFieldChange('description', e.target.value)}
+                    variant="outlined"
+                    sx={{ mb: 3 }}
+                  />
+                ) : (
+                  <Typography variant="body1" sx={{ mb: 2, color: 'text.secondary' }}>
+                    {studioData.description}
+                  </Typography>
+                )}
+                
+                <Typography variant="h6" sx={{ mt: 3, mb: 1, color: 'text.primary' }}>
+                  Services
+                </Typography>
+                
+                {editMode && activeTab === 1 ? (
+                  <Box sx={{ mb: 3 }}>
+                    {studioData.services.map((service, index) => (
+                      <Box key={index} sx={{ display: 'flex', gap: 1, mb: 1 }}>
+                        <TextField
+                          fullWidth
+                          value={service}
+                          onChange={(e) => handleServiceChange(index, e.target.value)}
+                          variant="outlined"
+                        />
+                        <IconButton onClick={() => removeService(index)} color="error">
+                          <Delete />
+                        </IconButton>
+                      </Box>
+                    ))}
+                    <Box sx={{ display: 'flex', gap: 2, mt: 2 }}>
+                      <TextField
+                        fullWidth
+                        value={newService}
+                        onChange={(e) => setNewService(e.target.value)}
+                        label="New Service"
+                        variant="outlined"
+                      />
+                      <Button 
+                        variant="contained" 
+                        color="primary"
+                        onClick={addService}
+                        startIcon={<Add />}
+                      >
+                        Add
+                      </Button>
+                    </Box>
+                  </Box>
+                ) : (
+                  <>
+                    {studioData.services.map((service, index) => (
+                      <Typography key={index} variant="body1" sx={{ mb: 1, color: 'text.secondary' }}>
+                        {service}
+                      </Typography>
+                    ))}
+                  </>
+                )}
+                
+                {/* Edit Gear List Section */}
+                {editMode && activeTab === 2 && (
+                  <Box sx={{ mb: 3 }}>
+                    <Typography variant="h6" sx={{ mt: 3, mb: 2, color: 'text.primary' }}>
+                      Studio Equipment
+                    </Typography>
+                    
+                    {studioGear.map((category, categoryIndex) => (
+                      <Box key={categoryIndex} sx={{ mb: 3, p: 2, border: '1px solid rgba(255, 255, 255, 0.12)', borderRadius: 1 }}>
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+                          <Typography variant="subtitle1" sx={{ fontWeight: 'bold', color: 'primary.main' }}>
+                            {category.category}
+                          </Typography>
+                          <IconButton onClick={() => removeGearCategory(categoryIndex)} size="small" color="error">
+                            <Delete fontSize="small" />
+                          </IconButton>
+                        </Box>
+                        
+                        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mb: 2 }}>
+                          {category.items.map((item, itemIndex) => (
+                            <Chip
+                              key={itemIndex}
+                              label={item}
+                              onDelete={() => removeGearItem(categoryIndex, itemIndex)}
+                              sx={{ bgcolor: 'rgba(0, 188, 212, 0.1)' }}
+                            />
+                          ))}
+                        </Box>
+                        
+                        <Box sx={{ display: 'flex', gap: 2 }}>
+                          <TextField
+                            fullWidth
+                            size="small"
+                            value={newGearItem}
+                            onChange={(e) => setNewGearItem(e.target.value)}
+                            label="New Item"
+                            variant="outlined"
+                          />
+                          <Button 
+                            variant="outlined" 
+                            color="primary"
+                            onClick={() => addGearItem(categoryIndex)}
+                            startIcon={<Add />}
+                            size="small"
+                          >
+                            Add Item
+                          </Button>
+                        </Box>
+                      </Box>
+                    ))}
+                    
+                    <Box sx={{ mt: 3, display: 'flex', gap: 2 }}>
+                      <TextField
+                        fullWidth
+                        value={newGearCategory}
+                        onChange={(e) => setNewGearCategory(e.target.value)}
+                        label="New Category"
+                        variant="outlined"
+                      />
+                      <Button 
+                        variant="contained" 
+                        color="primary"
+                        onClick={addGearCategory}
+                        startIcon={<Add />}
+                      >
+                        Add Category
+                      </Button>
+                    </Box>
+                  </Box>
+                )}
+                
+                {!editMode || activeTab !== 2 ? (
+                  <>
+                    <Typography variant="h6" sx={{ mt: 3, mb: 2, color: 'text.primary' }}>
+                      Studio Equipment
+                    </Typography>
+                    
+                    {studioGear.map((category, index) => (
+                      <Box key={index} sx={{ mb: 2 }}>
+                        <Typography variant="subtitle1" sx={{ fontWeight: 'bold', color: 'primary.main' }}>
+                          {category.category}:
+                        </Typography>
+                        <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                          {category.items.join(' • ')}
+                        </Typography>
+                      </Box>
+                    ))}
+                  </>
+                ) : null}
+                
+                <Typography variant="h6" sx={{ mt: 3, mb: 1, color: 'text.primary' }}>
+                  Recording Booths
+                </Typography>
+                
+                {editMode && activeTab === 1 ? (
+                  <TextField
+                    fullWidth
+                    multiline
+                    rows={3}
+                    value={studioData.recordingBooths}
+                    onChange={(e) => handleFieldChange('recordingBooths', e.target.value)}
+                    variant="outlined"
+                    sx={{ mb: 3 }}
+                  />
+                ) : (
+                  <Typography variant="body1" sx={{ mb: 3, color: 'text.secondary' }}>
+                    {studioData.recordingBooths}
+                  </Typography>
+                )}
+                
+                <Typography variant="h6" sx={{ mt: 3, mb: 1, color: 'text.primary' }}>
+                  Lounge Area
+                </Typography>
+                
+                {editMode && activeTab === 1 ? (
+                  <TextField
+                    fullWidth
+                    multiline
+                    rows={3}
+                    value={studioData.loungeArea}
+                    onChange={(e) => handleFieldChange('loungeArea', e.target.value)}
+                    variant="outlined"
+                    sx={{ mb: 3 }}
+                  />
+                ) : (
+                  <Typography variant="body1" sx={{ mb: 3, color: 'text.secondary' }}>
+                    {studioData.loungeArea}
+                  </Typography>
+                )}
+                
+                <Typography variant="h6" sx={{ mt: 3, mb: 1, color: 'text.primary' }}>
+                  Studio Features
+                </Typography>
+                
+                {editMode && activeTab === 1 ? (
+                  <Box sx={{ mb: 3 }}>
+                    {studioData.features.map((feature, index) => (
+                      <Box key={index} sx={{ display: 'flex', gap: 1, mb: 1 }}>
+                        <TextField
+                          fullWidth
+                          value={feature}
+                          onChange={(e) => handleFeatureChange(index, e.target.value)}
+                          variant="outlined"
+                        />
+                        <IconButton onClick={() => removeFeature(index)} color="error">
+                          <Delete />
+                        </IconButton>
+                      </Box>
+                    ))}
+                    <Box sx={{ display: 'flex', gap: 2, mt: 2 }}>
+                      <TextField
+                        fullWidth
+                        value={newFeature}
+                        onChange={(e) => setNewFeature(e.target.value)}
+                        label="New Feature"
+                        variant="outlined"
+                      />
+                      <Button 
+                        variant="contained" 
+                        color="primary"
+                        onClick={addFeature}
+                        startIcon={<Add />}
+                      >
+                        Add
+                      </Button>
+                    </Box>
+                  </Box>
+                ) : (
+                  <Typography variant="body1" sx={{ mb: 3, color: 'text.secondary' }}>
+                    {studioData.features.map((feature, index) => (
+                      <Box key={index} component="span">
+                        • {feature}
+                        {index < studioData.features.length - 1 && <br />}
+                      </Box>
+                    ))}
+                  </Typography>
+                )}
+                
+                {!editMode && (
+                  <Typography variant="body1" sx={{ mt: 4, textAlign: 'center', color: 'text.primary', fontWeight: 'medium' }}>
+                    We look forward to welcoming you to AudioHaus and helping you realize your musical projects in a professional and inspiring environment.
+                  </Typography>
+                )}
+              </Paper>
+            </Grid>
+            
+            {/* Right Column - Booking Widget */}
+            <Grid item xs={12} md={5}>
+              <Paper sx={{ p: 3, position: 'sticky', top: 20, bgcolor: 'background.paper', boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)', mb: 4 }}>
+                <Typography variant="h5" component="h2" sx={{ mb: 3, color: 'text.primary' }}>
+                  {editMode && activeTab === 3 ? 'Booking Settings' : 'For Booking'}
+                </Typography>
+                
+                {editMode && activeTab === 3 ? (
+                  <>
+                    <Typography variant="subtitle1" sx={{ mb: 1, color: 'text.primary' }}>
+                      Hourly Rate (LKR)
+                    </Typography>
+                    <TextField
+                      fullWidth
+                      type="number"
+                      value={studioData.hourlyRate}
+                      onChange={(e) => handleFieldChange('hourlyRate', e.target.value)}
+                      variant="outlined"
+                      sx={{ mb: 3 }}
+                    />
+                    
+                    <Typography variant="subtitle1" sx={{ mb: 1, color: 'text.primary' }}>
+                      Minimum Booking Duration (hours)
+                    </Typography>
+                    <TextField
+                      fullWidth
+                      type="number"
+                      value={studioData.minimumDuration}
+                      onChange={(e) => handleFieldChange('minimumDuration', e.target.value)}
+                      variant="outlined"
+                      sx={{ mb: 3 }}
+                    />
+                  </>
+                ) : (
+                  <>
+                    {/* Date Selection */}
+                    <Typography variant="subtitle1" sx={{ mb: 1, color: 'text.primary' }}>
+                      Date and time
+                    </Typography>
+                    <Box sx={{ mb: 3 }}>
+                      <TextField
+                        fullWidth
+                        value={formatDate(selectedDate)}
+                        onClick={() => setShowCalendar(!showCalendar)}
+                        InputProps={{
+                          readOnly: true,
+                          endAdornment: (
+                            <InputAdornment position="end">
+                              <KeyboardArrowDown />
+                            </InputAdornment>
+                          )
+                        }}
+                        sx={{
+                          '& .MuiOutlinedInput-root': {
+                            '& fieldset': {
+                              borderColor: 'rgba(255, 255, 255, 0.23)',
+                            },
+                            '&:hover fieldset': {
+                              borderColor: 'rgba(255, 255, 255, 0.5)',
+                            },
+                          }
+                        }}
+                      />
+                      
+                      {showCalendar && (
+                        <Paper elevation={3} sx={{ mt: 1, p: 1, width: '100%' }}>
+                          <LocalizationProvider dateAdapter={AdapterDateFns}>
+                            <DateCalendar
+                              value={selectedDate}
+                              onChange={(newDate) => {
+                                setSelectedDate(newDate);
+                                setShowCalendar(false);
+                              }}
+                              disablePast
+                              sx={{
+                                color: 'text.primary',
+                                '& .MuiPickersDay-root': {
+                                  color: 'text.primary',
+                                },
+                                '& .MuiPickersDay-today': {
+                                  borderColor: 'primary.main',
+                                },
+                                '& .Mui-selected': {
+                                  backgroundColor: 'primary.main',
+                                }
+                              }}
+                            />
+                          </LocalizationProvider>
+                        </Paper>
+                      )}
+                    </Box>
+                    
+                    {/* Time Selection */}
+                    <Grid container spacing={2} sx={{ mb: 3 }}>
+                      <Grid item xs={6}>
+                        <TextField
+                          select
+                          label="Start Time"
+                          fullWidth
+                          value={selectedStartTime}
+                          onChange={(e) => setSelectedStartTime(e.target.value)}
+                          sx={{
+                            '& .MuiInputLabel-root': {
+                              color: 'text.secondary',
+                            },
+                            '& .MuiOutlinedInput-root': {
+                              '& fieldset': {
+                                borderColor: 'rgba(255, 255, 255, 0.23)',
+                              },
+                              '&:hover fieldset': {
+                                borderColor: 'rgba(255, 255, 255, 0.5)',
+                              },
+                            }
+                          }}
+                        >
+                          {timeSlots.map((option) => (
+                            <MenuItem key={option.value} value={option.value}>
+                              {option.label}
+                            </MenuItem>
+                          ))}
+                        </TextField>
+                      </Grid>
+                      <Grid item xs={6}>
+                        <TextField
+                          select
+                          label="End Time"
+                          fullWidth
+                          value={selectedEndTime}
+                          onChange={(e) => setSelectedEndTime(e.target.value)}
+                          disabled={!selectedStartTime}
+                          sx={{
+                            '& .MuiInputLabel-root': {
+                              color: 'text.secondary',
+                            },
+                            '& .MuiOutlinedInput-root': {
+                              '& fieldset': {
+                                borderColor: 'rgba(255, 255, 255, 0.23)',
+                              },
+                              '&:hover fieldset': {
+                                borderColor: 'rgba(255, 255, 255, 0.5)',
+                              },
+                            }
+                          }}
+                        >
+                          {timeSlots
+                            .filter((slot) => {
+                              if (!selectedStartTime) return false;
+                              const startHour = parseInt(selectedStartTime.split(':')[0]);
+                              const slotHour = parseInt(slot.value.split(':')[0]);
+                              return slotHour > startHour;
+                            })
+                            .map((option) => (
+                              <MenuItem key={option.value} value={option.value}>
+                                {option.label}
+                              </MenuItem>
+                            ))}
+                        </TextField>
+                      </Grid>
+                    </Grid>
+                    
+                    {/* Minimum Duration Info */}
+                    <Box 
+                      sx={{ 
+                        display: 'flex', 
+                        alignItems: 'center', 
+                        mb: 3,
+                        p: 1,
+                        bgcolor: 'rgba(255, 193, 7, 0.15)', // Darker yellow background for dark mode
+                        borderRadius: 1
+                      }}
+                    >
+                      <Info sx={{ mr: 1, color: 'warning.light' }} /> {/* Lighter warning color for dark mode */}
+                      <Typography variant="body2" sx={{ color: 'text.primary' }}>
+                        {studioData.minimumDuration} hr minimum
+                        <Typography variant="caption" display="block" sx={{ color: 'text.secondary' }}>
+                          The host is more likely to accept if your request meets their minimum duration.
+                        </Typography>
+                      </Typography>
+                    </Box>
+                    
+                    {/* Price Information */}
+                    <Divider sx={{ mb: 2, backgroundColor: 'rgba(255, 255, 255, 0.12)' }} />
+                    <Box sx={{ mb: 2, display: 'flex', justifyContent: 'space-between' }}>
+                      <Typography variant="body1" sx={{ color: 'text.primary' }}>
+                        Rate
+                      </Typography>
+                      <Typography variant="body1" sx={{ color: 'text.primary', fontWeight: 'medium' }}>
+                        LKR {studioData.hourlyRate.toLocaleString()} / hour
+                      </Typography>
+                    </Box>
+                    
+                    {/* Booking Button */}
+                    <Button 
+                      variant="contained" 
+                      color="primary" 
+                      fullWidth 
+                      size="large"
+                      disabled={!selectedDate || !selectedStartTime || !selectedEndTime}
+                      sx={{ mb: 2 }}
+                    >
+                      Request to Book
+                    </Button>
+                    
+                    <Typography variant="caption" sx={{ display: 'block', textAlign: 'center', color: 'text.secondary' }}>
+                      You won't be charged yet.
+                    </Typography>
+                    
+                    {/* Host Response Time */}
+                    <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', mt: 2 }}>
+                      <EventAvailable sx={{ mr: 1, color: 'text.secondary', fontSize: 20 }} />
+                      <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                        Host typically responds within 2 hrs
+                      </Typography>
+                    </Box>
+                  </>
+                )}
+              </Paper>
+            </Grid>
+          </Grid>
+          
+          {/* Save Changes Button (visible only in edit mode) */}
+          {editMode && (
+            <Box sx={{ display: 'flex', justifyContent: 'center', mb: 4 }}>
+              <Button 
+                variant="contained" 
+                color="info" 
+                size="large"
+                onClick={saveChanges}
+                startIcon={<Save />}
+                sx={{ px: 6, py: 1.5 }}
+              >
+                Save All Changes
+              </Button>
+            </Box>
+          )}
+        </Container>
+        
+        {/* Full Screen Gallery Modal - Already has dark theme */}
+        <Dialog
+          open={galleryOpen}
+          onClose={closeGallery}
+          maxWidth="lg"
+          fullWidth
+          BackdropProps={{
+            sx: { backgroundColor: 'rgba(0, 0, 0, 0.95)' } // Already dark
+          }}
+          PaperProps={{
+            sx: { 
+              bgcolor: 'transparent',
+              boxShadow: 'none',
+              overflow: 'hidden',
+              maxHeight: '90vh',
+              height: 'auto',
+              m: 2
+            }
+          }}
+        >
+          <DialogContent sx={{ p: 0, position: 'relative', overflow: 'hidden' }}>
+            <IconButton 
+              onClick={closeGallery}
+              sx={{ 
+                position: 'absolute', 
+                top: 16, 
+                right: 16, 
+                bgcolor: 'rgba(0,0,0,0.6)',
+                color: 'white',
+                '&:hover': { bgcolor: 'rgba(0,0,0,0.8)' },
+                zIndex: 10
+              }}
+            >
+              <Close />
+            </IconButton>
+            
+            <Box sx={{ position: 'relative', width: '100%', height: '80vh', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+              <Box
+                component="img"
+                src={studioImages[galleryImageIndex]} // Use actual image
+                alt={`Studio Image ${galleryImageIndex + 1}`}
+                sx={{
+                  maxWidth: '100%',
+                  maxHeight: '80vh',
+                  objectFit: 'contain'
+                }}
+              />
+              
+              <IconButton 
+                onClick={handlePrevImage}
+                sx={{ 
+                  position: 'absolute', 
+                  left: 16, 
+                  bgcolor: 'rgba(0,0,0,0.6)',
+                  color: 'white',
+                  '&:hover': { bgcolor: 'rgba(0,0,0,0.8)' }
+                }}
+              >
+                <ArrowBackIos />
+              </IconButton>
+              
+              <IconButton 
+                onClick={handleNextImage}
+                sx={{ 
+                  position: 'absolute', 
+                  right: 16, 
+                  bgcolor: 'rgba(0,0,0,0.6)',
+                  color: 'white',
+                  '&:hover': { bgcolor: 'rgba(0,0,0,0.8)' }
+                }}
+              >
+                <ArrowForwardIos />
+              </IconButton>
+              
+              <Typography 
+                variant="body2" 
+                sx={{ 
+                  position: 'absolute', 
+                  bottom: 16, 
+                  left: '50%', 
+                  transform: 'translateX(-50%)', 
+                  color: 'white',
+                  bgcolor: 'rgba(0,0,0,0.7)',
+                  px: 2,
+                  py: 0.5,
+                  borderRadius: 1
+                }}
+              >
+                {galleryImageIndex + 1} / {studioImages.length}
+              </Typography>
+            </Box>
+          </DialogContent>
+        </Dialog>
+        <Footer />
+        
+        {/* Snackbar for notifications */}
+        <Snackbar
+          open={snackbarOpen}
+          autoHideDuration={6000}
+          onClose={handleSnackbarClose}
+          anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+        >
+          <Alert onClose={handleSnackbarClose} severity={snackbarSeverity} sx={{ width: '100%' }}>
+            {snackbarMessage}
+          </Alert>
+        </Snackbar>
+      </Box>
+    </ThemeProvider>
+  );
+};
+
+export default StudioProfileDashboard;
