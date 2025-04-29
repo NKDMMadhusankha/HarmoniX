@@ -6,6 +6,7 @@ const authController = require('./controllers/authController');
 const authRoutes = require('./routes/authRoutes'); // Make sure this path is correct
 const musicianAuthRoutes = require('./routes/musicianAuthRoutes');
 const contactRoute = require('./routes/contact');
+const studioRoutes = require('./routes/studioRoutes'); // Add this line
 
 // Load environment variables
 dotenv.config();
@@ -50,6 +51,7 @@ const musicianProfileRoutes = require('./routes/musicianProfileRoutes');
 app.use('/api/musician', musicianProfileRoutes);
 
 app.use('/api/contact', contactRoute);
+app.use('/api/studio', studioRoutes); // Add this line
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
