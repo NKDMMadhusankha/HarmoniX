@@ -17,27 +17,27 @@ const PORT = process.env.PORT || 5001;
 // Middleware
 app.use(express.json());
 app.use(cors({
-  origin: 'http://localhost:5173', // Replace with your frontend's origin
-  methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
-  credentials: true,
+origin: 'http://localhost:5173', // Replace with your frontend's origin
+methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+credentials: true,
 }));
 
 // Connect to MongoDB
 mongoose.connect(process.env.MONGO_URI, {
-  // Removed deprecated options
+// Removed deprecated options
 })
-  .then(() => console.log('MongoDB connected'))
-  .catch(err => {
-    if (err.name === 'MongooseServerSelectionError') {
-      console.error('MongoDB Connection Error: Could not connect to any servers in your MongoDB Atlas cluster. Make sure your current IP address is on your Atlas cluster\'s IP whitelist: https://www.mongodb.com/docs/atlas/security-whitelist/');
-    } else {
-      console.error('MongoDB connection error:', err);
-    }
-  });
+.then(() => console.log('MongoDB connected'))
+.catch(err => {
+if (err.name === 'MongooseServerSelectionError') {
+console.error('MongoDB Connection Error: Could not connect to any servers in your MongoDB Atlas cluster. Make sure your current IP address is on your Atlas cluster\'s IP whitelist: https://www.mongodb.com/docs/atlas/security-whitelist/');
+} else {
+console.error('MongoDB connection error:', err);
+}
+});
 
 // Routes
 app.get('/', (req, res) => {
-  res.send('Hello World!');
+res.send('Hello World!');
 });
 
 // Registration route
@@ -54,5 +54,5 @@ app.use('/api/contact', contactRoute);
 app.use('/api/studio', studioRoutes); // Add this line
 
 app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
-});
+console.log(`Server is running on port ${PORT}`);
+})
