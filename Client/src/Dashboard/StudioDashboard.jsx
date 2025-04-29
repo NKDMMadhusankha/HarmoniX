@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Box, 
   Typography, 
@@ -49,6 +49,7 @@ import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { LocalizationProvider, DateCalendar } from '@mui/x-date-pickers';
 import Navbar from '../Components/Navbar';
 import Footer from '../Components/Footer';
+import { useNavigate } from 'react-router-dom';
 
 // Create a dark theme with teal accents
 const darkTheme = createTheme({
@@ -136,15 +137,6 @@ const darkTheme = createTheme({
   }
 });
 
-// Updated studio images for gallery with online images
-const initialStudioImages = [
-  'https://img.freepik.com/free-photo/music-composer-showing-thumbs-up_107420-96142.jpg?t=st=1745860885~exp=1745864485~hmac=e3e336bf3ea449ed2226f7541c1af4bcff9d2683fa93404a9bb2882e6f4fc520&w=996',
-  'https://img.freepik.com/free-photo/male-audio-engineer-using-sound-mixer_107420-96112.jpg?t=st=1745860587~exp=1745864187~hmac=2bdd10df13166d72178711fd770d15390075182a96fe6a326ddf8e31ce0e4f08&w=996',
-  'https://img.freepik.com/free-photo/young-asian-duet-singers-with-microphone-recording-song-record-music-studio_627829-3771.jpg?t=st=1745861201~exp=1745864801~hmac=b42097dfa43f6a76109f7f60e98c163d9de20b3cddefc16db635d7af8db526a9&w=996',
-  'https://img.freepik.com/free-photo/male-audio-engineer-using-sound-mixer_107420-96112.jpg?t=st=1745860587~exp=1745864187~hmac=2bdd10df13166d72178711fd770d15390075182a96fe6a326ddf8e31ce0e4f08&w=996',
-  'https://img.freepik.com/free-photo/male-audio-engineer-using-sound-mixer_107420-96112.jpg?t=st=1745860587~exp=1745864187~hmac=2bdd10df13166d72178711fd770d15390075182a96fe6a326ddf8e31ce0e4f08&w=996'
-];
-
 // Available time slots
 const timeSlots = [
   { value: '09:00', label: '9:00 AM' },
@@ -163,19 +155,9 @@ const timeSlots = [
   { value: '22:00', label: '10:00 PM' },
 ];
 
-// Initial studio gear list
-const initialStudioGear = [
-  { category: 'Interface', items: ['UAD Apollo Twin X', 'SSL 2+'] },
-  { category: 'Microphones', items: ['Neumann TLM 103', 'Shure SM7B', 'AKG C414'] },
-  { category: 'Monitors', items: ['Yamaha HS8', 'Avantone Mixcubes'] },
-  { category: 'Preamps', items: ['Neve 1073 SPX', 'Warm Audio WA8000'] },
-  { category: 'Compressors', items: ['Tube-Tech CL1B', 'Wesaudio Dione', 'Neve 33609'] },
-  { category: 'EQ', items: ['Wesaudio Prometheus', 'Pultec EQP-1A'] },
-  { category: 'Reverb', items: ['Lexicon PCM96', 'Bricasti M7'] },
-  { category: 'Monitoring', items: ['Dangerous Music Monitor ST', 'Barefoot Footprint 01'] },
-];
-
 const StudioProfileDashboard = () => {
+  const navigate = useNavigate();
+
   // State for edit mode
   const [editMode, setEditMode] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
@@ -192,42 +174,76 @@ const StudioProfileDashboard = () => {
   
   // Editable fields state
   const [studioData, setStudioData] = useState({
-    name: 'MERASIC Recording Studio',
-    address: '149 Mill Road, Katubedda, Moratuwa',
-    country: 'Sri Lanka',
-    description: `Welcome to AudioHaus, our modern recording studio located in the heart of Moratuwa. 
-    We've designed this space specifically for artists, musicians and producers looking to create 
-    high-quality projects. Our studio combines cutting-edge technology and analog equipment to provide an 
-    exceptional recording experience with a unique aesthetic.`,
-    services: [
-      'Recording: Our studio is perfectly equipped for vocal recording and composition.',
-      'Mixing: Use our facilities to mix your tracks with professional quality, with the help of our experienced sound engineers.',
-      'Mastering: Final polish for your tracks using our high-end equipment.'
-    ],
-    recordingBooths: `Soundproofed and acoustically treated booths available for capturing vocals with exceptional precision. 
-    Our isolation booth features acoustic treatment for clean recordings.`,
-    loungeArea: `A relaxation lounge with ambient lighting available for breaks between recording sessions, 
-    equipped with coffee machine, keyboard setup, comfortable seating, and amenities to keep you comfortable 
-    during long sessions.`,
-    features: [
-      'Professional acoustic treatment',
-      'LED mood lighting throughout the space',
-      'Climate controlled environment',
-      'High-speed internet',
-      'Instrument collection including guitars',
-      'Producer workstation with industry-standard software'
-    ],
-    hourlyRate: 5000,
-    minimumDuration: 2
+    name: '',
+    address: '',
+    country: '',
+    description: '',
+    services: [],
+    recordingBooths: '',
+    loungeArea: '',
+    features: [],
+    hourlyRate: 0,
+    minimumDuration: 1
   });
-  
-  const [studioImages, setStudioImages] = useState(initialStudioImages);
-  const [studioGear, setStudioGear] = useState(initialStudioGear);
+  const [studioImages, setStudioImages] = useState([]);
+  const [studioGear, setStudioGear] = useState([]);
   const [newImageUrl, setNewImageUrl] = useState('');
   const [newGearCategory, setNewGearCategory] = useState('');
   const [newGearItem, setNewGearItem] = useState('');
   const [newService, setNewService] = useState('');
   const [newFeature, setNewFeature] = useState('');
+
+  useEffect(() => {
+    const fetchStudioData = async () => {
+      try {
+        const token = localStorage.getItem('authToken');
+        if (!token) {
+          navigate('/login');
+          return;
+        }
+
+        const res = await fetch('http://localhost:5000/api/studio/me', {
+          headers: { 'x-auth-token': token }
+        });
+
+        if (!res.ok) throw new Error('Failed to fetch');
+        const data = await res.json();
+        setStudioData({
+          name: data.studioName,
+          address: data.address,
+          country: data.country,
+          description: data.studioDescription,
+          services: data.services || [],
+          recordingBooths: data.recordingBooths || '',
+          loungeArea: data.loungeArea || '',
+          features: data.features || [],
+          hourlyRate: data.hourlyRate,
+          minimumDuration: data.minimumDuration,
+        });
+        setStudioImages(data.studioImages || []); // Fetch and set images from MongoDB
+        setStudioGear(data.studioGear || []);
+      } catch (err) {
+        console.error('Error fetching data:', err);
+        setStudioData({
+          name: '',
+          address: '',
+          country: '',
+          description: '',
+          services: [],
+          recordingBooths: '',
+          loungeArea: '',
+          features: [],
+          hourlyRate: 0,
+          minimumDuration: 1
+        });
+      }
+    };
+    fetchStudioData();
+  }, [navigate]);
+
+  if (!studioData) {
+    return <div>Loading...</div>;
+  }
 
   // Handle image navigation
   const handleNextImage = () => {
@@ -346,33 +362,56 @@ const StudioProfileDashboard = () => {
   };
   
   // Add new image
-  const addImage = (event) => {
+  const addImage = async (event) => {
     const file = event.target.files[0];
     if (file) {
-      if (!file.type.match('image.*')) {
-        setSnackbarMessage('Please upload an image file');
-        setSnackbarSeverity('error');
-        setSnackbarOpen(true);
-        return;
-      }
+      try {
+        const formData = new FormData();
+        formData.append('image', file);
 
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        setStudioImages([...studioImages, e.target.result]);
-        setSnackbarMessage('Image added successfully!');
-        setSnackbarSeverity('success');
-        setSnackbarOpen(true);
-      };
-      reader.readAsDataURL(file);
+        const response = await fetch('http://localhost:5000/api/studio/upload', {
+          method: 'POST',
+          headers: {
+            'x-auth-token': localStorage.getItem('authToken')
+          },
+          body: formData
+        });
+
+        const data = await response.json();
+        if (response.ok) {
+          setStudioImages([...studioImages, data.imageUrl]);
+          setSnackbarMessage('Image uploaded successfully!');
+          setSnackbarSeverity('success');
+        }
+      } catch (err) {
+        setSnackbarMessage('Error uploading image');
+        setSnackbarSeverity('error');
+      }
+      setSnackbarOpen(true);
     }
   };
   
   // Remove image
-  const removeImage = (index) => {
-    const newImages = studioImages.filter((_, i) => i !== index);
-    setStudioImages(newImages);
-    setSnackbarMessage('Image removed successfully!');
-    setSnackbarSeverity('info');
+  const removeImage = async (index) => {
+    try {
+      const url = studioImages[index];
+      const response = await fetch(`http://localhost:5000/api/studio/images/${encodeURIComponent(url)}`, {
+        method: 'DELETE',
+        headers: {
+          'x-auth-token': localStorage.getItem('authToken')
+        }
+      });
+
+      if (response.ok) {
+        const newImages = studioImages.filter((_, i) => i !== index);
+        setStudioImages(newImages);
+        setSnackbarMessage('Image removed successfully!');
+        setSnackbarSeverity('info');
+      }
+    } catch (err) {
+      setSnackbarMessage('Error removing image');
+      setSnackbarSeverity('error');
+    }
     setSnackbarOpen(true);
   };
   
@@ -420,14 +459,68 @@ const StudioProfileDashboard = () => {
   };
   
   // Save all changes
-  const saveChanges = () => {
-    // Here you would typically make an API call to save the changes
-    setEditMode(false);
-    setSnackbarMessage('All changes saved successfully!');
-    setSnackbarSeverity('success');
-    setSnackbarOpen(true);
+  const saveChanges = async () => {
+    try {
+      const token = localStorage.getItem('authToken');
+      
+      // Basic info update
+      await fetch('http://localhost:5000/api/studio/update', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-auth-token': token
+        },
+        body: JSON.stringify({
+          services: studioData.services,
+          features: studioData.features,
+          studioDescription: studioData.description,
+          recordingBooths: studioData.recordingBooths,
+          loungeArea: studioData.loungeArea,
+          bookingSettings: {
+            hourlyRate: studioData.hourlyRate,
+            minimumDuration: studioData.minimumDuration
+          }
+        })
+      });
+
+      // Gear updates
+      if (studioGear.length > 0) {
+        await fetch('http://localhost:5000/api/studio/gear', {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-auth-token': token
+          },
+          body: JSON.stringify({
+            operation: 'bulkUpdate',
+            payload: studioGear
+          })
+        });
+      }
+
+      // Image updates
+      if (studioImages.length > 0) {
+        await fetch('http://localhost:5000/api/studio/images', {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-auth-token': token
+          },
+          body: JSON.stringify({ images: studioImages })
+        });
+      }
+
+      setEditMode(false);
+      setSnackbarMessage('All changes saved successfully!');
+      setSnackbarSeverity('success');
+      setSnackbarOpen(true);
+    } catch (error) {
+      setSnackbarMessage('Error saving changes');
+      setSnackbarSeverity('error');
+      setSnackbarOpen(true);
+    }
   };
-  
+
   // Close snackbar
   const handleSnackbarClose = () => {
     setSnackbarOpen(false);
@@ -890,7 +983,7 @@ const StudioProfileDashboard = () => {
                   </Box>
                 ) : (
                   <>
-                    {studioData.services.map((service, index) => (
+                    {studioData.services && studioData.services.map((service, index) => (
                       <Typography key={index} variant="body1" sx={{ mb: 1, color: 'text.secondary' }}>
                         {service}
                       </Typography>
@@ -905,7 +998,7 @@ const StudioProfileDashboard = () => {
                       Studio Equipment
                     </Typography>
                     
-                    {studioGear.map((category, categoryIndex) => (
+                    {studioGear?.map((category, categoryIndex) => (
                       <Box key={categoryIndex} sx={{ mb: 3, p: 2, border: '1px solid rgba(255, 255, 255, 0.12)', borderRadius: 1 }}>
                         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
                           <Typography variant="subtitle1" sx={{ fontWeight: 'bold', color: 'primary.main' }}>
@@ -917,7 +1010,7 @@ const StudioProfileDashboard = () => {
                         </Box>
                         
                         <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mb: 2 }}>
-                          {category.items.map((item, itemIndex) => (
+                          {category.items?.map((item, itemIndex) => (
                             <Chip
                               key={itemIndex}
                               label={item}
@@ -975,13 +1068,13 @@ const StudioProfileDashboard = () => {
                       Studio Equipment
                     </Typography>
                     
-                    {studioGear.map((category, index) => (
+                    {studioGear?.map((category, index) => (
                       <Box key={index} sx={{ mb: 2 }}>
                         <Typography variant="subtitle1" sx={{ fontWeight: 'bold', color: 'primary.main' }}>
                           {category.category}:
                         </Typography>
                         <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                          {category.items.join(' • ')}
+                          {category.items?.join(' • ')}
                         </Typography>
                       </Box>
                     ))}

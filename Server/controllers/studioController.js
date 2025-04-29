@@ -57,3 +57,73 @@ exports.registerStudio = async (req, res) => {
     });
   }
 };
+
+exports.loginStudio = async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    const studio = await Studio.findOne({ email });
+    if (!studio) {
+      return res.status(401).json({ message: 'Invalid email or password' });
+    }
+    const isMatch = await bcrypt.compare(password, studio.password);
+    if (!isMatch) {
+      return res.status(401).json({ message: 'Invalid email or password' });
+    }
+
+    // Generate tokens
+    const accessToken = jwt.sign(
+      { id: studio._id, role: 'studio' },
+      process.env.JWT_SECRET,
+      { expiresIn: '1h' }
+    );
+    const refreshToken = jwt.sign(
+      { id: studio._id },
+      process.env.JWT_REFRESH_SECRET,
+      { expiresIn: '7d' }
+    );
+    studio.refreshToken = refreshToken;
+    await studio.save();
+
+    res.json({
+      success: true,
+      token: accessToken,
+      refreshToken,
+      studio: {
+        id: studio._id,
+        studioName: studio.studioName,
+        email: studio.email,
+        // add more fields as needed
+      }
+    });
+  } catch (err) {
+    res.status(500).json({ message: 'Server error during login' });
+  }
+};
+
+exports.updateStudioProfile = async (req, res) => {
+  try {
+    const updates = Object.keys(req.body);
+    const allowedUpdates = [
+      'services', 'features', 'bookingSettings', 
+      'studioDescription', 'recordingBooths', 'loungeArea'
+    ];
+    
+    const isValidOperation = updates.every(update => 
+      allowedUpdates.includes(update)
+    );
+
+    if (!isValidOperation) {
+      return res.status(400).json({ message: 'Invalid updates!' });
+    }
+
+    const studio = await Studio.findByIdAndUpdate(
+      req.user.id,
+      req.body,
+      { new: true, runValidators: true }
+    ).select('-password -refreshToken');
+
+    res.json({ success: true, studio });
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+};

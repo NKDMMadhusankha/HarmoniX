@@ -97,7 +97,7 @@ const App = () => {
         <Route path="/mixing/dashboard" element={<MixingDashboard />} />
         <Route path="/mastering/dashboard" element={<MasteringDashboard />} />
         <Route path="/lyricist/dashboard" element={<LyricistDashboard />} />
-        <Route path="/studios/dashboard" element={<StudioDashboard />} />
+        <Route path="/studio/dashboard" element={<StudioDashboard />} />
         
         
       </Routes>

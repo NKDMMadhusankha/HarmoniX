@@ -2,7 +2,92 @@
 const express = require('express');
 const router = express.Router();
 const studioController = require('../controllers/studioController');
+const Studio = require('../models/Studio');
+const authMiddleware = require('../middleware/authMiddleware');
 
 router.post('/register', studioController.registerStudio);
+
+router.post('/login', studioController.loginStudio);
+
+// Get current studio profile (protected route)
+router.get('/me', authMiddleware(['studio']), async (req, res) => {
+  try {
+    const studio = await Studio.findById(req.user.id).select('-password -refreshToken');
+    if (!studio) return res.status(404).json({ message: 'Studio not found' });
+    res.json(studio);
+  } catch (err) {
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// Update studio profile
+router.put('/update', authMiddleware(['studio']), async (req, res) => {
+  try {
+    const updates = req.body;
+    const studio = await Studio.findByIdAndUpdate(
+      req.user.id,
+      { $set: updates },
+      { new: true, runValidators: true }
+    ).select('-password -refreshToken');
+    
+    res.json({ success: true, studio });
+  } catch (err) {
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+});
+
+// Handle image uploads
+router.put('/images', authMiddleware(['studio']), async (req, res) => {
+  try {
+    const { images } = req.body;
+    const studio = await Studio.findByIdAndUpdate(
+      req.user.id,
+      { $push: { studioImages: { $each: images } } },
+      { new: true }
+    ).select('studioImages');
+    
+    res.json({ success: true, studioImages: studio.studioImages });
+  } catch (err) {
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+});
+
+// Handle gear updates
+router.put('/gear', authMiddleware(['studio']), async (req, res) => {
+  try {
+    const { operation, payload } = req.body;
+    let update;
+
+    switch (operation) {
+      case 'addCategory':
+        update = { $push: { studioGear: payload } };
+        break;
+      case 'removeCategory':
+        update = { $pull: { studioGear: { _id: payload.categoryId } } };
+        break;
+      case 'addItem':
+        update = { $push: { 'studioGear.$[category].items': payload.item } };
+        break;
+      case 'removeItem':
+        update = { $pull: { 'studioGear.$[category].items': payload.item } };
+        break;
+      default:
+        return res.status(400).json({ success: false, message: 'Invalid operation' });
+    }
+
+    const studio = await Studio.findByIdAndUpdate(
+      req.user.id,
+      update,
+      { 
+        new: true,
+        arrayFilters: payload.arrayFilters || []
+      }
+    ).select('studioGear');
+
+    res.json({ success: true, studioGear: studio.studioGear });
+  } catch (err) {
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+});
 
 module.exports = router;

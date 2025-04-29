@@ -56,7 +56,18 @@ const studioSchema = new mongoose.Schema({
     type: Date,
     default: Date.now
   },
-  refreshToken: String
+  refreshToken: String,
+  services: [String],
+  features: [String],
+  studioImages: [String],
+  studioGear: [{
+    category: String,
+    items: [String]
+  }],
+  bookingSettings: {
+    hourlyRate: Number,
+    minimumDuration: Number
+  }
 });
 
 // Hash password before saving

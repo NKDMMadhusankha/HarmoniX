@@ -235,6 +235,8 @@ const StudioRegistrationForm = () => {
   const [animate, setAnimate] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
   const [formData, setFormData] = useState({
     studioName: '',
     phoneNumber: '',
@@ -344,6 +346,7 @@ const StudioRegistrationForm = () => {
   };
 
   const handleSubmit = async () => {
+    setIsLoading(true);
     try {
       console.log('Submitting form data:', formData);
 
@@ -357,25 +360,26 @@ const StudioRegistrationForm = () => {
 
       const data = await response.json();
 
-      if (response.ok) {
-        console.log('Registration successful:', data);
-        
-        // Store authentication and user data
-        localStorage.setItem('authToken', data.token);
-        localStorage.setItem('token', data.token);
-        localStorage.setItem('userType', 'studio');
-        localStorage.setItem('userData', JSON.stringify(data.studio));
-        localStorage.setItem('userId', data.studio.userId);
-        
-        // Redirect to studio dashboard
-        window.location.href = '/studio/dashboard';
-      } else {
-        console.error('Registration failed:', data.message || 'Unknown error');
-        alert(data.message || 'Failed to register. Please check your input.');
+      if (!response.ok) {
+        setError(data.message || 'Registration failed');
+        return;
       }
+
+      console.log('Registration successful:', data);
+      
+      // Store authentication and user data
+      localStorage.setItem('authToken', data.accessToken);
+      localStorage.setItem('refreshToken', data.refreshToken);
+      localStorage.setItem('userType', 'studio');
+      localStorage.setItem('userData', JSON.stringify(data.studio));
+      
+      // Navigate to studio dashboard
+      navigate('/studio/dashboard');
     } catch (error) {
       console.error('Error during form submission:', error);
-      alert('An unexpected error occurred. Please try again later.');
+      setError('An unexpected error occurred. Please try again later.');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -723,6 +727,12 @@ const StudioRegistrationForm = () => {
             </Stepper>
 
             {getStepContent(activeStep)}
+
+            {error && (
+              <Box sx={{ mt: 2, textAlign: 'center' }}>
+                <Typography color="error">{error}</Typography>
+              </Box>
+            )}
 
             <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 4 }}>
               <Button

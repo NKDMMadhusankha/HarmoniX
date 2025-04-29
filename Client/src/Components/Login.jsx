@@ -69,64 +69,59 @@ const LoginForm = () => {
     setLoading(true);
 
     try {
-      // First try logging in as a regular user
+      // 1. Try regular user login
       let response = await axios.post('http://localhost:5000/api/auth/login', { email, password });
-      
       localStorage.setItem('authToken', response.data.token);
-      localStorage.setItem('token', response.data.token); // <-- Add this line
+      localStorage.setItem('token', response.data.token);
       localStorage.setItem('userType', 'user');
       localStorage.setItem('userData', JSON.stringify(response.data.user));
-      
       setSuccess(true);
-      
       setTimeout(() => {
         navigate('/home');
       }, 2000);
-
+      return;
     } catch (userError) {
-      // If user login fails, try musician login
+      // 2. Try musician login
       try {
-        const musicianResponse = await axios.post('http://localhost:5000/api/musician/login', { email, password });
-        
+        let musicianResponse = await axios.post('http://localhost:5000/api/musician/login', { email, password });
         localStorage.setItem('authToken', musicianResponse.data.token);
-        localStorage.setItem('token', musicianResponse.data.token); // <-- Add this line
+        localStorage.setItem('token', musicianResponse.data.token);
         localStorage.setItem('userType', 'musician');
         localStorage.setItem('userData', JSON.stringify(musicianResponse.data.musician));
-        
         setSuccess(true);
-        
-        // Get musician role from response
+        let dashboardRoute = '/musician/dashboard';
         const musicianRole = musicianResponse.data.musician.role;
-        
-        // Determine dashboard route based on role
-        let dashboardRoute = '/musician/dashboard'; // Default fallback
-        
-        switch(musicianRole) {
-          case 'Music Producer':
-            dashboardRoute = '/musicpro/dashboard';
-            break;
-          case 'Mixing Engineer':
-            dashboardRoute = '/mixing/dashboard';
-            break;
-          case 'Mastering Engineer':
-            dashboardRoute = '/mastering/dashboard';
-            break;
-          case 'Lyricist':
-            dashboardRoute = '/lyricist/dashboard';
-            break;
+        switch (musicianRole) {
+          case 'Music Producer': dashboardRoute = '/musicpro/dashboard'; break;
+          case 'Mixing Engineer': dashboardRoute = '/mixing/dashboard'; break;
+          case 'Mastering Engineer': dashboardRoute = '/mastering/dashboard'; break;
+          case 'Lyricist': dashboardRoute = '/lyricist/dashboard'; break;
         }
-        
         setTimeout(() => {
           navigate(dashboardRoute);
         }, 2000);
-
+        return;
       } catch (musicianError) {
-        let errorMessage = 'Invalid email or password';
-        if (musicianError.response && musicianError.response.data && musicianError.response.data.error) {
-          errorMessage = musicianError.response.data.error;
+        // 3. Try studio login
+        try {
+          let studioResponse = await axios.post('http://localhost:5000/api/studio/login', { email, password });
+          localStorage.setItem('authToken', studioResponse.data.token);
+          localStorage.setItem('token', studioResponse.data.token);
+          localStorage.setItem('userType', 'studio');
+          localStorage.setItem('userData', JSON.stringify(studioResponse.data.studio));
+          setSuccess(true);
+          setTimeout(() => {
+            navigate('/studio/dashboard');
+          }, 2000);
+          return;
+        } catch (studioError) {
+          let errorMessage = 'Invalid email or password';
+          if (studioError.response && studioError.response.data && studioError.response.data.message) {
+            errorMessage = studioError.response.data.message;
+          }
+          setError(errorMessage);
+          setLoading(false);
         }
-        setError(errorMessage);
-        setLoading(false);
       }
     }
   };
