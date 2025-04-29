@@ -194,6 +194,7 @@ const StudioProfileDashboard = () => {
   const [studioData, setStudioData] = useState({
     name: 'MERASIC Recording Studio',
     address: '149 Mill Road, Katubedda, Moratuwa',
+    country: 'Sri Lanka',
     description: `Welcome to AudioHaus, our modern recording studio located in the heart of Moratuwa. 
     We've designed this space specifically for artists, musicians and producers looking to create 
     high-quality projects. Our studio combines cutting-edge technology and analog equipment to provide an 
@@ -349,7 +350,7 @@ const StudioProfileDashboard = () => {
     const file = event.target.files[0];
     if (file) {
       if (!file.type.match('image.*')) {
-        setSnackbarMessage('Please upload an image file (PNG, JPEG, etc)');
+        setSnackbarMessage('Please upload an image file');
         setSnackbarSeverity('error');
         setSnackbarOpen(true);
         return;
@@ -484,43 +485,71 @@ const StudioProfileDashboard = () => {
             </Box>
           </Box>
 
-          {/* Location - Updated to be clickable */}
-          <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
-            <LocationOn sx={{ color: 'error.main', mr: 1 }} />
-            {editMode ? (
-              <TextField
-                fullWidth
-                value={studioData.address}
-                onChange={(e) => handleFieldChange('address', e.target.value)}
-                variant="outlined"
-                sx={{ 
-                  '& .MuiOutlinedInput-root': {
-                    '& fieldset': {
-                      borderColor: 'primary.main',
-                    },
-                    '&:hover fieldset': {
-                      borderColor: 'primary.light',
-                    },
-                  }
-                }}
-              />
-            ) : (
-              <Link 
-                component="button"
-                variant="subtitle1" 
-                onClick={openInGoogleMaps}
-                sx={{ 
-                  color: 'primary.main',
-                  textDecoration: 'none',
-                  '&:hover': {
-                    textDecoration: 'underline',
-                    color: 'primary.light'
-                  }
-                }}
-              >
-                {studioData.address}
-              </Link>
-            )}
+          {/* Location - Updated to include country */}
+          <Box sx={{ display: 'flex', alignItems: 'start', mb: 3 }}>
+            <LocationOn sx={{ color: 'error.main', mr: 1, mt: 0.5 }} />
+            <Box sx={{ flex: 1 }}>
+              {editMode ? (
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                  <TextField
+                    fullWidth
+                    value={studioData.address}
+                    onChange={(e) => handleFieldChange('address', e.target.value)}
+                    variant="outlined"
+                    sx={{ 
+                      '& .MuiOutlinedInput-root': {
+                        '& fieldset': {
+                          borderColor: 'primary.main',
+                        },
+                        '&:hover fieldset': {
+                          borderColor: 'primary.light',
+                        },
+                      }
+                    }}
+                  />
+                  <TextField
+                    fullWidth
+                    value={studioData.country}
+                    onChange={(e) => handleFieldChange('country', e.target.value)}
+                    variant="outlined"
+                    placeholder="Country"
+                    sx={{ 
+                      '& .MuiOutlinedInput-root': {
+                        '& fieldset': {
+                          borderColor: 'primary.main',
+                        },
+                        '&:hover fieldset': {
+                          borderColor: 'primary.light',
+                        },
+                      }
+                    }}
+                  />
+                </Box>
+              ) : (
+                <>
+                  <Link 
+                    component="button"
+                    variant="subtitle1" 
+                    onClick={openInGoogleMaps}
+                    sx={{ 
+                      color: 'primary.main',
+                      textDecoration: 'none',
+                      display: 'block',
+                      textAlign: 'left',
+                      '&:hover': {
+                        textDecoration: 'underline',
+                        color: 'primary.light'
+                      }
+                    }}
+                  >
+                    {studioData.address}
+                  </Link>
+                  <Typography variant="body2" sx={{ color: 'text.secondary', mt: 0.5 }}>
+                    {studioData.country}
+                  </Typography>
+                </>
+              )}
+            </Box>
           </Box>
           
           {/* Edit Mode Tabs */}
@@ -1148,7 +1177,7 @@ const StudioProfileDashboard = () => {
                     </Box>
                     
                     {/* Time Selection */}
-                    <Grid container spacing={2} sx={{ mb: 3 }}>
+                    <Grid container spacing={2} sx={{ mb: 8 }}>
                       <Grid item xs={6}>
                         <TextField
                           select
@@ -1243,30 +1272,6 @@ const StudioProfileDashboard = () => {
                       </Typography>
                       <Typography variant="body1" sx={{ color: 'text.primary', fontWeight: 'medium' }}>
                         LKR {studioData.hourlyRate.toLocaleString()} / hour
-                      </Typography>
-                    </Box>
-                    
-                    {/* Booking Button */}
-                    <Button 
-                      variant="contained" 
-                      color="primary" 
-                      fullWidth 
-                      size="large"
-                      disabled={!selectedDate || !selectedStartTime || !selectedEndTime}
-                      sx={{ mb: 2 }}
-                    >
-                      Request to Book
-                    </Button>
-                    
-                    <Typography variant="caption" sx={{ display: 'block', textAlign: 'center', color: 'text.secondary' }}>
-                      You won't be charged yet.
-                    </Typography>
-                    
-                    {/* Host Response Time */}
-                    <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', mt: 2 }}>
-                      <EventAvailable sx={{ mr: 1, color: 'text.secondary', fontSize: 20 }} />
-                      <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                        Host typically responds within 2 hrs
                       </Typography>
                     </Box>
                   </>

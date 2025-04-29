@@ -12,6 +12,7 @@ import AboutUs from "./Components/AboutUs";
 import ContactUs from "./Components/ContactUs";
 import RegistationCatogary from "./Auth/RegistationCatogary";
 import MusicianRegistrationForm from "./Auth/MusicianRegister";
+import StudioRegister from "./Auth/StudioRegister";
 import ForgotPassword from "./Components/FogotPass";
 
 
@@ -47,6 +48,7 @@ const App = () => {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/home" element={<Home />} />
+        <Route path="/about-producing" element={<AboutProducing />} />
 
         <Route path="/register" element={<Register />} />
         <Route path="/login" element={<Login />} />
@@ -57,8 +59,10 @@ const App = () => {
         <Route path="/contact" element={<ContactUs />} />
         <Route path="/catogary" element={<RegistationCatogary />} />
         <Route path="/musician/register" element={<MusicianRegistrationForm />} />
+        <Route path="/studio/register" element={<StudioRegister />} />
 
-        <Route path="/about-producing" element={<AboutProducing />} />
+
+        
 
 
         {/* Musicians Profile */}

@@ -238,23 +238,30 @@ const StudioProfile = () => {
           </Box>
 
           {/* Location - Updated to be clickable */}
-          <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
-            <LocationOn sx={{ color: 'error.main', mr: 1 }} />
-            <Link 
-              component="button"
-              variant="subtitle1" 
-              onClick={openInGoogleMaps}
-              sx={{ 
-                color: 'primary.main',
-                textDecoration: 'none',
-                '&:hover': {
-                  textDecoration: 'underline',
-                  color: 'primary.light'
-                }
-              }}
-            >
-              149 Mill Road, Katubedda, Moratuwa
-            </Link>
+          <Box sx={{ display: 'flex', alignItems: 'start', mb: 3 }}>
+            <LocationOn sx={{ color: 'error.main', mr: 1, mt: 0.5 }} />
+            <Box>
+              <Link 
+                component="button"
+                variant="subtitle1" 
+                onClick={openInGoogleMaps}
+                sx={{ 
+                  color: 'primary.main',
+                  textDecoration: 'none',
+                  display: 'block',
+                  textAlign: 'left',
+                  '&:hover': {
+                    textDecoration: 'underline',
+                    color: 'primary.light'
+                  }
+                }}
+              >
+                149 Mill Road, Katubedda, Moratuwa
+              </Link>
+              <Typography variant="body2" sx={{ color: 'text.secondary', mt: 0.5 }}>
+                Sri Lanka
+              </Typography>
+            </Box>
           </Box>
           
           {/* Main Image Gallery - Photo Collage */}

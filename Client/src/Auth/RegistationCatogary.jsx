@@ -4,7 +4,8 @@ import {
   ArrowBack,
   People,
   MusicNote,
-  CheckCircle
+  CheckCircle,
+  HomeWork
 } from '@mui/icons-material';
 import {
   Box,
@@ -51,9 +52,9 @@ const BackButton = styled(Button)(({ theme }) => ({
 
 const CategoryCard = styled(Paper)(({ theme, animate }) => ({
   background: 'rgba(18, 30, 43, 0.8)',
-  padding: theme.spacing(3, 3, 4, 3),
+  padding: theme.spacing(2), // reduced padding
   [theme.breakpoints.up('sm')]: {
-    padding: theme.spacing(4),
+    padding: theme.spacing(2.5), // reduced padding
   },
   borderRadius: theme.spacing(1.5),
   boxShadow: '0 10px 30px rgba(0, 0, 0, 0.5)',
@@ -80,18 +81,18 @@ const CategoryCard = styled(Paper)(({ theme, animate }) => ({
 }));
 
 const IconCircle = styled(Box)(({ theme }) => ({
-  width: 60,
-  height: 60,
+  width: 50, // reduced size
+  height: 50, // reduced size
   [theme.breakpoints.up('sm')]: {
-    width: 70,
-    height: 70,
+    width: 60, // reduced size
+    height: 60, // reduced size
   },
   borderRadius: '50%',
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
   backgroundColor: 'rgb(11, 98, 248)',
-  marginBottom: theme.spacing(2),
+  marginBottom: theme.spacing(1.5), // reduced margin
   position: 'relative',
   transition: 'all 0.3s ease',
 }));
@@ -113,14 +114,14 @@ const IconWrapper = styled(Box)(({ theme }) => ({
 }));
 
 const FeatureList = styled(List)(({ theme }) => ({
-  marginBottom: theme.spacing(3),
+  marginBottom: theme.spacing(2), // reduced margin
   flexGrow: 1,
   padding: 0,
   overflow: 'visible',
 }));
 
 const FeatureItem = styled(ListItem)(({ theme }) => ({
-  padding: theme.spacing(0.5, 0),
+  padding: theme.spacing(0.25, 0), // reduced padding
 }));
 
 const RegisterButton = styled(Button)(({ theme }) => ({
@@ -274,6 +275,21 @@ const RegistrationCategory = () => {
         "Access specialized tools and opportunities for growth"
       ],
       buttonText: 'Register as Musician'
+    },
+    {
+      id: 'studio',
+      path: '/studio/register',
+      icon: <HomeWork sx={{ fontSize: 28, color: 'white' }} />,
+      title: 'Studio',
+      description: 'List your recording studio and connect with artists and producers looking for professional recording spaces.',
+      features: [
+        "Create detailed studio profiles with equipment lists",
+        "Showcase your studio with high-quality images",
+        "Manage bookings and availability",
+        "Set custom pricing and packages",
+        "Connect with verified artists and producers"
+      ],
+      buttonText: 'Register as Studio'
     }
   ];
 
@@ -327,10 +343,10 @@ const RegistrationCategory = () => {
       </Container>
 
       {/* Registration Options */}
-      <Container maxWidth="lg" sx={{ mb: { xs: 2, md: 3 }, overflow: 'visible', px: { xs: 2, sm: 3, md: 4 } }}>
-        <Grid container spacing={{ xs: 10, sm: 10, md: 6 }} sx={{ overflow: 'visible' }}>
+      <Container maxWidth="lg" sx={{ mb: { xs: 1, md: 2 }, overflow: 'visible', px: { xs: 1, sm: 1, md: 1 } }}>
+        <Grid container spacing={{ xs: 6, sm: 7, md: 2 }} sx={{ overflow: 'visible' }}>
           {cardData.map((card, index) => (
-            <Grid item xs={12} md={6} key={card.id} sx={{ overflow: 'visible' }}>
+            <Grid item xs={12} sm={12} md={4} key={card.id} sx={{ overflow: 'visible' }}>
               <CategoryCard animate={animate} style={{ transitionDelay: `${0.1 + index * 0.1}s` }}>
                 <Box sx={{ position: 'relative', zIndex: 10, display: 'flex', flexDirection: 'column', height: '100%' }}>
                   {/* Icon */}
