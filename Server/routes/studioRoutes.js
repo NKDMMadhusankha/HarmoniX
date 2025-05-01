@@ -100,4 +100,15 @@ router.post('/upload-images', authMiddleware(['studio']), upload.array('studioIm
 // Add a route for deleting studio images by key
 router.delete('/images/:key', authMiddleware(['studio']), studioController.deleteStudioImage);
 
+// Add a route to fetch all studios
+router.get('/all', async (req, res) => {
+  try {
+    // Exclude sensitive fields
+    const studios = await Studio.find({}, '-password -refreshToken');
+    res.json({ success: true, studios });
+  } catch (err) {
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+});
+
 module.exports = router;

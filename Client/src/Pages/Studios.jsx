@@ -34,14 +34,16 @@ const ProducerCard = ({ image, producerInfo, onSeeMore }) => {
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
   const handleCardClick = () => {
-    // Show loader before navigation
     onSeeMore(producerInfo);
   };
 
-  // Truncate about to 150 chars
-  const truncatedAbout = producerInfo.about?.length > 150
-    ? producerInfo.about.slice(0, 150) + '...'
-    : producerInfo.about;
+  // Use the first image from studioImages or a placeholder
+  const cardImage = producerInfo.studioImages?.[0] || 'https://via.placeholder.com/400x250?text=No+Image';
+
+  // Truncate studioDescription to 150 characters
+  const truncatedDescription = producerInfo.studioDescription?.length > 150
+    ? producerInfo.studioDescription.slice(0, 150) + '...'
+    : producerInfo.studioDescription || 'No description available.';
 
   return (
     <Grid item xs={12} sm={6} md={4}>
@@ -72,8 +74,8 @@ const ProducerCard = ({ image, producerInfo, onSeeMore }) => {
         <CardMedia
           component="img"
           height={{ xs: 180, sm: 200, md: 240 }}
-          image={image}
-          alt={producerInfo.fullName}
+          image={cardImage}
+          alt={producerInfo.studioName}
           sx={{
             objectFit: 'cover',
           }}
@@ -97,7 +99,7 @@ const ProducerCard = ({ image, producerInfo, onSeeMore }) => {
               lineHeight: 1.2,
             }}
           >
-            {producerInfo.fullName}
+            {producerInfo.studioName}
           </Typography>
           <Typography
             variant="body2"
@@ -108,7 +110,7 @@ const ProducerCard = ({ image, producerInfo, onSeeMore }) => {
               fontWeight: 500,
             }}
           >
-            {producerInfo.country}
+            {producerInfo.city}, {producerInfo.country}
           </Typography>
           <Typography
             variant="body2"
@@ -123,7 +125,7 @@ const ProducerCard = ({ image, producerInfo, onSeeMore }) => {
               textOverflow: 'ellipsis',
             }}
           >
-            {truncatedAbout}
+            {truncatedDescription}
           </Typography>
         </CardContent>
         <CardActions
@@ -161,30 +163,31 @@ const ProducerCard = ({ image, producerInfo, onSeeMore }) => {
   );
 };
 
-const LyricistsPage = () => {
+const StudiosPage = () => {
   const theme = useTheme();
-  const [lyricists, setLyricists] = useState([]);
+  const [studios, setStudios] = useState([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
   useEffect(() => {
     window.scrollTo(0, 0);
     axios
-      .get('http://localhost:5000/api/musician/lyricists')
+      .get('http://localhost:5000/api/studio/all')
       .then((res) => {
         if (res.data.success) {
-          setLyricists(res.data.lyricists);
+          setStudios(res.data.studios);
         }
         setLoading(false);
       })
       .catch((err) => {
-        console.error('Error fetching lyricists:', err);
+        console.error('Error fetching studios:', err);
         setLoading(false);
       });
   }, []);
 
-  const handleSeeMore = (lyricistInfo) => {
-    window.location.href = `/music/lyricist/${lyricistInfo.id}`;
+  const handleSeeMore = (studio) => {
+    navigate(`/studio/${studio._id}`);
+    window.location.reload();
   };
 
   if (loading) {
@@ -403,7 +406,7 @@ const LyricistsPage = () => {
           </Button>
         </Box>
 
-        {/* Lyricist Cards */}
+        {/* Studio Cards */}
         <Grid 
           container 
           spacing={{ xs: 1.5, sm: 2, md: 3, lg: 4 }} 
@@ -413,11 +416,11 @@ const LyricistsPage = () => {
             width: { xs: 'calc(100% + 16px)', sm: 'calc(100% + 24px)', md: 'calc(100% + 32px)' }
           }}
         >
-          {lyricists.map((lyricist) => (
+          {studios.map((studio) => (
             <ProducerCard 
-              key={lyricist.id} 
-              image={lyricist.profileImage} 
-              producerInfo={lyricist}
+              key={studio.id} 
+              image={studio.profileImage} 
+              producerInfo={studio}
               onSeeMore={handleSeeMore}
             />
           ))}
@@ -431,4 +434,4 @@ const LyricistsPage = () => {
   );
 };
 
-export default LyricistsPage;
+export default StudiosPage;

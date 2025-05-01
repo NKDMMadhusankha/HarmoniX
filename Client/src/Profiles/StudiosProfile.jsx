@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Box, 
   Typography, 
@@ -39,6 +39,8 @@ import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { LocalizationProvider, DateCalendar } from '@mui/x-date-pickers';
 import Navbar from '../Components/Navbar';
 import Footer from '../Components/Footer';
+import { useParams } from 'react-router-dom';
+import axios from 'axios';
 
 // Create a dark theme with teal accents
 const darkTheme = createTheme({
@@ -126,17 +128,6 @@ const darkTheme = createTheme({
   }
 });
 
-// Updated studio images for gallery with online images
-const studioImages = [
-  'https://img.freepik.com/free-photo/music-composer-showing-thumbs-up_107420-96142.jpg?t=st=1745860885~exp=1745864485~hmac=e3e336bf3ea449ed2226f7541c1af4bcff9d2683fa93404a9bb2882e6f4fc520&w=996',
-  'https://img.freepik.com/free-photo/male-audio-engineer-using-sound-mixer_107420-96112.jpg?t=st=1745860587~exp=1745864187~hmac=2bdd10df13166d72178711fd770d15390075182a96fe6a326ddf8e31ce0e4f08&w=996',
-  'https://img.freepik.com/free-photo/young-asian-duet-singers-with-microphone-recording-song-record-music-studio_627829-3771.jpg?t=st=1745861201~exp=1745864801~hmac=b42097dfa43f6a76109f7f60e98c163d9de20b3cddefc16db635d7af8db526a9&w=996',
-  'https://img.freepik.com/free-photo/male-audio-engineer-using-sound-mixer_107420-96112.jpg?t=st=1745860587~exp=1745864187~hmac=2bdd10df13166d72178711fd770d15390075182a96fe6a326ddf8e31ce0e4f08&w=996',
-  'https://img.freepik.com/free-photo/male-audio-engineer-using-sound-mixer_107420-96112.jpg?t=st=1745860587~exp=1745864187~hmac=2bdd10df13166d72178711fd770d15390075182a96fe6a326ddf8e31ce0e4f08&w=996',
-  'https://img.freepik.com/free-photo/male-audio-engineer-using-sound-mixer_107420-96112.jpg?t=st=1745860587~exp=1745864187~hmac=2bdd10df13166d72178711fd770d15390075182a96fe6a326ddf8e31ce0e4f08&w=996',
-  'https://img.freepik.com/free-photo/male-audio-engineer-using-sound-mixer_107420-96112.jpg?t=st=1745860587~exp=1745864187~hmac=2bdd10df13166d72178711fd770d15390075182a96fe6a326ddf8e31ce0e4f08&w=996'
-];
-
 // Available time slots
 const timeSlots = [
   { value: '09:00', label: '9:00 AM' },
@@ -168,6 +159,29 @@ const studioGear = [
 ];
 
 const StudioProfile = () => {
+  const [studio, setStudio] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [studioImages, setStudioImages] = useState([]);
+  const { id } = useParams();
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+    axios
+      .get(`http://localhost:5000/api/studio/${id}`)
+      .then((res) => {
+        if (res.data.success) {
+          setStudio(res.data.studio);
+          // Set studio images if available, otherwise use an empty array
+          setStudioImages(res.data.studio.studioImages || []);
+        }
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error('Error fetching studio profile:', err);
+        setLoading(false);
+      });
+  }, [id]);
+
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [selectedStartTime, setSelectedStartTime] = useState('');
@@ -182,13 +196,13 @@ const StudioProfile = () => {
   // Handle image navigation
   const handleNextImage = () => {
     setGalleryImageIndex((prevIndex) => 
-      prevIndex === studioImages.length - 1 ? 0 : prevIndex + 1
+      prevIndex === displayImages.length - 1 ? 0 : prevIndex + 1
     );
   };
   
   const handlePrevImage = () => {
     setGalleryImageIndex((prevIndex) => 
-      prevIndex === 0 ? studioImages.length - 1 : prevIndex - 1
+      prevIndex === 0 ? displayImages.length - 1 : prevIndex - 1
     );
   };
 
@@ -216,6 +230,10 @@ const StudioProfile = () => {
     const encodedAddress = encodeURIComponent(address);
     window.open(`https://www.google.com/maps/search/?api=1&query=${encodedAddress}`, '_blank');
   };
+
+  // If no images are available, show a placeholder
+  const defaultImage = 'https://via.placeholder.com/400x300?text=No+Image+Available';
+  const displayImages = studioImages.length > 0 ? studioImages : [defaultImage];
   
   return (
     <ThemeProvider theme={darkTheme}>
@@ -280,7 +298,7 @@ const StudioProfile = () => {
               >
                 <Box
                   component="img"
-                  src={studioImages[0]} // Use actual image
+                  src={displayImages[0]} // Use actual image
                   alt="Studio Main"
                   sx={{
                     width: '100%',
@@ -308,7 +326,7 @@ const StudioProfile = () => {
                     >
                       <Box
                         component="img"
-                        src={studioImages[index]} // Use actual image
+                        src={displayImages[index]} // Use actual image
                         alt={`Studio Image ${index}`}
                         sx={{
                           width: '100%',
@@ -339,7 +357,7 @@ const StudioProfile = () => {
                     >
                       <Box
                         component="img"
-                        src={studioImages[index]} // Use actual image
+                        src={displayImages[index]} // Use actual image
                         alt={`Studio Image ${index}`}
                         sx={{
                           width: '100%',
@@ -360,7 +378,7 @@ const StudioProfile = () => {
                       borderRadius: 2,
                       overflow: 'hidden',
                       cursor: 'pointer',
-                      backgroundImage: `url(${studioImages[5]})`, // Use actual image
+                      backgroundImage: `url(${displayImages[5] || defaultImage})`, // Use actual image
                       backgroundSize: 'cover',
                       backgroundPosition: 'center',
                       display: 'flex',
@@ -718,7 +736,7 @@ const StudioProfile = () => {
             <Box sx={{ position: 'relative', width: '100%', height: '80vh', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
               <Box
                 component="img"
-                src={studioImages[galleryImageIndex]} // Use actual image
+                src={displayImages[galleryImageIndex]} // Use actual image
                 alt={`Studio Image ${galleryImageIndex + 1}`}
                 sx={{
                   maxWidth: '100%',
@@ -767,7 +785,7 @@ const StudioProfile = () => {
                   borderRadius: 1
                 }}
               >
-                {galleryImageIndex + 1} / {studioImages.length}
+                {galleryImageIndex + 1} / {displayImages.length}
               </Typography>
             </Box>
           </DialogContent>

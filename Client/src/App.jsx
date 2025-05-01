@@ -40,6 +40,7 @@ import AboutProducing from "./Landing/AboutProducing";
 
 import StudiosProfile from "./Profiles/StudiosProfile";
 import StudioUploadImages from "./Pages/StudioUploadImages";
+import StudioProfile from './Pages/Studios';
 
 
 
@@ -80,6 +81,7 @@ const App = () => {
         <Route path="/music/lyricist/:id" element={<LyricistsProfile />} />
 
         <Route path="/studiopro" element={<StudiosProfile />} />
+        <Route path="/studio/:id" element={<StudiosProfile />} />
         
 
 
