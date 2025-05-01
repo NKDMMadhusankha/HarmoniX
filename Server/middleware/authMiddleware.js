@@ -30,6 +30,14 @@ module.exports = function (roles = []) {
 
       // Check if user role matches the required roles
       if (roles.length && !roles.includes(decoded.role)) {
+        if (roles.includes('studio') && decoded.role !== 'studio') {
+          console.log(`Forbidden: User role '${decoded.role}' does not match required role: studio`);
+          return res.status(403).json({ 
+            success: false,
+            message: 'Forbidden: You do not have the required role for studio access' 
+          });
+        }
+
         console.log(`Forbidden: User role '${decoded.role}' does not match required roles: ${roles}`);
         return res.status(403).json({ 
           success: false,

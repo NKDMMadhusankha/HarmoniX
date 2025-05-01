@@ -50,6 +50,7 @@ import { LocalizationProvider, DateCalendar } from '@mui/x-date-pickers';
 import Navbar from '../Components/Navbar';
 import Footer from '../Components/Footer';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 
 // Create a dark theme with teal accents
 const darkTheme = createTheme({
@@ -197,17 +198,24 @@ const StudioProfileDashboard = () => {
     const fetchStudioData = async () => {
       try {
         const token = localStorage.getItem('authToken');
-        if (!token) {
+        const userType = localStorage.getItem('userType');
+
+        if (!token || userType !== 'studio') {
           navigate('/login');
           return;
         }
 
-        const res = await fetch('http://localhost:5000/api/studio/me', {
-          headers: { 'x-auth-token': token }
+        const response = await fetch('http://localhost:5000/api/studio/me', {
+          headers: { 'x-auth-token': token },
         });
 
-        if (!res.ok) throw new Error('Failed to fetch');
-        const data = await res.json();
+        if (!response.ok) throw new Error('Failed to fetch');
+        const data = await response.json();
+
+        // Check if images exist and are not empty strings
+        const validImages = data.studioImages?.filter(url => url && url.trim() !== '') || [];
+        console.log('Fetched studio images:', validImages);
+
         setStudioData({
           name: data.studioName,
           address: data.address,
@@ -220,10 +228,11 @@ const StudioProfileDashboard = () => {
           hourlyRate: data.hourlyRate,
           minimumDuration: data.minimumDuration,
         });
-        setStudioImages(data.studioImages || []); // Fetch and set images from MongoDB
+        setStudioImages(validImages);
         setStudioGear(data.studioGear || []);
       } catch (err) {
         console.error('Error fetching data:', err);
+        setError('Failed to load studio data');
         setStudioData({
           name: '',
           address: '',
@@ -234,10 +243,12 @@ const StudioProfileDashboard = () => {
           loungeArea: '',
           features: [],
           hourlyRate: 0,
-          minimumDuration: 1
+          minimumDuration: 1,
         });
+        setStudioImages([]);
       }
     };
+
     fetchStudioData();
   }, [navigate]);
 
@@ -364,41 +375,96 @@ const StudioProfileDashboard = () => {
   // Add new image
   const addImage = async (event) => {
     const file = event.target.files[0];
-    if (file) {
-      try {
-        const formData = new FormData();
-        formData.append('image', file);
+    if (!file) {
+      setSnackbarMessage('Please select a file to upload.');
+      setSnackbarSeverity('error');
+      setSnackbarOpen(true);
+      return;
+    }
 
-        const response = await fetch('http://localhost:5000/api/studio/upload', {
-          method: 'POST',
-          headers: {
-            'x-auth-token': localStorage.getItem('authToken')
-          },
-          body: formData
-        });
+    // Check if it's an image
+    if (!file.type.startsWith('image/')) {
+      setSnackbarMessage('Please select a valid image file.');
+      setSnackbarSeverity('error');
+      setSnackbarOpen(true);
+      return;
+    }
 
-        const data = await response.json();
-        if (response.ok) {
-          setStudioImages([...studioImages, data.imageUrl]);
+    // Check file size (5MB limit)
+    const maxSize = 5 * 1024 * 1024;
+    if (file.size > maxSize) {
+      setSnackbarMessage('Image size should be less than 5MB');
+      setSnackbarSeverity('error');
+      setSnackbarOpen(true);
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append('image', file);
+
+    try {
+      const token = localStorage.getItem('authToken');
+      if (!token) {
+        setSnackbarMessage('Authentication required');
+        setSnackbarSeverity('error');
+        setSnackbarOpen(true);
+        return;
+      }
+
+      const response = await fetch('http://localhost:5000/api/studio/upload', {
+        method: 'POST',
+        headers: {
+          'x-auth-token': token
+        },
+        body: formData,
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        // Check if image already exists to prevent duplicates
+        if (!studioImages.includes(data.imageUrl)) {
+          setStudioImages(prev => [...prev, data.imageUrl]);
           setSnackbarMessage('Image uploaded successfully!');
           setSnackbarSeverity('success');
+        } else {
+          setSnackbarMessage('This image has already been uploaded');
+          setSnackbarSeverity('warning');
         }
-      } catch (err) {
-        setSnackbarMessage('Error uploading image');
+      } else {
+        setSnackbarMessage(`Upload failed: ${data.message}`);
         setSnackbarSeverity('error');
       }
-      setSnackbarOpen(true);
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      setSnackbarMessage('An error occurred while uploading the image.');
+      setSnackbarSeverity('error');
     }
+
+    setSnackbarOpen(true);
+    // Clear the file input
+    event.target.value = '';
   };
-  
+
   // Remove image
   const removeImage = async (index) => {
     try {
       const url = studioImages[index];
-      const response = await fetch(`http://localhost:5000/api/studio/images/${encodeURIComponent(url)}`, {
+      // Extract the key from the URL
+      const key = url.split('.com/')[1];
+      
+      const token = localStorage.getItem('authToken');
+      if (!token) {
+        setSnackbarMessage('Authentication required');
+        setSnackbarSeverity('error');
+        setSnackbarOpen(true);
+        return;
+      }
+
+      const response = await fetch(`http://localhost:5000/api/studio/images/${encodeURIComponent(key)}`, {
         method: 'DELETE',
         headers: {
-          'x-auth-token': localStorage.getItem('authToken')
+          'x-auth-token': token
         }
       });
 
@@ -407,8 +473,13 @@ const StudioProfileDashboard = () => {
         setStudioImages(newImages);
         setSnackbarMessage('Image removed successfully!');
         setSnackbarSeverity('info');
+      } else {
+        const data = await response.json();
+        setSnackbarMessage(`Error removing image: ${data.message}`);
+        setSnackbarSeverity('error');
       }
     } catch (err) {
+      console.error('Error removing image:', err);
       setSnackbarMessage('Error removing image');
       setSnackbarSeverity('error');
     }
@@ -916,6 +987,54 @@ const StudioProfileDashboard = () => {
               <Typography variant="body2" sx={{ color: 'text.secondary' }}>
                 Current images: {studioImages.length} (Minimum 6 recommended)
               </Typography>
+              <Box sx={{ mt: 2 }}>
+                {studioImages.map((url, index) => (
+                  <Box
+                    key={index}
+                    sx={{
+                      display: 'inline-block',
+                      mr: 2,
+                      mb: 2,
+                      borderRadius: 2,
+                      overflow: 'hidden',
+                      border: '1px solid #222',
+                      width: 100,
+                      height: 100,
+                      backgroundColor: '#222',
+                      position: 'relative'
+                    }}
+                  >
+                    <img
+                      src={url}
+                      alt={`Studio Image ${index}`}
+                      style={{
+                        width: '100%',
+                        height: '100%',
+                        objectFit: 'cover'
+                      }}
+                    />
+                    {editMode && (
+                      <IconButton
+                        onClick={() => removeImage(index)}
+                        sx={{
+                          position: 'absolute',
+                          top: 4,
+                          right: 4,
+                          backgroundColor: 'rgba(0, 0, 0, 0.7)',
+                          color: 'error.main',
+                          padding: '4px',
+                          '&:hover': {
+                            backgroundColor: 'rgba(0, 0, 0, 0.9)',
+                          }
+                        }}
+                        size="small"
+                      >
+                        <Delete fontSize="small" />
+                      </IconButton>
+                    )}
+                  </Box>
+                ))}
+              </Box>
             </Paper>
           )}
           

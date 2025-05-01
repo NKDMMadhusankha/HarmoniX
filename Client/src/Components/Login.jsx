@@ -110,6 +110,12 @@ const LoginForm = () => {
           localStorage.setItem('userType', 'studio');
           localStorage.setItem('userData', JSON.stringify(studioResponse.data.studio));
           setSuccess(true);
+          if (studioResponse.data.isFirstTimeLogin) {
+            setTimeout(() => {
+              navigate('/studio/upload-images');
+            }, 2000);
+            return;
+          }
           setTimeout(() => {
             navigate('/studio/dashboard');
           }, 2000);

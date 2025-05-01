@@ -60,6 +60,10 @@ refreshToken: String,
 services: [String],
 features: [String],
 studioImages: [String],
+hasUploadedImages: {
+type: Boolean,
+default: false
+},
 studioGear: [{
 category: String,
 items: [String]

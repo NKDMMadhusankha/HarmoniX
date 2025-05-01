@@ -1,4 +1,5 @@
 const User = require('../models/User');
+const Studio = require('../models/Studio'); // Import Studio model
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const nodemailer = require('nodemailer');
@@ -38,7 +39,11 @@ const login = async (req, res) => {
 
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
 
-    res.json({ token, user });
+    // Check if the user is a studio and if studioImages is empty
+    const studio = await Studio.findOne({ email });
+    const isFirstTimeLogin = studio && studio.studioImages.length === 0;
+
+    res.json({ token, user, isFirstTimeLogin });
   } catch (error) {
     res.status(500).json({ error: 'Server error' });
   }

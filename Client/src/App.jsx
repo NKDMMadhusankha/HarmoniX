@@ -40,6 +40,9 @@ import AboutProducing from "./Landing/AboutProducing";
 
 import StudiosProfile from "./Profiles/StudiosProfile";
 
+import TestUpload from "./Pages/TestUpload";
+import StudioUploadImages from "./Pages/StudioUploadImages";
+
 
 
 const App = () => {
@@ -98,6 +101,10 @@ const App = () => {
         <Route path="/mastering/dashboard" element={<MasteringDashboard />} />
         <Route path="/lyricist/dashboard" element={<LyricistDashboard />} />
         <Route path="/studio/dashboard" element={<StudioDashboard />} />
+
+        <Route path="/studio/upload-images" element={<StudioUploadImages />} />
+
+        <Route path="/test/upload" element={<TestUpload />} />
         
         
       </Routes>

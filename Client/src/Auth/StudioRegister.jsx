@@ -36,6 +36,7 @@ import {
   VisibilityOff as VisibilityOffIcon
 } from '@mui/icons-material';
 import { styled } from '@mui/material/styles';
+import { useNavigate } from 'react-router-dom'; // Add this import
 
 // Custom styled components for background
 const GradientBackground = styled(Box)(({ theme }) => ({
@@ -231,6 +232,7 @@ const countries = [
 ];
 
 const StudioRegistrationForm = () => {
+  const navigate = useNavigate(); // Initialize navigate
   const [activeStep, setActiveStep] = useState(0);
   const [animate, setAnimate] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -358,26 +360,26 @@ const StudioRegistrationForm = () => {
         body: JSON.stringify(formData),
       });
 
-      const data = await response.json();
-
       if (!response.ok) {
+        const data = await response.json();
         setError(data.message || 'Registration failed');
         return;
       }
 
+      const data = await response.json();
       console.log('Registration successful:', data);
-      
+
       // Store authentication and user data
       localStorage.setItem('authToken', data.accessToken);
       localStorage.setItem('refreshToken', data.refreshToken);
       localStorage.setItem('userType', 'studio');
       localStorage.setItem('userData', JSON.stringify(data.studio));
-      
-      // Navigate to studio dashboard
-      navigate('/studio/dashboard');
+
+      // Navigate to the StudioUploadImages page
+      navigate('/studio/upload-images');
     } catch (error) {
       console.error('Error during form submission:', error);
-      setError('An unexpected error occurred. Please try again later.');
+      setError('Unable to connect to the server. Please try again later.');
     } finally {
       setIsLoading(false);
     }

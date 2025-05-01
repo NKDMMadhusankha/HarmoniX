@@ -2,6 +2,8 @@
 const Studio = require('../models/Studio');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
+const { uploadToS3 } = require('../utils/studioUpload');
+const { generateSignedUrl } = require('../utils/s3');
 
 exports.registerStudio = async (req, res) => {
 try {
@@ -19,6 +21,10 @@ return res.status(400).json({ message: 'Studio already exists' });
 
 // Create new studio
 const newStudio = new Studio(req.body);
+
+// Add a flag to indicate that the studio user has not uploaded images yet
+newStudio.hasUploadedImages = false;
+
 await newStudio.save();
 
 // Generate tokens
@@ -126,4 +132,98 @@ res.json({ success: true, studio });
 } catch (error) {
 res.status(500).json({ success: false, message: 'Server error' });
 }
+};
+
+exports.uploadStudioImage = async (req, res) => {
+  try {
+    if (!req.file) {
+      console.error('No file uploaded');
+      return res.status(400).json({ message: 'No file uploaded' });
+    }
+
+    const imageUrl = await uploadToS3(req.file, req.user.id);
+
+    // Save image URL to the database
+    const studio = await Studio.findByIdAndUpdate(
+      req.user.id,
+      { $push: { studioImages: imageUrl } },
+      { new: true }
+    );
+
+    res.status(200).json({ success: true, imageUrl, studio });
+  } catch (err) {
+    console.error('Error uploading image:', err.message);
+    res.status(500).json({ message: 'Error uploading image', error: err.message });
+  }
+};
+
+exports.uploadStudioImages = async (req, res) => {
+  try {
+    if (!req.files || req.files.length < 6) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Please upload at least 6 images' 
+      });
+    }
+
+    const uploadPromises = req.files.map(file => uploadToS3(file, req.user.id));
+    const uploadedUrls = await Promise.all(uploadPromises);
+
+    // Update the studio's images in the database
+    const studio = await Studio.findByIdAndUpdate(
+      req.user.id,
+      { 
+        $set: { 
+          studioImages: uploadedUrls,
+          hasUploadedImages: true 
+        } 
+      },
+      { new: true }
+    ).select('studioImages');
+
+    // Generate presigned URLs for immediate display
+    const signedImageUrls = await Promise.all(
+      studio.studioImages.map(async (imageUrl) => {
+        // Extract the key from the full URL
+        const key = imageUrl.split('.com/')[1];
+        return await generateSignedUrl(key);
+      })
+    );
+
+    res.status(200).json({ 
+      success: true, 
+      studioImages: signedImageUrls 
+    });
+  } catch (err) {
+    console.error('Error uploading studio images:', err);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Error uploading studio images', 
+      error: err.message 
+    });
+  }
+};
+
+exports.getStudioProfile = async (req, res) => {
+  try {
+    const studio = await Studio.findById(req.user.id).select('-password -refreshToken');
+    if (!studio) return res.status(404).json({ message: 'Studio not found' });
+
+    // Generate pre-signed URLs for studio images
+    const signedImageUrls = await Promise.all(
+      studio.studioImages.map(async (imageUrl) => {
+        // Extract the key from the full URL
+        const key = imageUrl.split('.com/')[1];
+        return await generateSignedUrl(key);
+      })
+    );
+
+    res.status(200).json({
+      ...studio.toObject(),
+      studioImages: signedImageUrls // Replace image keys with signed URLs
+    });
+  } catch (err) {
+    console.error('Error fetching studio profile:', err);
+    res.status(500).json({ message: 'Server error' });
+  }
 };
