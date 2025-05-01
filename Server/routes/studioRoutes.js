@@ -38,10 +38,10 @@ router.put('/images', authMiddleware(['studio']), async (req, res) => {
     const { images } = req.body;
     const studio = await Studio.findByIdAndUpdate(
       req.user.id,
-      { $push: { studioImages: { $each: images } } },
+      { $set: { studioImages: images } }, // Changed from $push to $set
       { new: true }
     ).select('studioImages');
-
+    
     res.json({ success: true, studioImages: studio.studioImages });
   } catch (err) {
     res.status(500).json({ success: false, message: 'Server error' });
@@ -96,5 +96,8 @@ router.post(
 
 // Add a route for bulk uploading studio images
 router.post('/upload-images', authMiddleware(['studio']), upload.array('studioImages', 12), studioController.uploadStudioImages);
+
+// Add a route for deleting studio images by key
+router.delete('/images/:key', authMiddleware(['studio']), studioController.deleteStudioImage);
 
 module.exports = router;

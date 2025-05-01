@@ -263,6 +263,9 @@ const HarmoniXNavbar = () => {
                           } else if (option === 'lyricist') {
                             navigate('/music/lyricists');  // Navigate to your lyricist page
                             setMobileMenuOpen(false);
+                          } else if (option === 'Recording Studios') {
+                            navigate('/music/studios');  // Navigate to your Studio page
+                            setMobileMenuOpen(false);
                           }
                         }}
                         sx={{ 
@@ -493,6 +496,9 @@ const HarmoniXNavbar = () => {
                               setFeaturesAnchorEl(null);
                             } else if (option === 'lyricist') {
                               navigate('/music/lyricists');  // Navigate to your lyricist page
+                              setMobileMenuOpen(false);
+                            } else if (option === 'Recording Studios') {
+                              navigate('/music/studios');  // Navigate to your lyricist page
                               setMobileMenuOpen(false);
                             }
                           }}

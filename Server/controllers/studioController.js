@@ -4,6 +4,7 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const { uploadToS3 } = require('../utils/studioUpload');
 const { generateSignedUrl } = require('../utils/s3');
+const { S3Client, DeleteObjectCommand } = require('@aws-sdk/client-s3');
 
 exports.registerStudio = async (req, res) => {
 try {
@@ -225,5 +226,37 @@ exports.getStudioProfile = async (req, res) => {
   } catch (err) {
     console.error('Error fetching studio profile:', err);
     res.status(500).json({ message: 'Server error' });
+  }
+};
+
+exports.deleteStudioImage = async (req, res) => {
+  try {
+    const { key } = req.params;
+    
+    // Configure S3 client with proper permissions
+    const s3 = new S3Client({
+      region: process.env.AWS_REGION,
+      credentials: {
+        accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY
+      }
+    });
+
+    await s3.send(new DeleteObjectCommand({
+      Bucket: process.env.AWS_BUCKET_NAME,
+      Key: key
+    }));
+
+    // Remove from database
+    await Studio.findByIdAndUpdate(
+      req.user.id,
+      { $pull: { studioImages: { $regex: key } } },
+      { new: true }
+    );
+
+    res.status(200).json({ success: true });
+  } catch (err) {
+    console.error('Delete error:', err);
+    res.status(500).json({ success: false, message: 'Error deleting image' });
   }
 };

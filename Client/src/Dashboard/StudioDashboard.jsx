@@ -450,32 +450,23 @@ const StudioProfileDashboard = () => {
   const removeImage = async (index) => {
     try {
       const url = studioImages[index];
-      // Extract the key from the URL
-      const key = url.split('.com/')[1];
-      
-      const token = localStorage.getItem('authToken');
-      if (!token) {
-        setSnackbarMessage('Authentication required');
-        setSnackbarSeverity('error');
-        setSnackbarOpen(true);
-        return;
-      }
+      // Properly extract S3 key from URL
+      const urlObj = new URL(url);
+      const key = decodeURIComponent(urlObj.pathname.substring(1)); // Remove leading slash
 
+      const token = localStorage.getItem('authToken');
       const response = await fetch(`http://localhost:5000/api/studio/images/${encodeURIComponent(key)}`, {
         method: 'DELETE',
-        headers: {
-          'x-auth-token': token
-        }
+        headers: { 'x-auth-token': token }
       });
 
       if (response.ok) {
-        const newImages = studioImages.filter((_, i) => i !== index);
-        setStudioImages(newImages);
+        setStudioImages((prevImages) => prevImages.filter((_, i) => i !== index));
         setSnackbarMessage('Image removed successfully!');
-        setSnackbarSeverity('info');
+        setSnackbarSeverity('success');
       } else {
-        const data = await response.json();
-        setSnackbarMessage(`Error removing image: ${data.message}`);
+        const errorData = await response.json();
+        setSnackbarMessage(errorData.message || 'Failed to remove image');
         setSnackbarSeverity('error');
       }
     } catch (err) {
@@ -531,6 +522,15 @@ const StudioProfileDashboard = () => {
   
   // Save all changes
   const saveChanges = async () => {
+    // Check for duplicate images before saving
+    const uniqueImages = [...new Set(studioImages)];
+    if (uniqueImages.length !== studioImages.length) {
+      setSnackbarMessage('Duplicate images detected');
+      setSnackbarSeverity('error');
+      setSnackbarOpen(true);
+      return;
+    }
+
     try {
       const token = localStorage.getItem('authToken');
       

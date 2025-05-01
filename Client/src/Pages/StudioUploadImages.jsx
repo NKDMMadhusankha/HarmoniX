@@ -3,6 +3,8 @@ import { Box, Button, Typography, Grid, IconButton, Alert, CircularProgress } fr
 import { useNavigate } from 'react-router-dom';
 import DeleteIcon from '@mui/icons-material/Delete';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
+import AddPhotoAlternateIcon from '@mui/icons-material/AddPhotoAlternate';
+import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 
 const StudioUploadImages = () => {
   const [images, setImages] = useState([]);
@@ -116,157 +118,290 @@ const StudioUploadImages = () => {
     }
   };
 
+  const totalImages = existingImages.length + images.length;
+  const imagesNeeded = Math.max(0, 6 - totalImages);
+
   return (
     <Box sx={{ 
-      p: 4, 
+      p: { xs: 2, md: 4 }, 
       minHeight: '100vh',
-      backgroundColor: '#121212',
+      backgroundColor: '#000000',
       color: 'white'
     }}>
-      <Typography variant="h4" gutterBottom sx={{ color: 'primary.main' }}>
-        Upload Studio Images
-      </Typography>
-      <Typography variant="body1" sx={{ mb: 3, color: 'text.secondary' }}>
-        Please upload at least 6 images of your studio. These images will be displayed on your profile.
-      </Typography>
-
-      {error && (
-        <Alert severity="error" sx={{ mb: 2 }}>
-          {error}
-        </Alert>
-      )}
-
-      <Box sx={{ mb: 3 }}>
-        <input
-          accept="image/*"
-          style={{ display: 'none' }}
-          id="raised-button-file"
-          multiple
-          type="file"
-          onChange={handleFileSelect}
-        />
-        <label htmlFor="raised-button-file">
-          <Button
-            variant="contained"
-            component="span"
-            startIcon={<CloudUploadIcon />}
-            sx={{ mb: 2 }}
-          >
-            Upload Images
-          </Button>
-        </label>
-        <Typography variant="caption" display="block" sx={{ color: 'text.secondary' }}>
-          Total images: {existingImages.length + images.length} (minimum 6 required)
+      <Box 
+        sx={{ 
+          maxWidth: '1200px', 
+          mx: 'auto', 
+          borderRadius: 3,
+          p: { xs: 2, md: 4 },
+          backgroundColor: 'rgba(18, 18, 18, 0.6)',
+          backdropFilter: 'blur(10px)',
+          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.2)',
+        }}
+      >
+        <Typography 
+          variant="h4" 
+          fontWeight="bold" 
+          sx={{ 
+            mb: 1, 
+            background: 'linear-gradient(90deg, #2196f3, #21f3e3)',
+            backgroundClip: 'text',
+            textFillColor: 'transparent',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+          }}
+        >
+          Studio Gallery
         </Typography>
-      </Box>
-
-      <Grid container spacing={2}>
-        {existingImages.map((imageUrl, index) => (
-          <Grid item xs={12} sm={6} md={4} key={`existing-${index}`}>
-            <Box
-              sx={{
-                position: 'relative',
-                border: '1px solid rgba(255, 255, 255, 0.1)',
-                borderRadius: 2,
-                overflow: 'hidden',
-                aspectRatio: '16/9',
-                bgcolor: 'rgba(0, 0, 0, 0.2)',
+        
+        <Box 
+          sx={{ 
+            display: 'flex', 
+            alignItems: 'center', 
+            gap: 1, 
+            mb: 4,
+            pb: 2,
+            borderBottom: '1px solid rgba(255,255,255,0.1)'
+          }}
+        >
+          <Typography variant="body1" sx={{ color: 'rgba(255,255,255,0.7)' }}>
+            Upload at least 6 high-quality images of your studio space
+          </Typography>
+          
+          <Box sx={{ display: 'flex', alignItems: 'center', ml: 'auto' }}>
+            <Typography 
+              variant="body2" 
+              sx={{ 
+                color: totalImages >= 6 ? '#4caf50' : 'rgba(255,255,255,0.5)',
                 display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
+                alignItems: 'center'
               }}
             >
-              {!imageLoadErrors[index] ? (
+              {totalImages >= 6 && <CheckCircleOutlineIcon sx={{ mr: 0.5, fontSize: 16 }} />}
+              {totalImages} / 6 images
+            </Typography>
+          </Box>
+        </Box>
+
+        {error && (
+          <Alert 
+            severity="error" 
+            sx={{ 
+              mb: 3, 
+              backgroundColor: 'rgba(211, 47, 47, 0.1)', 
+              color: '#f44336',
+              border: '1px solid rgba(211, 47, 47, 0.2)',
+              '& .MuiAlert-icon': {
+                color: '#f44336'
+              }
+            }}
+          >
+            {error}
+          </Alert>
+        )}
+
+        <Grid container spacing={3}>
+          {existingImages.map((imageUrl, index) => (
+            <Grid item xs={12} sm={6} md={4} key={`existing-${index}`}>
+              <Box
+                sx={{
+                  position: 'relative',
+                  borderRadius: 2,
+                  overflow: 'hidden',
+                  aspectRatio: '4/3',
+                  boxShadow: '0 4px 12px rgba(0,0,0,0.2)',
+                  transition: 'transform 0.2s, box-shadow 0.2s',
+                  '&:hover': {
+                    transform: 'translateY(-5px)',
+                    boxShadow: '0 8px 20px rgba(0,0,0,0.3)',
+                  }
+                }}
+              >
+                {!imageLoadErrors[index] ? (
+                  <img 
+                    src={imageUrl} 
+                    alt={`Studio ${index + 1}`} 
+                    onError={() => handleImageError(index)}
+                    style={{ 
+                      width: '100%', 
+                      height: '100%', 
+                      objectFit: 'cover' 
+                    }} 
+                  />
+                ) : (
+                  <Box sx={{
+                    height: '100%',
+                    width: '100%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    backgroundColor: 'rgba(0,0,0,0.3)'
+                  }}>
+                    <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                      Failed to load image
+                    </Typography>
+                  </Box>
+                )}
+                <IconButton
+                  onClick={() => handleDeleteImage(index, true)}
+                  sx={{
+                    position: 'absolute',
+                    top: 8,
+                    right: 8,
+                    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+                    '&:hover': {
+                      backgroundColor: 'rgba(244, 67, 54, 0.8)',
+                    },
+                    color: 'white',
+                    transition: 'all 0.2s',
+                    width: 36,
+                    height: 36,
+                  }}
+                >
+                  <DeleteIcon fontSize="small" />
+                </IconButton>
+              </Box>
+            </Grid>
+          ))}
+          
+          {previews.map((preview, index) => (
+            <Grid item xs={12} sm={6} md={4} key={`preview-${index}`}>
+              <Box
+                sx={{
+                  position: 'relative',
+                  borderRadius: 2,
+                  overflow: 'hidden',
+                  aspectRatio: '4/3',
+                  boxShadow: '0 4px 12px rgba(0,0,0,0.2)',
+                  transition: 'transform 0.2s, box-shadow 0.2s',
+                  '&:hover': {
+                    transform: 'translateY(-5px)',
+                    boxShadow: '0 8px 20px rgba(0,0,0,0.3)',
+                  }
+                }}
+              >
                 <img 
-                  src={imageUrl} 
-                  alt={`Studio ${index + 1}`} 
-                  onError={() => handleImageError(index)}
+                  src={preview} 
+                  alt={`New Studio ${index + 1}`} 
                   style={{ 
                     width: '100%', 
                     height: '100%', 
                     objectFit: 'cover' 
                   }} 
                 />
-              ) : (
-                <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                  Failed to load image
-                </Typography>
-              )}
-              <IconButton
-                onClick={() => handleDeleteImage(index, true)}
-                sx={{
-                  position: 'absolute',
-                  top: 8,
-                  right: 8,
-                  backgroundColor: 'rgba(0, 0, 0, 0.5)',
-                  '&:hover': {
-                    backgroundColor: 'rgba(0, 0, 0, 0.7)',
-                  },
-                  color: 'white',
-                }}
-              >
-                <DeleteIcon />
-              </IconButton>
-            </Box>
-          </Grid>
-        ))}
-        {previews.map((preview, index) => (
-          <Grid item xs={12} sm={6} md={4} key={`preview-${index}`}>
+                <Box
+                  sx={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    width: '100%',
+                    height: '100%',
+                    background: 'linear-gradient(to top, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0) 30%)',
+                  }}
+                />
+                <IconButton
+                  onClick={() => handleDeleteImage(index)}
+                  sx={{
+                    position: 'absolute',
+                    top: 8,
+                    right: 8,
+                    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+                    '&:hover': {
+                      backgroundColor: 'rgba(244, 67, 54, 0.8)',
+                    },
+                    color: 'white',
+                    transition: 'all 0.2s',
+                    width: 36,
+                    height: 36,
+                  }}
+                >
+                  <DeleteIcon fontSize="small" />
+                </IconButton>
+              </Box>
+            </Grid>
+          ))}
+          
+          {/* Upload New Image Tile */}
+          <Grid item xs={12} sm={6} md={4}>
             <Box
+              component="label"
+              htmlFor="raised-button-file"
               sx={{
                 position: 'relative',
-                border: '1px solid rgba(255, 255, 255, 0.1)',
                 borderRadius: 2,
-                overflow: 'hidden',
-                aspectRatio: '16/9',
+                aspectRatio: '4/3',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                cursor: 'pointer',
+                backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                border: '2px dashed rgba(255, 255, 255, 0.2)',
+                transition: 'all 0.2s',
+                '&:hover': {
+                  backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                  borderColor: 'rgba(33, 150, 243, 0.6)',
+                }
               }}
             >
-              <img 
-                src={preview} 
-                alt={`New Studio ${index + 1}`} 
-                style={{ 
-                  width: '100%', 
-                  height: '100%', 
-                  objectFit: 'cover' 
+              <AddPhotoAlternateIcon 
+                sx={{ 
+                  fontSize: 48, 
+                  mb: 1, 
+                  color: 'rgba(33, 150, 243, 0.8)' 
                 }} 
               />
-              <IconButton
-                onClick={() => handleDeleteImage(index)}
-                sx={{
-                  position: 'absolute',
-                  top: 8,
-                  right: 8,
-                  backgroundColor: 'rgba(0, 0, 0, 0.5)',
-                  '&:hover': {
-                    backgroundColor: 'rgba(0, 0, 0, 0.7)',
-                  },
-                  color: 'white',
-                }}
-              >
-                <DeleteIcon />
-              </IconButton>
+              <Typography variant="body1" sx={{ color: 'rgba(255, 255, 255, 0.7)' }}>
+                {imagesNeeded > 0 ? 
+                  `Add ${imagesNeeded} more image${imagesNeeded > 1 ? 's' : ''}` : 
+                  'Add more images'}
+              </Typography>
+              <input
+                accept="image/*"
+                style={{ display: 'none' }}
+                id="raised-button-file"
+                multiple
+                type="file"
+                onChange={handleFileSelect}
+              />
             </Box>
           </Grid>
-        ))}
-      </Grid>
+        </Grid>
 
-      <Box sx={{ mt: 4, display: 'flex', justifyContent: 'center' }}>
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={handleSubmit}
-          disabled={existingImages.length + images.length < 6 || loading}
-          sx={{ px: 4, py: 1.5 }}
-        >
-          {loading ? (
-            <>
-              <CircularProgress size={24} sx={{ mr: 1 }} color="inherit" />
-              Uploading...
-            </>
-          ) : (
-            'Submit'
-          )}
-        </Button>
+        <Box sx={{ 
+          mt: 6, 
+          pt: 3, 
+          display: 'flex', 
+          justifyContent: 'center',
+          borderTop: '1px solid rgba(255,255,255,0.1)'
+        }}>
+          <Button
+            variant="contained"
+            onClick={handleSubmit}
+            disabled={totalImages < 6 || loading}
+            startIcon={loading ? <CircularProgress size={20} color="inherit" /> : <CloudUploadIcon />}
+            sx={{ 
+              px: 5, 
+              py: 1.5,
+              fontSize: '1rem',
+              borderRadius: 8,
+              backgroundColor: 'rgba(33, 150, 243, 0.9)',
+              backgroundImage: 'linear-gradient(45deg, #2196f3, #21cbf3)',
+              boxShadow: '0 4px 20px rgba(33, 150, 243, 0.5)',
+              transition: 'all 0.3s',
+              '&:hover': {
+                boxShadow: '0 6px 25px rgba(33, 150, 243, 0.7)',
+                transform: 'translateY(-2px)'
+              },
+              '&.Mui-disabled': {
+                backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                color: 'rgba(255, 255, 255, 0.4)'
+              }
+            }}
+          >
+            {loading ? 'Uploading...' : 'Save Gallery'}
+          </Button>
+        </Box>
       </Box>
     </Box>
   );

@@ -33,7 +33,8 @@ import {
   Twitter as TwitterIcon,
   LinkedIn as LinkedInIcon,
   Visibility as VisibilityIcon,
-  VisibilityOff as VisibilityOffIcon
+  VisibilityOff as VisibilityOffIcon,
+  AddPhotoAlternate as AddPhotoAlternateIcon
 } from '@mui/icons-material';
 import { styled } from '@mui/material/styles';
 import { useNavigate } from 'react-router-dom'; // Add this import
@@ -639,6 +640,59 @@ const StudioRegistrationForm = () => {
                   </Grid>
                 </Grid>
               </Grid>
+
+              {/* Commenting out the upload image section */}
+              
+              {/* <Grid item xs={12} sx={{ mt: 3 }}>
+                <Typography variant="h6" sx={{ mb: 2, color: 'secondary.main' }}>
+                  Upload Studio Images
+                </Typography>
+                <Grid container spacing={2}>
+                  {[...Array(6)].map((_, index) => (
+                    <Grid item xs={12} sm={6} md={4} key={index}>
+                      <Box
+                        component="label"
+                        htmlFor={`upload-image-${index}`}
+                        sx={{
+                          position: 'relative',
+                          borderRadius: 2,
+                          aspectRatio: '4/3',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          cursor: 'pointer',
+                          backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                          border: '2px dashed rgba(255, 255, 255, 0.2)',
+                          transition: 'all 0.2s',
+                          '&:hover': {
+                            backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                            borderColor: 'rgba(33, 150, 243, 0.6)',
+                          }
+                        }}
+                      >
+                        <AddPhotoAlternateIcon 
+                          sx={{ 
+                            fontSize: 48, 
+                            mb: 1, 
+                            color: 'rgba(33, 150, 243, 0.8)' 
+                          }} 
+                        />
+                        <Typography variant="body1" sx={{ color: 'rgba(255, 255, 255, 0.7)' }}>
+                          Upload Image {index + 1}
+                        </Typography>
+                        <input
+                          accept="image/*"
+                          style={{ display: 'none' }}
+                          id={`upload-image-${index}`}
+                          type="file"
+                        />
+                      </Box>
+                    </Grid>
+                  ))}
+                </Grid>
+              </Grid> */}
+              
 
               <Grid item xs={12} sx={{ mt: 3 }}>
                 <Typography variant="caption" sx={{ display: 'block', color: 'text.secondary' }}>

@@ -39,8 +39,6 @@ import StudioDashboard from "./Dashboard/StudioDashboard";
 import AboutProducing from "./Landing/AboutProducing";
 
 import StudiosProfile from "./Profiles/StudiosProfile";
-
-import TestUpload from "./Pages/TestUpload";
 import StudioUploadImages from "./Pages/StudioUploadImages";
 
 
@@ -103,8 +101,6 @@ const App = () => {
         <Route path="/studio/dashboard" element={<StudioDashboard />} />
 
         <Route path="/studio/upload-images" element={<StudioUploadImages />} />
-
-        <Route path="/test/upload" element={<TestUpload />} />
         
         
       </Routes>
