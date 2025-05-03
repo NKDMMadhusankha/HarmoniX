@@ -783,7 +783,7 @@ const StudioProfile = () => {
                   px: 2,
                   py: 0.5,
                   borderRadius: 1
-                }}
+                }}NPM S
               >
                 {galleryImageIndex + 1} / {displayImages.length}
               </Typography>
