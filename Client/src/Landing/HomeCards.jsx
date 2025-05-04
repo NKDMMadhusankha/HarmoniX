@@ -77,7 +77,11 @@ const MusicServices = () => {
       id: 2,
       title: 'Audio Mixing',
       description: 'Elevate your music with expert mixing services that enhance clarity and balance. Our skilled engineers ensure your tracks sound their best on any platform.',
-      link: '/about-mixing'
+      link: '/about-mixing',
+      onClick: () => {
+        navigate('/about-mixing');
+        window.location.reload();
+      }
     },
     {
       id: 3,

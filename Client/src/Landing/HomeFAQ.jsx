@@ -23,20 +23,20 @@ const MusicCollaborationFAQs = () => {
 
   const faqData = [
     {
-      question: "Why is Better collaboration important for my project?",
-      answer: "Effective construction management ensures that projects are completed on time, within budget, and to the desired quality standards. It involves planning, coordinating, and supervising the construction process, which minimizes risks and improves efficiency."
+      question: "How does HarmoniX help me find the right music professionals for my project ?",
+      answer: "HarmoniX uses an AI-powered recommendation engine that matches your project needs with suitable music producers, engineers, and artists based on genre, mood, and style."
     },
     {
-      question: "How does your platform help improve my project's visibility?",
-      answer: "Our platform provides real-time tracking, comprehensive reporting, and collaborative tools that enhance transparency and communication across all project stakeholders."
+      question: "Can I upload a project brief in natural language to get recommendations ?",
+      answer: "Yes, you can describe your project using natural language prompts (e.g., “I want a chill lo-fi beat for a late-night vibe”), and our NLP engine will interpret it to suggest relevant professionals."
     },
     {
-      question: "How long does it take to see results from using your platform?",
-      answer: "Typically, users start seeing improvements in project management efficiency within the first few weeks of implementation, with full optimization realized within 2-3 months."
+      question: "How does the AI recommendation system work on HarmoniX ?",
+      answer: "It analyzes your input (such as music type, mood, and references) and compares it with the profiles and past work of musicians to suggest the best matches."
     },
     {
-      question: "How do you measure the success of construction projects?",
-      answer: "We measure project success through key performance indicators including timeline adherence, budget compliance, quality of work, safety records, and client satisfaction."
+      question: "Are all bookings instantly confirmed on HarmoniX ?",
+      answer: "No. Once a booking request is submitted, the studio owner or admin will review the availability and approve the booking if the slot is free."
     }
   ];
 
@@ -57,8 +57,8 @@ const MusicCollaborationFAQs = () => {
               <Typography variant="h4" gutterBottom sx={{ mb: 3 }}>
                 Music Collaboration FAQs
               </Typography>
-              <Typography variant="body1" paragraph sx={{ mb: 5 }}>
-                As a leading construction management platform, we are dedicated to providing comprehensive solutions and answering frequently asked questions to help our users.
+              <Typography variant="body1" paragraph sx={{ mb: 5, fontFamily:'inherit' }}>
+                As a leading music collaboration platform, we are committed to connecting artists and clients by providing smart solutions and answering frequently asked questions to support our users.
               </Typography>
               <Box sx={{ display: 'flex', gap: 2 }}>
                 <Button 

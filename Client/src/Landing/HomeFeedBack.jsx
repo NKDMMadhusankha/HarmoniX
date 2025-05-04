@@ -17,20 +17,20 @@ import 'swiper/css';
 import 'swiper/css/navigation';
 import 'swiper/css/pagination';
 
-import pro1 from '../assets/pro1.jpg';
-import pro2 from '../assets/pro2.jpg';
-import pro3 from '../assets/pro3.jpg';
-import pro4 from '../assets/pro4.jpg';
-import pro5 from '../assets/pro4.jpg';
-import pro6 from '../assets/pro2.jpg';
+import pro1 from '../assets/boy1.png';
+import pro2 from '../assets/boy2.jpeg';
+import pro3 from '../assets/girl1.jpeg';
+import pro4 from '../assets/boy3.jpg';
+import pro5 from '../assets/girl2.jpg';
+import pro6 from '../assets/boy4.jpg';
 
 const testimonials = [
-  { name: 'MICHAEL TURNER', position: 'Product Manager at CloudDyne', quote: "Partnering with organization was one of the best decisions we've made for our success.", image: pro1 },
-  { name: 'EMILY ROGERS', position: 'Owner of StyleBoutique', quote: "Our online store's sales have skyrocketed after working with them.", image: pro2 },
-  { name: 'SARAH JOHNSON', position: 'Marketing Director', quote: "An incredible platform that transformed our business approach.", image: pro3 },
-  { name: 'DAVID LEE', position: 'Startup Founder', quote: "Their innovative solution has been a game-changer for our team.", image: pro4 },
-  { name: 'ALEX WONG', position: 'Tech Innovator', quote: "Seamless integration and outstanding user experience.", image: pro5 },
-  { name: 'JESSICA MILLER', position: 'Creative Director', quote: "Exceeded all our expectations with their cutting-edge design.", image: pro6 }
+  { name: 'SANDUN PERERA', position: 'Singer-Songwriter', quote: "Finding the right producer for my single was effortless thanks to this platform.", image: pro1 },
+  { name: 'ISHARA FERNANDO', position: 'Founder of Island Vibes Studio', quote: "This platform streamlined the way we connect with clients and manage studio bookings.", image: pro2 },
+  { name: 'NIPUNI RATHNAYAKE', position: 'Music Producer', quote: "The recommendation system helped me get noticed by artists I never imagined working with.", image: pro3 },
+  { name: 'THARINDU JAYASINGHE', position: 'Indie Artist', quote: "I discovered incredible collaborators who understood exactly what I needed musically.", image: pro4 },
+  { name: 'HIRUNI SENANAYAKE', position: 'Vocal Coach & Engineer', quote: "Managing projects and sessions has never been this easy.", image: pro5 },
+  { name: 'KASUN DISSANAYAKE', position: 'Beat Maker', quote: "From connecting with clients to showcasing my work—everything is smooth and professional.", image: pro6 }
 ];
 
 const CompactTestimonialCard = ({ testimonial }) => (

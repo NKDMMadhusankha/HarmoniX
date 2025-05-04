@@ -37,6 +37,7 @@ import StudioDashboard from "./Dashboard/StudioDashboard";
 
 
 import AboutProducing from "./Landing/AboutProducing";
+import AboutMixing from "./Landing/AboutMixing";
 
 import StudiosProfile from "./Profiles/StudiosProfile";
 import StudioUploadImages from "./Pages/StudioUploadImages";
@@ -51,6 +52,8 @@ const App = () => {
         <Route path="/" element={<Home />} />
         <Route path="/home" element={<Home />} />
         <Route path="/about-producing" element={<AboutProducing />} />
+        <Route path="/about-mixing" element={<AboutMixing />} />
+
 
         <Route path="/register" element={<Register />} />
         <Route path="/login" element={<Login />} />
