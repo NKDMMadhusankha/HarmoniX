@@ -29,6 +29,7 @@ const uploadToS3 = async (file, userId) => {
       ContentType: file.mimetype,
     };
 
+    // No file size limit applied here
     await s3.send(new PutObjectCommand(uploadParams));
 
     return `https://${process.env.AWS_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${key}`;

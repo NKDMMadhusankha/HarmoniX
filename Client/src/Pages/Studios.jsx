@@ -418,7 +418,7 @@ const StudiosPage = () => {
         >
           {studios.map((studio) => (
             <ProducerCard 
-              key={studio.id} 
+              key={studio._id} // Use studio._id for a unique key
               image={studio.profileImage} 
               producerInfo={studio}
               onSeeMore={handleSeeMore}

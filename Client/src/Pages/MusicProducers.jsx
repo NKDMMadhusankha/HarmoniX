@@ -165,6 +165,7 @@ const MusicProducersPage = () => {
   const theme = useTheme();
   const [producers, setProducers] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [placeholderText, setPlaceholderText] = useState("Get Personalized Music Professional Recommendations");
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -183,6 +184,23 @@ const MusicProducersPage = () => {
         console.error('Error fetching producers:', err);
         setLoading(false);
       });
+  }, []);
+
+  // Add placeholder animation effect
+  useEffect(() => {
+    const texts = [
+      "Get Personalized Music Professional Recommendations",
+      "Type what you're trying to create …",
+      "Share your creative idea … "
+    ];
+    let currentIndex = 0;
+    
+    const interval = setInterval(() => {
+      currentIndex = (currentIndex + 1) % texts.length;
+      setPlaceholderText(texts[currentIndex]);
+    }, 3000);
+    
+    return () => clearInterval(interval);
   }, []);
 
   const handleSeeMore = (producerInfo) => {
@@ -380,24 +398,29 @@ const MusicProducersPage = () => {
             boxShadow: '0 4px 12px rgba(0, 0, 0, 0.2)'
           }}
         >
-          <Typography 
-            variant="h5" 
-            component="div" 
+          <Box 
+            component="input"
+            placeholder={placeholderText}
             sx={{ 
               fontWeight: 'medium',
               color: 'white',
+              backgroundColor: 'transparent',
+              border: 'none',
+              outline: 'none',
               pl: { xs: 2, sm: 3, md: 4 },
               pr: { xs: 2, sm: 2, md: 0 },
               py: { xs: 1.5, sm: 2 },
               textAlign: { xs: 'center', sm: 'left' },
               fontSize: { xs: '0.9rem', sm: '1rem', md: '1.2rem', lg: '1.5rem' },
-              width: { xs: '100%', sm: 'auto' },
-              whiteSpace: { sm: 'nowrap' },
-              lineHeight: 1.3
+              width: { xs: '100%', sm: 'auto', md: '70%' },
+              lineHeight: 1.3,
+              '&::placeholder': {
+                color: 'rgba(255, 255, 255, 0.3)',
+                opacity: 1,
+                transition: 'opacity 0.5s ease',
+              }
             }}
-          >
-            Get Personalized Music Professional Recommendations
-          </Typography>
+          />
           <Button
             variant="contained"
             endIcon={<ArrowForwardIcon />}
