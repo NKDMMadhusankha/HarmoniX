@@ -744,7 +744,7 @@ const ProducingPage = () => {
                           }}
                           onClick={() => window.location.href = "/music/producer"}
                         >
-                          Get Your Producer
+                          Get Your Music Producer
                         </Button>
                       </Box>
                   </RevealSection> 
