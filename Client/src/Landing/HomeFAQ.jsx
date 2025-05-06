@@ -28,7 +28,7 @@ const MusicCollaborationFAQs = () => {
     },
     {
       question: "Can I upload a project brief in natural language to get recommendations ?",
-      answer: "Yes, you can describe your project using natural language prompts (e.g., “I want a chill lo-fi beat for a late-night vibe”), and our NLP engine will interpret it to suggest relevant professionals."
+      answer: "Yes, you can describe your project using prompts (e.g., “I want a chill lo-fi beat for a late-night vibe”), and our NLP engine will interpret it to suggest relevant professionals."
     },
     {
       question: "How does the AI recommendation system work on HarmoniX ?",

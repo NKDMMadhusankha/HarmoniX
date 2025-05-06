@@ -87,7 +87,11 @@ const MusicServices = () => {
       id: 3,
       title: 'Audio Mastering',
       description: 'Achieve a polished final product with our professional mastering services tailored to your specific needs. Ensure your music is ready for release.',
-      link: '/about-mastering'
+      link: '/about-mastering',
+      onClick: () => {
+        navigate('/about-mastering');
+        window.location.reload();
+      }
     }
   ], [navigate]);
 

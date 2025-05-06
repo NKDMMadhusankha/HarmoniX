@@ -6,12 +6,9 @@ import {
   Grid,
   useTheme,
   useMediaQuery,
-  Button,
-  Paper
+  Button
 } from '@mui/material';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
-import MusicNoteIcon from '@mui/icons-material/MusicNote';
-import SettingsIcon from '@mui/icons-material/Settings';
 import { motion, useScroll, useTransform, useSpring, useInView, AnimatePresence } from 'framer-motion';
 import styled from '@emotion/styled';
 
@@ -20,10 +17,10 @@ import Navbar from '../Components/Navbar';
 import Footer from '../Components/Footer';
 
 // Import assets (you'll need to update these with your actual image paths)
-import musicProducer from '../assets/ab2.png';
-import recordingStudio from '../assets/ab3.png';
-import arrangements from '../assets/ab4.png';
-import finalTouches from '../assets/ab5.png';
+import masteringEngineer from '../assets/think.png';
+import loudnessProcessing from '../assets/monitors.png';
+import masteringEquipment from '../assets/mastering.png';
+import referenceMonitors from '../assets/player.png';
 
 // Parallax effect for background elements
 const ParallaxBackground = () => {
@@ -43,7 +40,7 @@ const ParallaxBackground = () => {
             width: Math.random() * 200 + 50,
             height: Math.random() * 200 + 50,
             borderRadius: '50%',
-            background: `radial-gradient(circle, rgba(${Math.floor(Math.random() * 50 + 20)}, ${Math.floor(Math.random() * 100 + 50)}, ${Math.floor(Math.random() * 150 + 100)}, 0.15) 0%, rgba(0,0,0,0) 70%)`,
+            background: `radial-gradient(circle, rgba(${Math.floor(Math.random() * 50 + 20)}, ${Math.floor(Math.random() * 50 + 20)}, ${Math.floor(Math.random() * 100 + 50)}, 0.15) 0%, rgba(0,0,0,0) 70%)`,
             top: `${Math.random() * 100}%`,
             left: `${Math.random() * 100}%`,
             y: i % 3 === 0 ? y1 : i % 3 === 1 ? y2 : y3,
@@ -55,7 +52,7 @@ const ParallaxBackground = () => {
 };
 
 // Glow text effect for headings
-const GlowText = ({ children, color = "#3a9bdc", delay = 0, fontSize = "inherit" }) => {
+const GlowText = ({ children, color = "#2da84a", delay = 0, fontSize = "inherit" }) => {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, amount: 0.3 });
   
@@ -131,12 +128,12 @@ const SplitReveal = ({ children, delay = 0 }) => {
 const PrismaticButton = styled(motion.div)`
   position: relative;
   padding: 16px 32px;
-  background: linear-gradient(135deg, #3a9bdc 0%, #63b8f0 50%, #3a9bdc 100%);
+  background: linear-gradient(135deg, #2da84a 0%, #7ddb92 50%, #2da84a 100%);
   background-size: 200% 200%;
   border-radius: 50px;
   overflow: hidden;
   cursor: pointer;
-  box-shadow: 0 6px 20px rgba(58, 155, 220, 0.25);
+  box-shadow: 0 6px 20px rgba(45, 168, 74, 0.25);
   
   &:before {
     content: '';
@@ -145,7 +142,7 @@ const PrismaticButton = styled(motion.div)`
     left: -2px;
     right: -2px;
     bottom: -2px;
-    background: linear-gradient(135deg, #3a9bdc, #63b8f0, #3a9bdc);
+    background: linear-gradient(135deg, #2da84a, #7ddb92, #2da84a);
     background-size: 400% 400%;
     border-radius: 50px;
     z-index: -1;
@@ -166,7 +163,7 @@ const PrismaticButton = styled(motion.div)`
 `;
 
 // Enhanced jumping text animation component with expanded effects
-const JumpingText = ({ text, color = "#3a9bdc", delay = 0 }) => {
+const JumpingText = ({ text, color = "#2da84a", delay = 0 }) => {
   const letters = text.split("");
   
   return (
@@ -392,7 +389,7 @@ const RevealSection = ({ children, direction = 'up', staggerChildren = 0.1, dela
 };
 
 // Main page component
-const ProducingPage = () => {
+const MasteringPage = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const isSmallScreen = useMediaQuery(theme.breakpoints.down('sm'));
@@ -416,7 +413,7 @@ const ProducingPage = () => {
       element.scrollIntoView({ behavior: 'smooth' });
     } else {
       // If section doesn't exist on this page, navigate to page with that section
-      window.location.href = `./music/producing`; // Changed to direct to producing page
+      window.location.href = `./music/mastering`; // Changed to direct to mastering page
     }
   };
   
@@ -445,7 +442,7 @@ const ProducingPage = () => {
           height: '4px',
           width: progressBarWidth,
           opacity: progressBarOpacity,
-          background: 'linear-gradient(90deg, #3a9bdc, #63b8f0)',
+          background: 'linear-gradient(90deg, #2da84a, #7ddb92)',
           zIndex: 9999,
         }}
       />
@@ -458,11 +455,11 @@ const ProducingPage = () => {
       }}>
         {/* Hero section */}
         <Box 
-          my={0}
-          pt={isMobile ? 0 : 2}
-          mt={-4}
+          my={0} // Changed from my={isMobile ? 4 : 6} to reduce margin
+          pt={isMobile ? 0 : 2} // Changed from pt={isMobile ? 2 : 4} to reduce padding
+          mt={-4} // Added negative margin top to move up
           sx={{ 
-            mb: isMobile ? 6 : 10
+            mb: isMobile ? 6 : 10 // Add more margin bottom to separate from next section
           }}
         >
           <RevealSection staggerChildren={0.15}>
@@ -478,11 +475,12 @@ const ProducingPage = () => {
                 flexWrap: "wrap"
               }}
             >
-              The Art of <JumpingText text="Music Production" delay={0.5} />
+              The Art of <JumpingText text="Audio Mastering" delay={0.5} />
             </Typography>
             
             <Typography 
               variant="body1" 
+              
               mb={6}
               sx={{
                 fontSize: isSmallScreen ? '1.1rem' : '1.25rem',
@@ -495,21 +493,21 @@ const ProducingPage = () => {
               }}
             >
               <SplitReveal delay={0.6} >
-              The transformative process of crafting sonic experiences, combining technical expertise with creative vision to shape raw musical ideas into polished, professional productions.
+                The final crucial step in music production that transforms good mixes into exceptional commercial-ready releases that sound phenomenal on any playback system.
               </SplitReveal>
             </Typography>
           </RevealSection>
         </Box>
         
-        {/* What is Music Production Section */}
+        {/* What is Mastering Section */}
         <Box my={isMobile ? 8 : 12}>
           <Grid container alignItems="center" spacing={isMobile ? 4 : 8} mb={isMobile ? 4 : 6}>
             {isMobile ? (
               <>
                 <Grid item xs={12}>
                   <PerspectiveImage 
-                    src={musicProducer} 
-                    alt="Music producer in studio"
+                    src={masteringEngineer} 
+                    alt="Mastering engineer at console"
                     index={0}
                     delay={0.2}
                   />
@@ -517,12 +515,12 @@ const ProducingPage = () => {
                 <Grid item xs={12}>
                   <RevealSection direction="right" delay={0.3}>
                     <Typography variant={isSmallScreen ? "h5" : "h4"} mb={3}>
-                      <GlowText color="#3a9bdc">What Is Music Production?</GlowText>
+                      <GlowText color="#2da84a">What Is Audio Mastering?</GlowText>
                     </Typography>
                     <Typography variant="body1" sx={{ fontSize: isSmallScreen ? '1rem' : '1.1rem', lineHeight: 1.7, opacity: 0.9 }}>
-                      Music production is the comprehensive creative and technical process of bringing a musical idea to life as a finished recording. A skilled producer serves as both visionary and technical guide, shaping all aspects of a project from songwriting and arrangement to recording, editing, mixing, and finalizing.<br/><br/>
+                      Audio mastering is the final creative and technical step in the music production process. It's where a skilled engineer applies precise sonic enhancements to prepare your music for distribution across all listening platforms and environments. Mastering engineers use specialized equipment in acoustically-treated rooms to bring cohesion, clarity, and commercial loudness to your tracks.<br/><br/>
                       
-                      At its heart, music production is about capturing and enhancing artistic expression. It balances technical precision with creative intuition, combining advanced audio engineering with musical theory and artistic direction. A producer makes countless decisions that ultimately define the sonic identity and emotional impact of a recording—choosing instruments, crafting arrangements, directing performances, and sculpting sounds to create a cohesive musical statement that resonates with listeners.
+                      During mastering, subtle adjustments to EQ, dynamics, stereo imaging, and loudness are made to ensure your music translates perfectly across all playback systems—from high-end studio monitors to earbuds, car stereos, and club sound systems. A properly mastered track will sound polished, professional, and competitive with commercial releases while preserving the creative vision of the artist and mixer.
                     </Typography>
                   </RevealSection>
                 </Grid>
@@ -532,19 +530,19 @@ const ProducingPage = () => {
                 <Grid item md={6}>
                   <RevealSection direction="right" delay={0.3}>
                     <Typography variant="h4" mb={3}>
-                      <GlowText color="#3a9bdc">What Is Music Production?</GlowText>
+                      <GlowText color="#2da84a">What Is Audio Mastering?</GlowText>
                     </Typography>
                     <Typography variant="body1" sx={{ fontSize: '1.1rem', lineHeight: 1.7, opacity: 0.9 }}>
-                      Music production is the comprehensive creative and technical process of bringing a musical idea to life as a finished recording. A skilled producer serves as both visionary and technical guide, shaping all aspects of a project from songwriting and arrangement to recording, editing, mixing, and finalizing.<br/><br/>
+                      Audio mastering is the final creative and technical step in the music production process. It's where a skilled engineer applies precise sonic enhancements to prepare your music for distribution across all listening platforms and environments. Mastering engineers use specialized equipment in acoustically-treated rooms to bring cohesion, clarity, and commercial loudness to your tracks.<br/><br/>
                       
-                      At its heart, music production is about capturing and enhancing artistic expression. It balances technical precision with creative intuition, combining advanced audio engineering with musical theory and artistic direction. A producer makes countless decisions that ultimately define the sonic identity and emotional impact of a recording—choosing instruments, crafting arrangements, directing performances, and sculpting sounds to create a cohesive musical statement that resonates with listeners.
+                      During mastering, subtle adjustments to EQ, dynamics, stereo imaging, and loudness are made to ensure your music translates perfectly across all playback systems—from high-end studio monitors to earbuds, car stereos, and club sound systems. A properly mastered track will sound polished, professional, and competitive with commercial releases while preserving the creative vision of the artist and mixer.
                     </Typography>
                   </RevealSection>
                 </Grid>
                 <Grid item md={6}>
                   <PerspectiveImage 
-                    src={musicProducer} 
-                    alt="Music producer in studio"
+                    src={masteringEngineer} 
+                    alt="Mastering engineer at console"
                     index={0}
                     delay={0.4}
                   />
@@ -554,15 +552,15 @@ const ProducingPage = () => {
           </Grid>
         </Box>
 
-        {/* Composition & Recording Section */}
+        {/* Frequency Balance Section */}
         <Box my={isMobile ? 8 : 12}>
           <Grid container alignItems="center" spacing={isMobile ? 4 : 8} mb={isMobile ? 4 : 6}>
             {isMobile ? (
               <>
                 <Grid item xs={12}>
                   <PerspectiveImage 
-                    src={recordingStudio} 
-                    alt="Recording studio session"
+                    src={masteringEquipment} 
+                    alt="Mastering EQ equipment"
                     index={1}
                     delay={0.2}
                   />
@@ -570,18 +568,18 @@ const ProducingPage = () => {
                 <Grid item xs={12}>
                   <RevealSection direction="left" delay={0.3} staggerChildren={0.08}>
                     <Typography variant={isSmallScreen ? "h5" : "h4"} mb={3}>
-                      <GlowText color="#3a9bdc">1. Composition & Recording</GlowText>
+                      <GlowText color="#2da84a">1. Tonal Balance & EQ</GlowText>
                     </Typography>
                     <Typography variant="body1" sx={{ fontSize: isSmallScreen ? '1rem' : '1.1rem', lineHeight: 1.7, opacity: 0.9 }}>
-                      The foundation of any musical project begins with capturing inspired performances and developing the core musical ideas. This first phase focuses on translating creative vision into recorded audio.<br/><br/>
+                      The first critical step in mastering is achieving perfect tonal balance through precise equalization. Unlike mixing EQ which shapes individual elements, mastering EQ makes subtle, musical adjustments to the entire mix as a cohesive whole.<br/><br/>
                       
-                      • Songwriting development and refinement of musical structure<br/><br/>
-                      • Selection of key instruments and sounds that define the track's character<br/><br/>
-                      • Capturing pristine audio through strategic microphone placement and selection<br/><br/>
-                      • Directing performers to achieve the optimal emotional delivery<br/><br/>
-                      • Building a solid foundation of rhythm, harmony, and melody<br/><br/>
+                      • Mastering engineers use high-resolution equalizers to enhance clarity, warmth, and presence<br/><br/>
+                      • They correct frequency imbalances without compromising the artistic intent of the mix<br/><br/>
+                      • Strategic high-pass filtering removes inaudible ultra-low frequencies that consume headroom<br/><br/>
+                      • Mid-side EQ techniques can enhance stereo width while maintaining mono compatibility<br/><br/>
+                      • Reference tracks in similar styles help ensure the frequency balance matches commercial standards<br/><br/>
                       
-                      During this phase, a producer helps artists refine their ideas while capturing performances that maintain both technical excellence and emotional authenticity—creating the raw materials that will become the finished production.
+                      The goal is a natural, balanced sound that translates well across all playback systems while retaining the original character of the music.
                     </Typography>
                   </RevealSection>
                 </Grid>
@@ -591,25 +589,25 @@ const ProducingPage = () => {
                 <Grid item md={6} order={{ md: 2 }}>
                   <RevealSection direction="left" delay={0.3} staggerChildren={0.08}>
                     <Typography variant="h4" mb={3}>
-                      <GlowText color="#3a9bdc">1. Composition & Recording</GlowText>
+                      <GlowText color="#2da84a">1. Tonal Balance & EQ</GlowText>
                     </Typography>
                     <Typography variant="body1" sx={{ fontSize: '1.1rem', lineHeight: 1.7, opacity: 0.9 }}>
-                      The foundation of any musical project begins with capturing inspired performances and developing the core musical ideas. This first phase focuses on translating creative vision into recorded audio.<br/><br/>
+                      The first critical step in mastering is achieving perfect tonal balance through precise equalization. Unlike mixing EQ which shapes individual elements, mastering EQ makes subtle, musical adjustments to the entire mix as a cohesive whole.<br/><br/>
                       
-                      • Songwriting development and refinement of musical structure<br/><br/>
-                      • Selection of key instruments and sounds that define the track's character<br/><br/>
-                      • Capturing pristine audio through strategic microphone placement and selection<br/><br/>
-                      • Directing performers to achieve the optimal emotional delivery<br/><br/>
-                      • Building a solid foundation of rhythm, harmony, and melody<br/><br/>
+                      • Mastering engineers use high-resolution equalizers to enhance clarity, warmth, and presence<br/><br/>
+                      • They correct frequency imbalances without compromising the artistic intent of the mix<br/><br/>
+                      • Strategic high-pass filtering removes inaudible ultra-low frequencies that consume headroom<br/><br/>
+                      • Mid-side EQ techniques can enhance stereo width while maintaining mono compatibility<br/><br/>
+                      • Reference tracks in similar styles help ensure the frequency balance matches commercial standards<br/><br/>
                       
-                      During this phase, a producer helps artists refine their ideas while capturing performances that maintain both technical excellence and emotional authenticity—creating the raw materials that will become the finished production.
+                      The goal is a natural, balanced sound that translates well across all playback systems while retaining the original character of the music.
                     </Typography>
                   </RevealSection>
                 </Grid>
                 <Grid item md={6} order={{ md: 1 }}>
                   <PerspectiveImage 
-                    src={recordingStudio}
-                    alt="Recording studio session"
+                    src={masteringEquipment}
+                    alt="Mastering EQ equipment"
                     index={1}
                     delay={0.2}
                   />
@@ -619,15 +617,15 @@ const ProducingPage = () => {
           </Grid>
         </Box>
                 
-        {/* Arrangement & Sound Design Section */}
+        {/* Dynamics and Loudness Section */}
         <Box my={isMobile ? 8 : 12}>
           <Grid container alignItems="center" spacing={isMobile ? 4 : 8} mb={isMobile ? 4 : 6}>
             {isMobile ? (
               <>
                 <Grid item xs={12}>
                   <PerspectiveImage 
-                    src={arrangements} 
-                    alt="Arrangement and sound design"
+                    src={loudnessProcessing} 
+                    alt="Loudness and dynamics processing"
                     index={2}
                     delay={0.2}
                   />
@@ -635,18 +633,18 @@ const ProducingPage = () => {
                 <Grid item xs={12}>
                   <RevealSection direction="right" delay={0.3} staggerChildren={0.08}>
                     <Typography variant={isSmallScreen ? "h5" : "h4"} mb={3}>
-                      <GlowText color="#3a9bdc">2. Arrangement & Sound Design</GlowText>
+                      <GlowText color="#2da84a">2. Dynamics & Loudness</GlowText>
                     </Typography>
                     <Typography variant="body1" sx={{ fontSize: isSmallScreen ? '1rem' : '1.1rem', lineHeight: 1.7, opacity: 0.9 }}>
-                      Transforming raw recordings into a compelling musical journey requires thoughtful arrangement and sonic craftsmanship. This phase focuses on building the architecture of the music while developing unique sonic textures.<br/><br/>
+                      Achieving the right balance between dynamic expression and commercial loudness is perhaps the most challenging aspect of modern mastering. It requires careful application of compression, limiting, and saturation to increase perceived loudness while preserving musical impact.<br/><br/>
                       
-                      • Strategic structuring of musical sections to create emotional flow and listener engagement<br/><br/>
-                      • Layering complementary instruments and sounds to build depth and dimension<br/><br/>
-                      • Creating custom sound design elements that give the production a unique signature<br/><br/>
-                      • Crafting transitions and builds that maintain energy and interest throughout<br/><br/>
-                      • Editing performances for timing precision while preserving natural feel<br/><br/>
+                      • Multi-band compression allows for targeted dynamic control across different frequency ranges<br/><br/>
+                      • Careful peak limiting increases overall loudness while minimizing distortion and preserving transients<br/><br/>
+                      • Mastering engineers target appropriate LUFS levels for different distribution platforms<br/><br/>
+                      • Subtle saturation adds density and warmth without obvious distortion<br/><br/>
+                      • Parallel compression techniques can add energy while preserving dynamics<br/><br/>
                       
-                      Through careful arrangement decisions and creative sound design, a producer transforms individual recordings into a cohesive musical experience with its own unique sonic identity and emotional arc.
+                      The best mastering avoids the "louder is better" trap, instead focusing on creating impact and punch that remains effective at any volume level, while still meeting modern loudness expectations.
                     </Typography>
                   </RevealSection>
                 </Grid>
@@ -656,25 +654,25 @@ const ProducingPage = () => {
                 <Grid item md={6}>
                   <RevealSection direction="right" delay={0.3} staggerChildren={0.08}>
                     <Typography variant="h4" mb={3}>
-                      <GlowText color="#3a9bdc">2. Arrangement & Sound Design</GlowText>
+                      <GlowText color="#2da84a">2. Dynamics & Loudness</GlowText>
                     </Typography>
                     <Typography variant="body1" sx={{ fontSize: '1.1rem', lineHeight: 1.7, opacity: 0.9 }}>
-                      Transforming raw recordings into a compelling musical journey requires thoughtful arrangement and sonic craftsmanship. This phase focuses on building the architecture of the music while developing unique sonic textures.<br/><br/>
+                      Achieving the right balance between dynamic expression and commercial loudness is perhaps the most challenging aspect of modern mastering. It requires careful application of compression, limiting, and saturation to increase perceived loudness while preserving musical impact.<br/><br/>
                       
-                      • Strategic structuring of musical sections to create emotional flow and listener engagement<br/><br/>
-                      • Layering complementary instruments and sounds to build depth and dimension<br/><br/>
-                      • Creating custom sound design elements that give the production a unique signature<br/><br/>
-                      • Crafting transitions and builds that maintain energy and interest throughout<br/><br/>
-                      • Editing performances for timing precision while preserving natural feel<br/><br/>
+                      • Multi-band compression allows for targeted dynamic control across different frequency ranges<br/><br/>
+                      • Careful peak limiting increases overall loudness while minimizing distortion and preserving transients<br/><br/>
+                      • Mastering engineers target appropriate LUFS levels for different distribution platforms<br/><br/>
+                      • Subtle saturation adds density and warmth without obvious distortion<br/><br/>
+                      • Parallel compression techniques can add energy while preserving dynamics<br/><br/>
                       
-                      Through careful arrangement decisions and creative sound design, a producer transforms individual recordings into a cohesive musical experience with its own unique sonic identity and emotional arc.
+                      The best mastering avoids the "louder is better" trap, instead focusing on creating impact and punch that remains effective at any volume level, while still meeting modern loudness expectations.
                     </Typography>
                   </RevealSection>
                 </Grid>
                 <Grid item md={6}>
                   <PerspectiveImage 
-                    src={arrangements} 
-                    alt="Arrangement and sound design"
+                    src={loudnessProcessing} 
+                    alt="Loudness and dynamics processing"
                     index={2}
                     delay={0.2}
                   />
@@ -684,88 +682,105 @@ const ProducingPage = () => {
           </Grid>
         </Box>
         
-        {/* Mixing & Finalizing Section */}
+        {/* Stereo Image and Enhancement Section */}
         <Box my={isMobile ? 8 : 12}>
           <Grid container alignItems="center" spacing={isMobile ? 4 : 8}>
             {isMobile ? (
               <>
                 <Grid item xs={12}>
                   <PerspectiveImage 
-                    src={finalTouches} 
-                    alt="Mixing and finalizing"
+                    src={referenceMonitors} 
+                    alt="Reference monitors for spatial enhancement"
                     index={3}
                     delay={0.2}
                   />
                 </Grid>
-                <Grid item xs={12}> 
-                  <RevealSection direction="left" delay={0.3} staggerChildren={0.08}> 
-                    <Typography variant={isSmallScreen ? "h5" : "h4"} mb={3}> 
-                      <GlowText color="#3a9bdc">3. Mixing & Finalizing</GlowText> 
-                    </Typography> 
-                    <Typography variant="body1" sx={{ fontSize: isSmallScreen ? '1rem' : '1.1rem', lineHeight: 1.7, opacity: 0.9 }}> 
-                      The final stage transforms a well-arranged production into a polished, professional recording ready for release. This phase focuses on sonic enhancement and ensuring the music translates across all listening environments.<br/><br/> 
-                      • Balancing levels to create a clear, defined mix where all elements work in harmony<br/><br/> 
-                      • Applying EQ, compression, and effects to enhance each sound's character<br/><br/> 
-                      • Creating a three-dimensional soundscape through panning and spatial processing<br/><br/> 
-                      • Dynamic automation that brings the emotional journey to life<br/><br/> 
-                      • Final polishing to ensure the production sounds professional across all platforms 
-                    </Typography> 
-                  </RevealSection> 
+                <Grid item xs={12}>
+                  <RevealSection direction="left" delay={0.3} staggerChildren={0.08}>
+                    <Typography variant={isSmallScreen ? "h5" : "h4"} mb={3}>
+                      <GlowText color="#2da84a">3. Stereo Enhancement & Finalization</GlowText>
+                    </Typography>
+                    <Typography variant="body1" sx={{ fontSize: isSmallScreen ? '1rem' : '1.1rem', lineHeight: 1.7, opacity: 0.9 }}>
+                      The final stage of mastering focuses on enhancing the stereo image and adding the finishing touches that give commercial releases their characteristic polish and dimension. This includes careful adjustments to stereo width, depth, and imaging.<br/><br/>
+                      • Stereo width enhancement creates an immersive listening experience without causing phase issues<br/><br/>
+                      • Specialized tools analyze and ensure mono compatibility for radio and club playback<br/><br/>
+                      • Harmonic excitement adds subtle air and sheen to the high frequencies<br/><br/>
+                      • Meticulous attention to detail ensures your music translates perfectly across all playback systems<br/><br/>
+                      • Final limiting and dithering optimizes your music for digital distribution platforms
+                    </Typography>
+                    <Box mt={4} display="flex" justifyContent={isSmallScreen ? "center" : "flex-start"}>
+                      <Button 
+                        variant="contained" 
+                        color="primary"
+                        endIcon={<ArrowForwardIcon />}
+                        sx={{
+                          background: 'linear-gradient(90deg, #2da84a 0%, #55c370 100%)',
+                          padding: '10px 24px',
+                          fontWeight: 600,
+                          '&:hover': {
+                            background: 'linear-gradient(90deg, #35b556 0%, #65d380 100%)',
+                          }
+                        }}
+                        onClick={() => scrollToSection('contact')}
+                      >
+                        Get Your Music Mastered
+                      </Button>
+                    </Box>
+                  </RevealSection>
                 </Grid>
               </>
             ) : (
               <>
-                <Grid item md={6} order={{ md: 2 }}> 
-                  <RevealSection direction="left" delay={0.3} staggerChildren={0.08}> 
-                    <Typography variant="h4" mb={3}> 
-                      <GlowText color="#3a9bdc">3. Production and Refinement</GlowText> 
-                    </Typography> 
-                    <Typography variant="body1" sx={{ fontSize: '1.1rem', lineHeight: 1.7, opacity: 0.9 }}> 
-                        In this final producing stage, everything gets cleaned up, polished, and finalized as much as possible before moving into technical processes like mixing.<br/><br/>
-                        • The producer listens carefully to how the elements blend together.<br/><br/>
-                        • They may fine-tune the volume of instruments, adjust how certain sounds interact, and make sure nothing feels too empty or too crowded.<br/><br/>
-                        • Sometimes, parts get added or removed to make the song tighter and more effective.<br/><br/>
-                        • This stage also involves making rough versions (called rough mixes) so the song can be shared with mixing engineers later.<br/><br/>
-                        At the end of the production phase, the song should already sound very close to a finished track — full, emotional, and professional — even before mixing and mastering happen.
-                      </Typography>
-                      
-                      <Box mt={4} display="flex" justifyContent="flex-start">
-                        <Button 
-                          variant="contained" 
-                          color="primary"
-                          endIcon={<ArrowForwardIcon />}
-                          sx={{
-                            background: 'linear-gradient(90deg, #3a9bdc 0%, #63b8f0 100%)',
-                            padding: '10px 24px',
-                            fontWeight: 600,
-                            '&:hover': {
-                              background: 'linear-gradient(90deg, #2c87c7 0%, #4da9e6 100%)',
-                            }
-                          }}
-                          onClick={() => window.location.href = "/music/producer"}
-                        >
-                          Get Your Producer
-                        </Button>
-                      </Box>
-                  </RevealSection> 
-                </Grid> 
-                <Grid item md={6} order={{ md: 1 }}> 
+                <Grid item md={6}>
                   <PerspectiveImage 
-                    src={finalTouches} 
-                    alt="Mixing and finalizing"
+                    src={referenceMonitors} 
+                    alt="Reference monitors for spatial enhancement"
                     index={3}
                     delay={0.2}
                   />
-                </Grid> 
+                </Grid>
+                <Grid item md={6}>
+                  <RevealSection direction="left" delay={0.3} staggerChildren={0.08}>
+                    <Typography variant="h4" mb={3}>
+                      <GlowText color="#2da84a">3. Stereo Enhancement & Finalization</GlowText>
+                    </Typography>
+                    <Typography variant="body1" sx={{ fontSize: '1.1rem', lineHeight: 1.7, opacity: 0.9 }}>
+                      The final stage of mastering focuses on enhancing the stereo image and adding the finishing touches that give commercial releases their characteristic polish and dimension. This includes careful adjustments to stereo width, depth, and imaging.<br/><br/>
+                      • Stereo width enhancement creates an immersive listening experience without causing phase issues<br/><br/>
+                      • Specialized tools analyze and ensure mono compatibility for radio and club playback<br/><br/>
+                      • Harmonic excitement adds subtle air and sheen to the high frequencies<br/><br/>
+                      • Meticulous attention to detail ensures your music translates perfectly across all playback systems<br/><br/>
+                      • Final limiting and dithering optimizes your music for digital distribution platforms
+                    </Typography>
+                    <Box mt={4} display="flex" justifyContent="flex-start">
+                      <Button 
+                        variant="contained" 
+                        color="primary"
+                        endIcon={<ArrowForwardIcon />}
+                        sx={{
+                          background: 'linear-gradient(90deg, #2da84a 0%, #55c370 100%)',
+                          padding: '10px 24px',
+                          fontWeight: 600,
+                          '&:hover': {
+                            background: 'linear-gradient(90deg, #35b556 0%, #65d380 100%)',
+                          }
+                        }}
+                        onClick={() => scrollToSection('contact')}
+                      >
+                        Get Your Music Mastered
+                      </Button>
+                    </Box>
+                  </RevealSection>
+                </Grid>
               </>
             )}
           </Grid>
         </Box>
-
       </Container>
+      
       <Footer />
     </Box>
   );
 };
 
-export default ProducingPage;
+export default MasteringPage;
