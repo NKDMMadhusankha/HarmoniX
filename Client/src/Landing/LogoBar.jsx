@@ -21,7 +21,7 @@ const LogoScrollContainer = styled(Box)({
 
 const LogoTrack = styled(Box)({
   display: 'inline-flex',
-  animation: 'scrollLoop 15s linear infinite',
+  animation: 'scrollLoop 25s linear infinite',
   width: 'max-content',
   '@keyframes scrollLoop': {
     '0%': { transform: 'translateX(0)' },
@@ -76,7 +76,8 @@ const LogoScrollBar = () => {
     logo1, logo2, logo3, logo4, logo5, logo6, logo7,
     logo1, logo2, logo3, logo4, logo5, logo6, logo7,
     logo1, logo2, logo3, logo4, logo5, logo6, logo7,
-    logo1, logo2, logo3, logo4, logo5, logo6, logo7,// Duplicate for seamless scrolling
+    logo1, logo2, logo3, logo4, logo5, logo6, logo7// Duplicate for seamless scrolling
+    
   ];
 
   return (
