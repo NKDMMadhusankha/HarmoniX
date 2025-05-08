@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import axios from 'axios'; // Add axios for API requests
 import { 
   Box, 
@@ -18,6 +18,7 @@ import Navbar from '../Components/Navbar';
 import Footer from '../Components/Footer';
 import Loader from '../Components/Loader';
 import { Link as RouterLink, useNavigate, useLocation } from 'react-router-dom'; // Add useNavigate and useLocation
+// import { ProducerContext } from '../context/ProducerContext'; // Import ProducerContext
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -163,10 +164,30 @@ const ProducerCard = ({ image, producerInfo, onSeeMore }) => {
 
 const MusicProducersPage = () => {
   const theme = useTheme();
+  const { searchProducers } = useContext(ProducerContext); // Access ProducerContext
   const [producers, setProducers] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [placeholderText, setPlaceholderText] = useState("Get Personalized Music Professional Recommendations");
   const navigate = useNavigate();
+  const [searchQuery, setSearchQuery] = useState('');
+  const [placeholder, setPlaceholder] = useState('Get Personalized Music Professional Recommendations...');
+  
+  // Placeholder text animation
+  useEffect(() => {
+    const placeholders = [
+      "Get Personalized Music Professional Recommendations...",
+      "Type what you're trying to create…",
+      "Describe your music vision…",
+      "Find the perfect producer for your next track..."
+    ];
+    let currentIndex = 0;
+    
+    const intervalId = setInterval(() => {
+      currentIndex = (currentIndex + 1) % placeholders.length;
+      setPlaceholder(placeholders[currentIndex]);
+    }, 3000); // Change every 3 seconds
+    
+    return () => clearInterval(intervalId);
+  }, []);
 
   useEffect(() => {
     window.scrollTo(0, 0); // Scroll to top when component mounts
@@ -186,26 +207,14 @@ const MusicProducersPage = () => {
       });
   }, []);
 
-  // Add placeholder animation effect
-  useEffect(() => {
-    const texts = [
-      "Get Personalized Music Professional Recommendations",
-      "Type what you're trying to create …",
-      "Share your creative idea … "
-    ];
-    let currentIndex = 0;
-    
-    const interval = setInterval(() => {
-      currentIndex = (currentIndex + 1) % texts.length;
-      setPlaceholderText(texts[currentIndex]);
-    }, 3000);
-    
-    return () => clearInterval(interval);
-  }, []);
-
   const handleSeeMore = (producerInfo) => {
     // Force a page refresh when navigating
     window.location.href = `/music/producer/${producerInfo.id}`;
+  };
+
+  const handleSearch = (query) => {
+    searchProducers(query); // Use searchProducers from context
+    navigate('/producers'); // Navigate to producers page
   };
 
   if (loading) {
@@ -376,7 +385,7 @@ const MusicProducersPage = () => {
         </Container>
       </Box>
 
-      {/* Recommendation Section */}
+      {/* Search Bar Section (converted from Recommendation Section) */}
       <Container 
         maxWidth="lg" 
         sx={{ 
@@ -386,6 +395,7 @@ const MusicProducersPage = () => {
       >
         <Box
           sx={{
+            marginLeft:'15px',
             display: 'flex',
             flexDirection: { xs: 'column', sm: 'row' },
             justifyContent: 'space-between',
@@ -398,55 +408,69 @@ const MusicProducersPage = () => {
             boxShadow: '0 4px 12px rgba(0, 0, 0, 0.2)'
           }}
         >
-          <Box 
-            component="input"
-            placeholder={placeholderText}
-            sx={{ 
-              fontWeight: 'medium',
-              color: 'white',
-              backgroundColor: 'transparent',
-              border: 'none',
-              outline: 'none',
-              pl: { xs: 2, sm: 3, md: 4 },
-              pr: { xs: 2, sm: 2, md: 0 },
-              py: { xs: 1.5, sm: 2 },
-              textAlign: { xs: 'center', sm: 'left' },
-              fontSize: { xs: '0.9rem', sm: '1rem', md: '1.2rem', lg: '1.5rem' },
-              width: { xs: '100%', sm: 'auto', md: '70%' },
-              lineHeight: 1.3,
-              '&::placeholder': {
-                color: 'rgba(255, 255, 255, 0.3)',
-                opacity: 1,
-                transition: 'opacity 0.5s ease',
+          <Box
+            component="form"
+            onSubmit={(e) => {
+              e.preventDefault();
+              if (searchQuery.trim()) {
+                handleSearch(searchQuery);
               }
             }}
-          />
-          <Button
-            variant="contained"
-            endIcon={<ArrowForwardIcon />}
             sx={{
-              width: { xs: '100%', sm: 'auto' },
-              height: { xs: 'auto', sm: '100%' },
-              borderRadius: { xs: '0', sm: '0px 10px 10px 40px' },
-              px: { xs: 2, sm: 3, md: 4, lg: 8 },
-              py: { xs: 1.5, sm: 2, md: 2.5 },
-              fontSize: { xs: '0.8rem', sm: '0.85rem', md: '0.9rem', lg: '1.1rem' },
-              fontWeight: 'bold',
-              backgroundColor: 'white',
-              color: 'black',
-              textTransform: 'uppercase',
-              transition: 'all 0.3s ease',
-              whiteSpace: 'nowrap',
-              letterSpacing: { xs: 0.5, md: 1 },
-              '&:hover': {
-                backgroundColor: '#136AA8',
-                color: 'white',
-                transform: 'translateX(20px)'
-              }
+              display: 'flex',
+              flexDirection: { xs: 'column', sm: 'row' },
+              alignItems: 'center',
+              width: '100%',
             }}
           >
-            GET STARTED
-          </Button>
+            <input
+              type="text"
+              name="search"
+              placeholder={placeholder}
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              required
+              style={{
+                flex: 1,
+                padding: '12px 16px',
+                border: 'none',
+                outline: 'none',
+                backgroundColor: 'transparent',
+                color: 'white',
+                fontSize: '1.3rem', // Increased from 1rem to 1.2rem
+                width: '100%',
+                fontWeight: 'medium',
+                transition: 'opacity 0.5s ease-in-out',
+              }}
+            />
+            <Button
+              type="submit"
+              variant="contained"
+              endIcon={<ArrowForwardIcon />}
+              sx={{
+                width: { xs: '100%', sm: 'auto' },
+                height: { xs: 'auto', sm: '100%' },
+                borderRadius: { xs: '0', sm: '0px 10px 10px 40px' },
+                px: { xs: 2, sm: 3, md: 4, lg: 8 },
+                py: { xs: 1.5, sm: 2, md: 2.5 },
+                fontSize: { xs: '0.8rem', sm: '0.85rem', md: '0.9rem', lg: '1.1rem' },
+                fontWeight: 'bold',
+                backgroundColor: 'white',
+                color: 'black',
+                textTransform: 'uppercase',
+                transition: 'all 0.3s ease',
+                whiteSpace: 'nowrap',
+                letterSpacing: { xs: 0.5, md: 1 },
+                '&:hover': {
+                  backgroundColor: '#136AA8',
+                  color: 'white',
+                  transform: 'translateX(20px)'
+                }
+              }}
+            >
+              GET STARTED
+            </Button>
+          </Box>
         </Box>
 
         {/* Producer Cards */}
