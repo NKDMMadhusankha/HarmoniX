@@ -13,10 +13,10 @@ router.post('/', async (req, res) => {
   }
 
   try {
-    // Only allow sending to Lyricists for now
+    // Allow sending to Lyricists and Mixing Engineers
     const musician = await Musician.findById(musicianId);
-    if (!musician || musician.role !== 'Lyricist') {
-      return res.status(404).json({ success: false, message: 'Lyricist not found.' });
+    if (!musician || !['Lyricist', 'Mixing Engineer'].includes(musician.role)) {
+      return res.status(404).json({ success: false, message: 'Musician not found.' });
     }
 
     // Setup Nodemailer transporter

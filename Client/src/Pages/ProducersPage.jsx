@@ -200,12 +200,16 @@ const ProducersPage = () => {
           {loading && (
             <div style={{ 
               textAlign: 'center', 
-              padding: '80px 20px',
+              padding: '0', 
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
               justifyContent: 'center',
-              minHeight: '60vh',
+              minHeight: '100vh', // Ensure it covers the full viewport height
+              position: 'absolute', // Use absolute positioning for centering
+              top: '50%',
+              left: '50%',
+              transform: 'translate(-50%, -50%)', // Center horizontally and vertically
               fontFamily: 'Poppins, sans-serif'
             }}>
               {/* Loading Animation */}

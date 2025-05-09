@@ -553,24 +553,40 @@ const MusicProducerProfile = () => {
     }));
   };
 
-  const handleSubmitContact = (e) => {
+  const handleSubmitContact = async (e) => {
     e.preventDefault();
-    // Here you would typically send the form data to a backend
-    // For this frontend example, we'll just show a success message
-    console.log('Form submitted:', contactForm);
-    
-    // Show success message
-    setSnackbarMessage('Your message has been sent successfully!');
-    setSnackbarSeverity('success');
+    if (!contactForm.name || !contactForm.email || !contactForm.message) {
+      setSnackbarMessage('All fields are required.');
+      setSnackbarSeverity('error');
+      setSnackbarOpen(true);
+      return;
+    }
+    try {
+      const response = await fetch('http://localhost:5000/api/musician/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          musicianId: profile?.id || profile?._id, // Use the mixing engineer's MongoDB ID
+          name: contactForm.name,
+          email: contactForm.email,
+          message: contactForm.message,
+        }),
+      });
+      const data = await response.json();
+      if (data.success) {
+        setSnackbarMessage('Your message has been sent successfully!');
+        setSnackbarSeverity('success');
+        setContactForm({ name: '', email: '', message: '' });
+        handleCloseContact();
+      } else {
+        setSnackbarMessage(data.message || 'Failed to send message.');
+        setSnackbarSeverity('error');
+      }
+    } catch (error) {
+      setSnackbarMessage('An error occurred while sending your message.');
+      setSnackbarSeverity('error');
+    }
     setSnackbarOpen(true);
-    
-    // Reset form and close modal
-    setContactForm({
-      name: '',
-      email: '',
-      message: ''
-    });
-    handleCloseContact();
   };
 
   const handleSnackbarClose = () => {

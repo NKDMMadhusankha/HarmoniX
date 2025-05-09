@@ -3,13 +3,28 @@ html, body {
     padding: 0;
     height: 100%;
     width: 100%;
-  }
+}
   
-  #root {
+#root {
     height: 100%;
     overflow: auto;
     overflow: overlay;
-  }
+    position: relative; /* Add position relative for proper stacking context */
+}
+
+/* Add CSS variables for scrollbar width calculation */
+:root {
+  --scrollbar-width: 10px;
+}
+
+/* Fix navbar overlap with scrollbar */
+.MuiAppBar-positionFixed, 
+.MuiAppBar-root {
+  width: calc(100% - var(--scrollbar-width)) !important;
+  right: var(--scrollbar-width) !important; /* Move navbar away from scrollbar */
+  left: 0 !important;
+  box-sizing: border-box !important;
+}
 
 /* Custom dark scrollbar styles for WebKit browsers (Chrome, Safari, Edge) */
 ::-webkit-scrollbar {
@@ -38,9 +53,6 @@ html, body {
   scrollbar-width: thin;  /* Thin scrollbar */
   scrollbar-color: #444 #222;  /* Thumb color and track color (dark theme) */
 }
-
-
-
 
 .rhap_container {
   background: transparent !important;

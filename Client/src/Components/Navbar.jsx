@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { 
   AppBar, 
   Toolbar, 
@@ -170,6 +170,32 @@ const HarmoniXNavbar = () => {
     navigate(path);
     toggleMobileMenu();
   };
+
+  // Add scrollbar width calculation
+  useEffect(() => {
+    // Calculate scrollbar width and set as CSS variable
+    const calculateScrollbarWidth = () => {
+      const outer = document.createElement('div');
+      outer.style.visibility = 'hidden';
+      outer.style.overflow = 'scroll';
+      outer.style.msOverflowStyle = 'scrollbar';
+      document.body.appendChild(outer);
+      
+      const inner = document.createElement('div');
+      outer.appendChild(inner);
+      
+      const scrollbarWidth = (outer.offsetWidth - inner.offsetWidth);
+      document.documentElement.style.setProperty('--scrollbar-width', `${scrollbarWidth}px`);
+      
+      document.body.removeChild(outer);
+    };
+    
+    calculateScrollbarWidth();
+    
+    // Recalculate on window resize
+    window.addEventListener('resize', calculateScrollbarWidth);
+    return () => window.removeEventListener('resize', calculateScrollbarWidth);
+  }, []);
 
   return (
     <ThemeProvider theme={fullWidthTheme}>
@@ -381,16 +407,13 @@ const HarmoniXNavbar = () => {
         
         {/* Main navbar */}
         <AppBar 
-          position="static" // Changed from 'static' to 'fixed'
+          position="fixed"
           sx={{ 
             bgcolor: '#000000', 
             boxShadow: 'none', 
             border: 'none',
-            width: '100vw',
-            margin: 0,
-            padding: 0,
             borderRadius: 0,
-            zIndex: theme.zIndex.drawer + 1 // Ensure it's above other content
+            zIndex: theme.zIndex.drawer + 1
           }}
         >
           <Toolbar disableGutters sx={{ px: { xs: 2, sm: 3 } }}>
@@ -429,7 +452,18 @@ const HarmoniXNavbar = () => {
             ) : (
               // Desktop navigation
               <>
-                <Box sx={{ flexGrow: 1, display: 'flex', justifyContent: 'center' }}>
+                {/* Empty box to push content to center */}
+                <Box sx={{ flex: 1 }} />
+                
+                {/* Centered navigation items */}
+                <Box sx={{ 
+                  display: 'flex', 
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  position: 'absolute',
+                  left: '50%',
+                  transform: 'translateX(-50%)'
+                }}>
                   {/* Features dropdown with improved hover */}
                   <Box 
                     ref={featuresMenuRef}
@@ -540,8 +574,8 @@ const HarmoniXNavbar = () => {
                   ))}
                 </Box>
 
-                {/* Profile dropdown */}
-                <Box sx={{ flexGrow: 0 }}>
+                {/* Profile dropdown - right aligned */}
+                <Box sx={{ flex: 1, display: 'flex', justifyContent: 'flex-end' }}>
                   <IconButton
                     onClick={handleProfileMenuOpen}
                     sx={{ color: 'white' }}
@@ -584,6 +618,19 @@ const HarmoniXNavbar = () => {
             )}
           </Toolbar>
         </AppBar>
+        
+        {/* Add a placeholder to prevent content from jumping under the fixed navbar */}
+        <Box sx={{ 
+          height: { xs: '56px', sm: '64px' },  // Match AppBar height
+          width: '100%'
+        }} />
+        
+        {/* Add this to fix the scrollbar issue */}
+        <style jsx global>{`
+          body {
+            overflow-x: hidden !important;
+          }
+        `}</style>
       </Box>
     </ThemeProvider>
   );
