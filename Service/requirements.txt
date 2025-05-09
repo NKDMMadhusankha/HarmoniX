@@ -1,0 +1,22 @@
+# API Framework
+fastapi
+uvicorn
+pydantic
+python-dotenv
+starlette
+
+# Database
+motor
+pymongo
+
+# Machine Learning
+numpy
+pandas
+scikit-learn
+joblib
+
+# Utilities
+python-multipart
+httpx
+pytest
+pytest-asyncio
