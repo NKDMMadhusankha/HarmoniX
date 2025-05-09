@@ -535,24 +535,39 @@ const MusicProducerProfile = () => {
     }));
   };
 
-  const handleSubmitContact = (e) => {
+  const handleSubmitContact = async (e) => {
     e.preventDefault();
-    // Here you would typically send the form data to a backend
-    // For this frontend example, we'll just show a success message
-    console.log('Form submitted:', contactForm);
-    
-    // Show success message
-    setSnackbarMessage('Your message has been sent successfully!');
-    setSnackbarSeverity('success');
-    setSnackbarOpen(true);
-    
-    // Reset form and close modal
-    setContactForm({
-      name: '',
-      email: '',
-      message: ''
-    });
-    handleCloseContact();
+
+    try {
+      const response = await fetch('http://localhost:5000/api/musician/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          musicianId: profile?._id || profile?.id, // Use the correct ID from the loaded profile
+          name: contactForm.name,
+          email: contactForm.email,
+          message: contactForm.message
+        })
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.success) {
+        setSnackbarMessage('Your message has been sent successfully!');
+        setSnackbarSeverity('success');
+        setSnackbarOpen(true);
+        setContactForm({ name: '', email: '', message: '' });
+        handleCloseContact();
+      } else {
+        setSnackbarMessage(data.message || 'Failed to send message.');
+        setSnackbarSeverity('error');
+        setSnackbarOpen(true);
+      }
+    } catch (err) {
+      setSnackbarMessage('Failed to send message. Please try again.');
+      setSnackbarSeverity('error');
+      setSnackbarOpen(true);
+    }
   };
 
   const handleSnackbarClose = () => {

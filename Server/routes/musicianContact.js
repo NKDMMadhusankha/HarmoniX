@@ -1,22 +1,26 @@
-// routes/musicianContact.js
 const express = require('express');
 const router = express.Router();
 const nodemailer = require('nodemailer');
 const Musician = require('../models/Musician');
 
-// POST /api/musician/contact
 router.post('/', async (req, res) => {
   const { musicianId, name, email, message } = req.body;
 
+  // Validate required fields
   if (!musicianId || !name || !email || !message) {
     return res.status(400).json({ success: false, message: 'All fields are required.' });
   }
 
   try {
-    // Allow sending to Lyricists and Mixing Engineers
+    // Find musician by ID and check role
     const musician = await Musician.findById(musicianId);
-    if (!musician || !['Lyricist', 'Mixing Engineer'].includes(musician.role)) {
+    if (!musician || !['Lyricist', 'Mixing Engineer', 'Mastering Engineer', 'Music Producer'].includes(musician.role)) {
       return res.status(404).json({ success: false, message: 'Musician not found.' });
+    }
+
+    // Check if the musician has a valid email
+    if (!musician.email || typeof musician.email !== 'string' || musician.email.trim() === '') {
+      return res.status(400).json({ success: false, message: 'Musician does not have a valid email address.' });
     }
 
     // Setup Nodemailer transporter
@@ -31,13 +35,12 @@ router.post('/', async (req, res) => {
     // Compose the email
     const mailOptions = {
       from: `"${name}" <${email}>`,
-      to: musician.email, // Send to Lyricist's personal email
+      to: musician.email,
       subject: `New message from HarmoniX user`,
       text: `You have received a new message from ${name} (${email}):\n\n${message}`,
       html: `<p>You have received a new message from <b>${name}</b> (${email}):</p><p>${message}</p>`,
     };
 
-    // Send the email
     await transporter.sendMail(mailOptions);
 
     res.json({ success: true, message: 'Message sent successfully!' });
