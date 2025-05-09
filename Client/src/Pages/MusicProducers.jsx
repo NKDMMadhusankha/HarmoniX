@@ -214,7 +214,7 @@ const MusicProducersPage = () => {
 
   const handleSearch = (query) => {
     searchProducers(query); // Use searchProducers from context
-    window.location.href = '/producers'; // Force a page refresh
+    navigate('/producers'); // Navigate to producers page
   };
 
   if (loading) {

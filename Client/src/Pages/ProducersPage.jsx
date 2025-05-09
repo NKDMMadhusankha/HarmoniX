@@ -161,7 +161,7 @@ const ProducersPage = () => {
         
         {/* Content Area */}
         <div style={{ 
-          maxWidth: '1200px', // Increased from 1000px to 1200px
+          maxWidth: '1000px', 
           margin: '0 auto',
           padding: '40px 20px',
           fontFamily: 'Poppins, sans-serif'
@@ -200,17 +200,12 @@ const ProducersPage = () => {
           {loading && (
             <div style={{ 
               textAlign: 'center', 
-              padding: '0',
+              padding: '80px 20px',
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
               justifyContent: 'center',
-              minHeight: '80vh', // Increased to better center vertically
-              width: '100%',
-              position: 'absolute',
-              top: '50%',
-              left: '50%',
-              transform: 'translate(-50%, -50%)',
+              minHeight: '60vh',
               fontFamily: 'Poppins, sans-serif'
             }}>
               {/* Loading Animation */}
@@ -309,8 +304,7 @@ const ProducersPage = () => {
               flexDirection: 'column',
               gap: '25px',
               padding: '20px 0',
-              fontFamily: 'Poppins, sans-serif',
-              width: '100%' // Ensure cards take full width of container
+              fontFamily: 'Poppins, sans-serif'
             }}>
               {producers.map((producer, index) => (
                 <div 
@@ -319,8 +313,7 @@ const ProducersPage = () => {
                     opacity: visibleCards.includes(index) ? 1 : 0,
                     transform: visibleCards.includes(index) ? 'translateY(0)' : 'translateY(20px)',
                     transition: 'opacity 0.5s ease-out, transform 0.5s ease-out',
-                    animation: visibleCards.includes(index) ? 'cardAppear 0.5s ease-out' : 'none',
-                    width: '100%' // Ensure card container takes full width
+                    animation: visibleCards.includes(index) ? 'cardAppear 0.5s ease-out' : 'none'
                   }}
                 >
                   <ProducerCard producer={producer} />
