@@ -104,7 +104,7 @@ const ProducersPage = () => {
               width: '100%',
               height: '100%',
               objectFit: 'cover',
-              opacity: 0.15, // Reduced opacity for better text contrast
+              opacity: 0.25, // Reduced opacity for better text contrast
               zIndex: 0,
               pointerEvents: 'none', // Prevent interaction with video
             }}
@@ -284,7 +284,7 @@ const ProducersPage = () => {
                 position: 'relative',
                 zIndex: 10,
                 color: 'white',
-                boxShadow: '0 8px 32px rgba(0,0,0,0.5)',
+                boxShadow: 'none', // Removed the box shadow to eliminate border appearance
                 pointerEvents: 'all',
                 userSelect: 'text' // Changed from 'all' to 'text' for normal text selection behavior
               }}
