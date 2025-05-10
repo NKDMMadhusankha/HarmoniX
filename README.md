@@ -26,6 +26,8 @@ The LLM helps extract meaning from the request and suggests relevant producers, 
 - Musician matching based on descriptive text
 - Enhanced user experience through conversational project input
 
+> 🔄 The recommendation logic and LLM communication are handled via a Python microservice located in the `Service_ml/` folder.
+
 ## 🛠️ Tech Stack
 
 **Frontend**  
@@ -41,8 +43,8 @@ The LLM helps extract meaning from the request and suggests relevant producers, 
 - AWS S3 for media storage
 
 **AI/LLM Integration**  
-- Python-based LLM handler 
-- NLP pre-processing for client input
+- Python-based LLM handler (`Service_ml/`)  
+- NLP pre-processing for client input  
 - Matching logic integrated into backend services
 
 ## 📁 Project Structure
@@ -51,4 +53,5 @@ The LLM helps extract meaning from the request and suggests relevant producers, 
 HarmoniX/
 ├── Client/         # React Frontend
 ├── Server/         # Express Backend
+├── Service_ml/     # Python-based LLM microservice for recommendations
 └── .gitignore
