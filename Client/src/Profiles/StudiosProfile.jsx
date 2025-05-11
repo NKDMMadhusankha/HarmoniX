@@ -162,24 +162,38 @@ const StudioProfile = () => {
   const [studio, setStudio] = useState(null);
   const [loading, setLoading] = useState(true);
   const [studioImages, setStudioImages] = useState([]);
+  const [error, setError] = useState(null);
+  const [about, setAbout] = useState(null); // Add state for 'about'
+  const [studioDescription, setStudioDescription] = useState('');
+  const [services, setServices] = useState([]);
+  const [features, setFeatures] = useState([]);
+  const [gear, setGear] = useState([]);
   const { id } = useParams();
 
   useEffect(() => {
-    window.scrollTo(0, 0);
-    axios
-      .get(`http://localhost:5000/api/studio/${id}`)
-      .then((res) => {
-        if (res.data.success) {
-          setStudio(res.data.studio);
-          // Set studio images if available, otherwise use an empty array
-          setStudioImages(res.data.studio.studioImages || []);
+    const fetchStudioData = async () => {
+      try {
+        setLoading(true);
+        const response = await axios.get(`http://localhost:5000/api/studio/${id}`);
+        if (response.data.success) {
+          setStudio(response.data.studio);
+          setStudioImages(response.data.studio.studioImages || []);
+          setAbout(response.data.studio.about || '');
+          setStudioDescription(response.data.studio.description || '');
+          setServices(response.data.studio.services || []);
+          setFeatures(response.data.studio.features || []);
+          setGear(response.data.studio.studioGear || []);
+        } else {
+          setError('Failed to fetch studio data.');
         }
+      } catch (err) {
+        setError('An error occurred while fetching studio data.');
+      } finally {
         setLoading(false);
-      })
-      .catch((err) => {
-        console.error('Error fetching studio profile:', err);
-        setLoading(false);
-      });
+      }
+    };
+
+    fetchStudioData();
   }, [id]);
 
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
@@ -235,6 +249,14 @@ const StudioProfile = () => {
   const defaultImage = 'https://via.placeholder.com/400x300?text=No+Image+Available';
   const displayImages = studioImages.length > 0 ? studioImages : [defaultImage];
   
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
+  if (error) {
+    return <div>Error: {error}</div>;
+  }
+
   return (
     <ThemeProvider theme={darkTheme}>
       <Box sx={{ bgcolor: 'background.default', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
@@ -243,7 +265,7 @@ const StudioProfile = () => {
           {/* Studio Title & Actions */}
           <Box sx={{ pt: 4, pb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <Typography variant="h4" component="h1" sx={{ color: 'text.primary' }}>
-              MERASIC Recording Studio
+              {studio?.name}
             </Typography>
             <Box>
               {/* <IconButton aria-label="share" sx={{ color: 'text.secondary' }}>
@@ -436,10 +458,7 @@ const StudioProfile = () => {
                   About the Studio
                 </Typography>
                 <Typography variant="body1" sx={{ mb: 2, color: 'text.secondary' }}>
-                  Welcome to AudioHaus, our modern recording studio located in the heart of Moratuwa. 
-                  We've designed this space specifically for artists, musicians and producers looking to create 
-                  high-quality projects. Our studio combines cutting-edge technology and analog equipment to provide an 
-                  exceptional recording experience with a unique aesthetic.
+                  {studio?.description}
                 </Typography>
                 
                 <Typography variant="h6" sx={{ mt: 3, mb: 1, color: 'text.primary' }}>
@@ -783,7 +802,7 @@ const StudioProfile = () => {
                   px: 2,
                   py: 0.5,
                   borderRadius: 1
-                }}NPM S
+                }}
               >
                 {galleryImageIndex + 1} / {displayImages.length}
               </Typography>

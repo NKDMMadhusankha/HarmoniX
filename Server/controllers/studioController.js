@@ -260,3 +260,20 @@ exports.deleteStudioImage = async (req, res) => {
     res.status(500).json({ success: false, message: 'Error deleting image' });
   }
 };
+
+// Controller function to fetch studio images by ID
+exports.getStudioImagesById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const studio = await Studio.findById(id).select('studioImages');
+
+    if (!studio) {
+      return res.status(404).json({ success: false, message: 'Studio not found' });
+    }
+
+    res.json({ success: true, studioImages: studio.studioImages });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+};

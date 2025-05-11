@@ -111,4 +111,20 @@ router.get('/all', async (req, res) => {
   }
 });
 
+// Add a route to fetch a studio by ID, including the 'about' field
+router.get('/:id', async (req, res) => {
+  try {
+    const studio = await Studio.findById(req.params.id, '-password -refreshToken');
+    if (!studio) {
+      return res.status(404).json({ success: false, message: 'Studio not found' });
+    }
+    res.json({ success: true, studio, about: studio.about });
+  } catch (err) {
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+});
+
+// Add a route to fetch studio images by ID
+router.get('/:id/images', studioController.getStudioImagesById);
+
 module.exports = router;
