@@ -103,10 +103,50 @@ const forgotPassword = async (req, res) => {
       to: user.email,
       from: process.env.GMAIL_USER,
       subject: 'Password Reset Request',
-      text: `You are receiving this because you (or someone else) have requested the reset of the password for your account.\n\n
-      Please click on the following link, or paste it into your browser to complete the process:\n\n
-      ${resetUrl}\n\n
-      If you did not request this, please ignore this email.\n`,
+      text: `You are receiving this because you (or someone else) have requested the reset of the password for your account.
+
+Please click the link below to complete the process:
+${resetUrl}
+
+If you did not request this, please ignore this email.
+      `,
+      html: `
+        <body style="margin:0; padding:0; background: #f6f8fc;">
+          <table cellpadding="0" cellspacing="0" width="100%" style="background: #f6f8fc; min-height: 100vh;">
+            <tr>
+              <td>
+                <table cellpadding="0" cellspacing="0" width="100%" style="max-width: 440px; margin: 48px auto; background: #fff; border-radius: 18px; box-shadow: 0 6px 32px rgba(25,118,210,0.10); overflow: hidden;">
+                  <tr>
+                    <td style="padding: 40px 36px 32px 36px; text-align: center;">
+                      <!-- Logo (optional) -->
+                      <img src="https://img.icons8.com/color/96/000000/musical-notes.png" width="56" height="56" alt="Harmonix" style="margin-bottom: 18px; border-radius: 12px;" />
+                      <h2 style="font-family: 'Inter', 'Segoe UI', Arial, sans-serif; color: #222; margin-bottom: 10px; font-size: 26px; letter-spacing: -1px;">
+                        Reset your password
+                      </h2>
+                      <p style="font-family: 'Inter', 'Segoe UI', Arial, sans-serif; color: #5f6c7b; font-size: 16px; margin-bottom: 32px; line-height: 1.6;">
+                        We received a request to reset your password.<br>
+                        Click the button below to create a new password for your account.
+                      </p>
+                      <a href="${resetUrl}"
+                        style="display: inline-block; padding: 16px 36px; background: linear-gradient(90deg, #1976d2, #21cbf3); color: #fff; border-radius: 8px; font-weight: 600; text-decoration: none; font-size: 17px; letter-spacing: 0.5px; box-shadow: 0 2px 8px rgba(33,203,243,0.10); transition: background 0.3s;">
+                        Reset Password
+                      </a>
+                      <p style="font-family: 'Inter', 'Segoe UI', Arial, sans-serif; color: #b0b8c1; font-size: 13px; margin-top: 36px; margin-bottom: 0;">
+                        Didn’t request a password reset? You can safely ignore this email.
+                      </p>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="background: #f6f8fc; text-align: center; padding: 18px 0 6px 0; font-size: 12px; color: #b0b8c1; font-family: 'Inter', 'Segoe UI', Arial, sans-serif;">
+                      &copy; ${new Date().getFullYear()} Harmonix. All rights reserved.
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+          </table>
+        </body>
+      `,
     };
 
     await transporter.sendMail(mailOptions);

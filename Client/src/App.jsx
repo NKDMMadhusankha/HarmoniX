@@ -48,6 +48,9 @@ import StudioProfile from './Pages/Studios';
 import ProducersPage from './Pages/ProducersPage';
 import ProducerDetailsPage from './Pages/ProducerDetailsPage';
 
+
+import ClientProfile from "./Profiles/ClientProfile";
+
 const App = () => {
   return (
     <Router>
@@ -69,6 +72,10 @@ const App = () => {
           <Route path="/catogary" element={<RegistationCatogary />} />
           <Route path="/musician/register" element={<MusicianRegistrationForm />} />
           <Route path="/studio/register" element={<StudioRegister />} />
+
+
+          <Route path="/clientpro" element={<ClientProfile />} />
+          
 
           {/* Musicians Profile */}
           <Route path="/musicpro" element={<MusicProfile />} />
@@ -105,6 +112,9 @@ const App = () => {
           {/* Producer Pages */}
           <Route path="/producers" element={<ProducersPage />} />  
           <Route path="/producer/:id" element={<MusicProfile />} />
+
+          
+
         </Routes>
       </ProducerProvider>
     </Router>

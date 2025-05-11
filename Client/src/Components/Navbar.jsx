@@ -36,6 +36,7 @@ import ContactMailIcon from '@mui/icons-material/ContactMail';
 import LoginIcon from '@mui/icons-material/Login';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import PersonIcon from '@mui/icons-material/Person';
+import LogoutIcon from '@mui/icons-material/Logout';
 
 // Import React Router components
 import { Link, useNavigate } from 'react-router-dom';
@@ -177,14 +178,14 @@ const HarmoniXNavbar = () => {
     const calculateScrollbarWidth = () => {
       const outer = document.createElement('div');
       outer.style.visibility = 'hidden';
-      outer.style.overflow = 'scroll';
-      outer.style.msOverflowStyle = 'scrollbar';
+      outer.style.overflow = 'scroll'; // Correct property assignment
+      outer.style.msOverflowStyle = 'scrollbar'; // Correct property assignment
       document.body.appendChild(outer);
       
       const inner = document.createElement('div');
       outer.appendChild(inner);
       
-      const scrollbarWidth = (outer.offsetWidth - inner.offsetWidth);
+      const scrollbarWidth = outer.offsetWidth - inner.offsetWidth;
       document.documentElement.style.setProperty('--scrollbar-width', `${scrollbarWidth}px`);
       
       document.body.removeChild(outer);
@@ -555,17 +556,25 @@ const HarmoniXNavbar = () => {
                   {/* Other navigation items */}
                   {navItemsWithoutFeatures.map((item) => (
                     item === 'Contact' ? (
-                      <Link to="/contact" style={{ textDecoration: 'none' }} key={item}>
+                      <a 
+                        key={item} 
+                        href="/contact" 
+                        style={{ textDecoration: 'none' }}
+                      >
                         <Button sx={{ my: 2, color: 'white', display: 'block', mx: 1 }}>
                           {item}
                         </Button>
-                      </Link>
+                      </a>
                     ) : item === 'About Us' ? (
-                      <Link to="/about" style={{ textDecoration: 'none' }} key={item}>
+                      <a 
+                        key={item} 
+                        href="/about" 
+                        style={{ textDecoration: 'none' }}
+                      >
                         <Button sx={{ my: 2, color: 'white', display: 'block', mx: 1 }}>
                           {item}
                         </Button>
-                      </Link>
+                      </a>
                     ) : (
                       <Button key={item} sx={{ my: 2, color: 'white', display: 'block', mx: 1 }}>
                         {item}
@@ -606,11 +615,33 @@ const HarmoniXNavbar = () => {
                       </ListItemIcon>
                       Sign Up
                     </MenuItem>
-                    <MenuItem onClick={handleProfileClick} sx={{ color: 'white' }}>
+                    <MenuItem 
+                      onClick={handleProfileClick} 
+                      sx={{ color: 'white' }}
+                    >
                       <ListItemIcon sx={{ color: 'white' }}>
                         <PersonIcon />
                       </ListItemIcon>
                       Profile
+                    </MenuItem>
+                    <MenuItem 
+                      onClick={() => {
+                        // Add your logout logic here
+                        console.log('User logged out');
+                        handleProfileMenuClose();
+                      }} 
+                      sx={{ 
+                        color: 'white', 
+                        backgroundColor: '#f44336', // Red background color
+                        '&:hover': {
+                          backgroundColor: '#d32f2f' // Darker red on hover
+                        }
+                      }}
+                    >
+                      <ListItemIcon sx={{ color: 'white' }}>
+                        <LogoutIcon />
+                      </ListItemIcon>
+                      Log Out
                     </MenuItem>
                   </Menu>
                 </Box>
