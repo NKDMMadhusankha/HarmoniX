@@ -36,7 +36,7 @@ router.post('/', async (req, res) => {
     const mailOptions = {
       from: `"${name}" <${email}>`,
       to: musician.email,
-      subject: `New message from HarmoniX user`,
+      subject: `New message from HarmoniX users`,
       text: `You have received a new message from ${name} (${email}):\n\n${message}`,
       html: `<p>You have received a new message from <b>${name}</b> (${email}):</p><p>${message}</p>`,
     };
