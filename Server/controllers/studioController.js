@@ -207,21 +207,21 @@ exports.uploadStudioImages = async (req, res) => {
 
 exports.getStudioProfile = async (req, res) => {
   try {
-    const studio = await Studio.findById(req.user.id).select('-password -refreshToken');
+    const studio = await Studio.findById(req.params.id).select('-password -refreshToken');
     if (!studio) return res.status(404).json({ message: 'Studio not found' });
 
-    // Generate pre-signed URLs for studio images
-    const signedImageUrls = await Promise.all(
-      studio.studioImages.map(async (imageUrl) => {
-        // Extract the key from the full URL
-        const key = imageUrl.split('.com/')[1];
-        return await generateSignedUrl(key);
-      })
-    );
+    // Generate full URLs for studio images
+    const imageUrls = studio.studioImages.map(key => {
+      if (key.startsWith('http')) return key;
+      return `https://${process.env.AWS_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${key}`;
+    });
 
     res.status(200).json({
-      ...studio.toObject(),
-      studioImages: signedImageUrls // Replace image keys with signed URLs
+      success: true,
+      studio: {
+        ...studio.toObject(),
+        studioImages: imageUrls
+      }
     });
   } catch (err) {
     console.error('Error fetching studio profile:', err);

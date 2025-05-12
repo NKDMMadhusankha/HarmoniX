@@ -41,6 +41,7 @@ import Navbar from '../Components/Navbar';
 import Footer from '../Components/Footer';
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
+import Loader from '../Components/Loader'; // Import the Loader component
 
 // Create a dark theme with teal accents
 const darkTheme = createTheme({
@@ -131,9 +132,9 @@ const darkTheme = createTheme({
 // Available time slots
 const timeSlots = [
   { value: '09:00', label: '9:00 AM' },
-  { value: '10:00', label: '10:00 AM' },
-  { value: '11:00', label: '11:00 AM' },
-  { value: '12:00', label: '12:00 PM' },
+  { value: '10:00', label: '10:00 AM'},
+  { value: '11:00', label: '11:00 AM'},
+  { value: '12:00', label: '12:00 PM'},
   { value: '13:00', label: '1:00 PM' },
   { value: '14:00', label: '2:00 PM' },
   { value: '15:00', label: '3:00 PM' },
@@ -143,7 +144,7 @@ const timeSlots = [
   { value: '19:00', label: '7:00 PM' },
   { value: '20:00', label: '8:00 PM' },
   { value: '21:00', label: '9:00 PM' },
-  { value: '22:00', label: '10:00 PM' },
+  { value: '22:00', label: '10:00 PM'},
 ];
 
 // Studio gear list
@@ -158,6 +159,16 @@ const studioGear = [
   { category: 'Monitoring', items: ['Dangerous Music Monitor ST', 'Barefoot Footprint 01'] },
 ];
 
+const getImageUrl = (key) => {
+  if (!key) return '/assets/default-placeholder.png';
+  
+  // If it's already a full URL, use it directly
+  if (key.startsWith('http')) return key;
+  
+  // Otherwise construct the S3 URL (or use your signed URL logic)
+  return `https://${process.env.REACT_APP_AWS_BUCKET_NAME}.s3.${process.env.REACT_APP_AWS_REGION}.amazonaws.com/${key}`;
+};
+
 const StudioProfile = () => {
   const [studio, setStudio] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -168,7 +179,18 @@ const StudioProfile = () => {
   const [services, setServices] = useState([]);
   const [features, setFeatures] = useState([]);
   const [gear, setGear] = useState([]);
+  const [country, setCountry] = useState(''); // Add state for 'country'
+  const [recordingBooths, setRecordingBooths] = useState('');
+  const [loungeArea, setLoungeArea] = useState('');
+  const [studioFeatures, setStudioFeatures] = useState([]);
   const { id } = useParams();
+
+  // Add an onError handler to replace broken images with a default placeholder
+  const handleImageError = (event) => {
+    event.target.src = '/assets/default-placeholder.png';
+    event.target.style.objectFit = 'contain'; // Change to contain for placeholder
+    event.target.onerror = null; // Prevent infinite loop if placeholder fails
+  };
 
   useEffect(() => {
     const fetchStudioData = async () => {
@@ -177,17 +199,23 @@ const StudioProfile = () => {
         const response = await axios.get(`http://localhost:5000/api/studio/${id}`, {
           headers: {
             'Cache-Control': 'no-cache',
+            'Pragma': 'no-cache'
           },
         });
 
         if (response.data.success) {
-          setStudio(response.data.studio);
-          setStudioImages(response.data.studio.studioImages || []);
-          setAbout(response.data.studio.about || '');
-          setStudioDescription(response.data.studio.studioDescription || '');
-          setServices(response.data.studio.services || []);
-          setFeatures(response.data.studio.features || []);
-          setGear(response.data.studio.studioGear || []);
+          const studioData = response.data.studio;
+          setStudio(studioData);
+          setStudioImages(studioData.studioImages || []);
+          setAbout(studioData.about || '');
+          setStudioDescription(studioData.studioDescription || '');
+          setServices(studioData.services || []);
+          setFeatures(studioData.features || []);
+          setGear(studioData.studioGear || []);
+          setCountry(studioData.country || '');
+          setRecordingBooths(studioData.recordingBooths || 'No details available.');
+          setLoungeArea(studioData.loungeArea || 'No details available.');
+          setStudioFeatures(studioData.studioFeatures || []);
         } else {
           setError('Failed to fetch studio data.');
         }
@@ -244,23 +272,29 @@ const StudioProfile = () => {
     return date.toLocaleDateString('en-US', options);
   };
   
-  // Function to open Google Maps with the address
+  // Function to open Google Maps with the fetched address
   const openInGoogleMaps = () => {
-    const address = "149 Mill Road, Katubedda, Moratuwa";
-    const encodedAddress = encodeURIComponent(address);
-    window.open(`https://www.google.com/maps/search/?api=1&query=${encodedAddress}`, '_blank');
+    if (studio?.address) {
+      const encodedAddress = encodeURIComponent(studio.address);
+      window.open(`https://www.google.com/maps/search/?api=1&query=${encodedAddress}`, '_blank');
+    } else {
+      console.error('Address not available');
+    }
   };
 
   // If no images are available, show a placeholder
-  const defaultImage = '/assets/default-placeholder.png'; // Updated placeholder image path
-  const displayImages = studioImages.length > 0 ? studioImages : [defaultImage];
-  
+  const displayImages = studioImages; // Use only fetched images
+
   if (loading) {
-    return <div>Loading...</div>;
+    return <Loader />; // Use the Loader component
   }
 
   if (error) {
     return <div>Error: {error}</div>;
+  }
+
+  if (displayImages.length === 0) {
+    return <div>No images available for this studio.</div>; // Handle case where no images are fetched
   }
 
   return (
@@ -270,17 +304,20 @@ const StudioProfile = () => {
         <Container maxWidth="lg">
           {/* Studio Title & Actions */}
           <Box sx={{ pt: 4, pb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <Typography variant="h4" component="h1" sx={{ color: 'text.primary' }}>
+            <Typography variant="h4" component="h1" sx={{ color: 'text.primary', cursor: 'pointer' }}>
               {studio?.studioName || 'Studio Name Not Available'}
             </Typography>
           </Box>
 
           {/* Location - Updated to be clickable */}
-          <Box sx={{ display: 'flex', alignItems: 'start', mb: 3 }}>
+          <Box sx={{ display: 'flex', alignItems: 'start', mb: 3, cursor: 'pointer' }} onClick={openInGoogleMaps}>
             <LocationOn sx={{ color: 'error.main', mr: 1, mt: 0.5 }} />
             <Box>
               <Typography variant="subtitle1" sx={{ color: 'primary.main' }}>
                 {studio?.address || 'Address Not Available'}
+              </Typography>
+              <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                {country || 'Country Not Available'}
               </Typography>
             </Box>
           </Box>
@@ -301,8 +338,9 @@ const StudioProfile = () => {
               >
                 <Box
                   component="img"
-                  src={displayImages[0]} // Use actual image
+                  src={getImageUrl(displayImages[0])}
                   alt="Studio Main"
+                  onError={handleImageError}
                   sx={{
                     width: '100%',
                     height: '100%',
@@ -329,8 +367,9 @@ const StudioProfile = () => {
                     >
                       <Box
                         component="img"
-                        src={displayImages[index]} // Use actual image
+                        src={getImageUrl(displayImages[index])}
                         alt={`Studio Image ${index}`}
+                        onError={handleImageError}
                         sx={{
                           width: '100%',
                           height: '100%',
@@ -347,7 +386,7 @@ const StudioProfile = () => {
             <Grid item xs={12}>
               <Grid container spacing={1}>
                 {[3, 4].map((index) => (
-                  <Grid item xs={6} md={4} key={index}>
+                  <Grid item xs={4} md={4} key={index}>
                     <Box
                       sx={{
                         position: 'relative',
@@ -360,8 +399,9 @@ const StudioProfile = () => {
                     >
                       <Box
                         component="img"
-                        src={displayImages[index]} // Use actual image
+                        src={getImageUrl(displayImages[index])}
                         alt={`Studio Image ${index}`}
+                        onError={handleImageError}
                         sx={{
                           width: '100%',
                           height: '100%',
@@ -372,8 +412,8 @@ const StudioProfile = () => {
                   </Grid>
                 ))}
                 
-                {/* View all button with image background - with darker overlay */}
-                <Grid item xs={6} md={4}>
+                {/* Show the 6th image (index 5) */}
+                <Grid item xs={4} md={4}>
                   <Box
                     sx={{
                       position: 'relative',
@@ -381,49 +421,68 @@ const StudioProfile = () => {
                       borderRadius: 2,
                       overflow: 'hidden',
                       cursor: 'pointer',
-                      backgroundImage: `url(${displayImages[5] || defaultImage})`, // Use actual image
-                      backgroundSize: 'cover',
-                      backgroundPosition: 'center',
-                      display: 'flex',
-                      flexDirection: 'column',
-                      justifyContent: 'center',
-                      alignItems: 'center',
-                      '&::before': {
-                        content: '""',
+                    }}
+                    onClick={() => openGallery(5)}
+                  >
+                    <Box
+                      component="img"
+                      src={getImageUrl(displayImages[5])}
+                      alt="Studio Image 6"
+                      onError={handleImageError}
+                      sx={{
+                        width: '100%',
+                        height: '100%',
+                        objectFit: 'cover'
+                      }}
+                    />
+                    
+                    {/* View all overlay on the 6th image */}
+                    <Box
+                      sx={{
                         position: 'absolute',
                         top: 0,
                         left: 0,
-                        right: 0,
-                        bottom: 0,
-                        backgroundColor: 'rgba(0, 0, 0, 0.7)', // Darker overlay
-                      }
-                    }}
-                    onClick={() => openGallery(0)}
-                  >
-                    <Box 
-                      sx={{ 
-                        width: 40, 
-                        height: 40, 
-                        display: 'flex', 
-                        justifyContent: 'center', 
+                        width: '100%',
+                        height: '100%',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        justifyContent: 'center',
                         alignItems: 'center',
-                        borderRadius: 1,
-                        mb: 1,
-                        bgcolor: 'rgba(255, 255, 255, 0.2)',
-                        border: '1px solid rgba(255, 255, 255, 0.3)',
-                        zIndex: 1
+                        bgcolor: 'rgba(0, 0, 0, 0.6)', // Dark overlay
+                        transition: 'background-color 0.3s',
+                        '&:hover': {
+                          bgcolor: 'rgba(0, 0, 0, 0.7)',
+                        }
+                      }}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        openGallery(0);
                       }}
                     >
-                      <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 0.5 }}>
-                        <Box sx={{ width: 8, height: 8, bgcolor: 'white', borderRadius: 0.5 }} />
-                        <Box sx={{ width: 8, height: 8, bgcolor: 'white', borderRadius: 0.5 }} />
-                        <Box sx={{ width: 8, height: 8, bgcolor: 'white', borderRadius: 0.5 }} />
-                        <Box sx={{ width: 8, height: 8, bgcolor: 'white', borderRadius: 0.5 }} />
+                      <Box 
+                        sx={{ 
+                          width: 40, 
+                          height: 40, 
+                          display: 'flex', 
+                          justifyContent: 'center', 
+                          alignItems: 'center',
+                          borderRadius: 1,
+                          mb: 1,
+                          bgcolor: 'rgba(255, 255, 255, 0.2)',
+                          border: '1px solid rgba(255, 255, 255, 0.3)',
+                        }}
+                      >
+                        <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 0.5 }}>
+                          <Box sx={{ width: 8, height: 8, bgcolor: 'white', borderRadius: 0.5 }} />
+                          <Box sx={{ width: 8, height: 8, bgcolor: 'white', borderRadius: 0.5 }} />
+                          <Box sx={{ width: 8, height: 8, bgcolor: 'white', borderRadius: 0.5 }} />
+                          <Box sx={{ width: 8, height: 8, bgcolor: 'white', borderRadius: 0.5 }} />
+                        </Box>
                       </Box>
+                      <Typography variant="button" sx={{ color: 'white', fontWeight: 'medium' }}>
+                        View all
+                      </Typography>
                     </Box>
-                    <Typography variant="button" sx={{ color: 'white', zIndex: 1, fontWeight: 'medium' }}>
-                      View all
-                    </Typography>
                   </Box>
                 </Grid>
               </Grid>
@@ -435,30 +494,56 @@ const StudioProfile = () => {
             {/* Left Column - Studio Info */}
             <Grid item xs={12} md={7}>
               <Paper sx={{ p: 3, mb: 4, bgcolor: 'background.paper', boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)' }}>
-                <Typography variant="h5" component="h2" sx={{ mb: 2, color: 'text.primary' }}>
-                  About the Studio
-                </Typography>
-                <Typography variant="body1" sx={{ mb: 2, color: 'text.secondary' }}>
-                  {studio?.description}
-                </Typography>
-
                 {/* About the Studio Section */}
                 <Box sx={{ mb: 3 }}>
-                  <Typography variant="h6" sx={{ color: 'text.primary' }}>About the Studio</Typography>
-                  <Typography variant="body1" sx={{ color: 'text.secondary' }}>
+                  <Typography variant="h5" sx={{ color: 'text.primary', mb: '10px' }}>About the Studio</Typography>
+                  <Typography 
+                    variant="body1" 
+                    sx={{ 
+                      color: 'text.secondary', 
+                      wordWrap: 'break-word', // Ensure text wraps properly
+                      whiteSpace: 'pre-wrap' // Preserve line breaks if any
+                    }}
+                  >
                     {studioDescription || 'No description available.'}
                   </Typography>
                 </Box>
                 
                 {/* Services Section */}
                 <Box sx={{ mb: 3 }}>
-                  <Typography variant="h6" sx={{ color: 'text.primary' }}>Services</Typography>
+                  <Typography variant="h6" sx={{ color: 'text.primary', mb: 2 }}>Services</Typography>
                   {services.length > 0 ? (
-                    <ul>
+                    <Grid container spacing={2}>
                       {services.map((service, index) => (
-                        <li key={index} style={{ color: 'text.secondary' }}>{service}</li>
+                        <Grid item xs={12} sm={6} md={4} key={index}>
+                          <Paper 
+                            elevation={2} 
+                            sx={{ 
+                              p: 1, // Further reduced padding to lower height
+                              bgcolor: 'background.paper',
+                              borderRadius: 2,
+                              textAlign: 'center',
+                              borderLeft: '4px solid #2196F3', // Changed to blue color
+                              transition: 'transform 0.2s',
+                              '&:hover': {
+                                transform: 'translateY(-4px)',
+                                boxShadow: '0 6px 12px rgba(0, 0, 0, 0.3)'
+                              }
+                            }}
+                          >
+                            <Typography 
+                              variant="body1" 
+                              sx={{ 
+                                color: 'text.primary', 
+                                fontWeight: 'bold'
+                              }}
+                            >
+                              {service}
+                            </Typography>
+                          </Paper>
+                        </Grid>
                       ))}
-                    </ul>
+                    </Grid>
                   ) : (
                     <Typography variant="body1" sx={{ color: 'text.secondary' }}>
                       No services available.
@@ -503,35 +588,52 @@ const StudioProfile = () => {
                   )}
                 </Box>
 
-                <Typography variant="h6" sx={{ mt: 3, mb: 1, color: 'text.primary' }}>
-                  Recording Booths
-                </Typography>
-                <Typography variant="body1" sx={{ mb: 3, color: 'text.secondary' }}>
-                  Soundproofed and acoustically treated booths available for capturing vocals with exceptional precision. 
-                  Our isolation booth features acoustic treatment for clean recordings.
-                </Typography>
-                
-                <Typography variant="h6" sx={{ mt: 3, mb: 1, color: 'text.primary' }}>
-                  Lounge Area
-                </Typography>
-                <Typography variant="body1" sx={{ mb: 3, color: 'text.secondary' }}>
-                  A relaxation lounge with ambient lighting available for breaks between recording sessions, 
-                  equipped with coffee machine, keyboard setup, comfortable seating, and amenities to keep you comfortable 
-                  during long sessions.
-                </Typography>
-                
-                <Typography variant="h6" sx={{ mt: 3, mb: 1, color: 'text.primary' }}>
-                  Studio Features
-                </Typography>
-                <Typography variant="body1" sx={{ mb: 3, color: 'text.secondary' }}>
-                  • Professional acoustic treatment
-                  • LED mood lighting throughout the space
-                  • Climate controlled environment
-                  • High-speed internet
-                  • Instrument collection including guitars
-                  • Producer workstation with industry-standard software
-                </Typography>
-                
+                {/* Recording Booths Section */}
+                <Box sx={{ mb: 3 }}>
+                  <Typography variant="h6" sx={{ color: 'text.primary' }}>Recording Booths</Typography>
+                  <Typography 
+                    variant="body1" 
+                    sx={{ 
+                      color: 'text.secondary', 
+                      wordWrap: 'break-word', 
+                      whiteSpace: 'pre-wrap' 
+                    }}
+                  >
+                    {recordingBooths}
+                  </Typography>
+                </Box>
+
+                {/* Lounge Area Section */}
+                <Box sx={{ mb: 3 }}>
+                  <Typography variant="h6" sx={{ color: 'text.primary' }}>Lounge Area</Typography>
+                  <Typography 
+                    variant="body1" 
+                    sx={{ 
+                      color: 'text.secondary', 
+                      wordWrap: 'break-word', 
+                      whiteSpace: 'pre-wrap' 
+                    }}
+                  >
+                    {loungeArea}
+                  </Typography>
+                </Box>
+
+                {/* Studio Features Section */}
+                <Box sx={{ mb: 3 }}>
+                  <Typography variant="h6" sx={{ color: 'text.primary' }}>Studio Features</Typography>
+                  {studioFeatures.length > 0 ? (
+                    <ul>
+                      {studioFeatures.map((feature, index) => (
+                        <li key={index} style={{ color: 'text.secondary' }}>{feature}</li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <Typography variant="body1" sx={{ color: 'text.secondary' }}>
+                      No features available.
+                    </Typography>
+                  )}
+                </Box>
+
                 <Typography variant="body1" sx={{ mt: 4, textAlign: 'center', color: 'text.primary', fontWeight: 'medium' }}>
                   We look forward to welcoming you to AudioHaus and helping you realize your musical projects in a professional and inspiring environment.
                 </Typography>
@@ -768,8 +870,9 @@ const StudioProfile = () => {
             <Box sx={{ position: 'relative', width: '100%', height: '80vh', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
               <Box
                 component="img"
-                src={displayImages[galleryImageIndex]} // Use actual image
+                src={getImageUrl(displayImages[galleryImageIndex])}
                 alt={`Studio Image ${galleryImageIndex + 1}`}
+                onError={handleImageError}
                 sx={{
                   maxWidth: '100%',
                   maxHeight: '80vh',

@@ -206,31 +206,6 @@ const HarmoniXNavbar = () => {
     return () => window.removeEventListener('resize', calculateScrollbarWidth);
   }, []);
 
-  useEffect(() => {
-    const fetchProfileImage = async () => {
-      const token = localStorage.getItem('authToken');
-      if (!token) return;
-
-      try {
-        const response = await fetch('http://localhost:5000/api/profile/data', {
-          method: 'GET',
-          headers: { 'Authorization': `Bearer ${token}` },
-        });
-
-        if (response.ok) {
-          const data = await response.json();
-          setProfileImage(data.profileImageUrl);
-        } else {
-          console.error('Failed to fetch profile image');
-        }
-      } catch (error) {
-        console.error('Error fetching profile image:', error);
-      }
-    };
-
-    fetchProfileImage();
-  }, []);
-
   return (
     <ThemeProvider theme={fullWidthTheme}>
       <CssBaseline />

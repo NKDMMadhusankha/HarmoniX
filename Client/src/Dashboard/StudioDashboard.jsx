@@ -424,10 +424,10 @@ const StudioProfileDashboard = () => {
       return;
     }
 
-    // Check file size (5MB limit)
-    const maxSize = 5 * 1024 * 1024;
+    // Check file size (20MB limit)
+    const maxSize = 20 * 1024 * 1024; // Updated to 20MB
     if (file.size > maxSize) {
-      setSnackbarMessage('Image size should be less than 5MB');
+      setSnackbarMessage('Image size should be less than 20MB'); // Updated message
       setSnackbarSeverity('error');
       setSnackbarOpen(true);
       return;
