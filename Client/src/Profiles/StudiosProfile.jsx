@@ -180,7 +180,6 @@ const StudioProfile = () => {
   const [features, setFeatures] = useState([]);
   const [gear, setGear] = useState([]);
   const [country, setCountry] = useState(''); // Add state for 'country'
-  const [recordingBooths, setRecordingBooths] = useState('');
   const [loungeArea, setLoungeArea] = useState('');
   const [studioFeatures, setStudioFeatures] = useState([]);
   const { id } = useParams();
@@ -213,7 +212,6 @@ const StudioProfile = () => {
           setFeatures(studioData.features || []);
           setGear(studioData.studioGear || []);
           setCountry(studioData.country || '');
-          setRecordingBooths(studioData.recordingBooths || 'No details available.');
           setLoungeArea(studioData.loungeArea || 'No details available.');
           setStudioFeatures(studioData.studioFeatures || []);
         } else {
@@ -553,15 +551,12 @@ const StudioProfile = () => {
 
                 {/* Studio Equipment Section */}
                 <Box sx={{ mb: 3 }}>
-                  <Typography variant="h6" sx={{ color: 'text.primary' }}>Studio Equipment</Typography>
+                  <Typography variant="h6" sx={{ color: 'text.primary', mb:'10px' }}>Studio Equipment</Typography>
                   {gear.length > 0 ? (
                     gear.map((g, index) => (
                       <Box key={index} sx={{ mb: 2 }}>
-                        <Typography variant="subtitle1" sx={{ fontWeight: 'bold', color: 'primary.main' }}>
-                          {g.category}:
-                        </Typography>
                         <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                          {g.items.join(' • ')}
+                          <Box component="span" sx={{ fontWeight: 'bold', color: 'primary.main' }}>{g.category}:</Box> {g.items.join(' • ')}
                         </Typography>
                       </Box>
                     ))
@@ -572,35 +567,67 @@ const StudioProfile = () => {
                   )}
                 </Box>
 
-                {/* Studio Features Section */}
+                {/* Studio Features Section - Colorful Grid Design (No Icons) */}
                 <Box sx={{ mb: 3 }}>
-                  <Typography variant="h6" sx={{ color: 'text.primary' }}>Studio Features</Typography>
+                  <Typography variant="h6" sx={{ color: 'text.primary', mb: 2 }}>Studio Features</Typography>
                   {features.length > 0 ? (
-                    <ul>
-                      {features.map((feature, index) => (
-                        <li key={index} style={{ color: 'text.secondary' }}>{feature}</li>
-                      ))}
-                    </ul>
+                    <Grid container spacing={1.5}>
+                      {features.map((feature, index) => {
+                        // Create an array of vibrant colors for the left accents
+                        const colors = [
+                          '#FF5252', // Red
+                          '#7C4DFF', // Deep Purple
+                          '#00BFA5', // Teal
+                          '#FFAB40', // Orange
+                          '#448AFF', // Blue
+                          '#69F0AE', // Green
+                          '#FF4081', // Pink
+                          '#FFD740', // Amber
+                        ];
+                        
+                        // Select color based on index
+                        const accentColor = colors[index % colors.length];
+                        
+                        return (
+                          <Grid item xs={12} sm={6} key={index}>
+                            <Box
+                              sx={{
+                                p: 1.5,
+                                borderRadius: 1.5,
+                                bgcolor: 'rgba(18, 18, 18, 0.8)',
+                                borderLeft: `4px solid ${accentColor}`,
+                                display: 'flex',
+                                alignItems: 'center',
+                                transition: 'all 0.2s ease',
+                                boxShadow: '0 1px 3px rgba(0,0,0,0.2)',
+                                '&:hover': {
+                                  transform: 'translateY(-3px)',
+                                  boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
+                                  borderLeft: `4px solid ${accentColor}`,
+                                  bgcolor: 'rgba(25, 25, 25, 0.9)'
+                                }
+                              }}
+                            >
+                              <Typography 
+                                variant="body2" 
+                                sx={{ 
+                                  color: 'white',
+                                  fontWeight: 'medium',
+                                  ml: 1
+                                }}
+                              >
+                                {feature}
+                              </Typography>
+                            </Box>
+                          </Grid>
+                        );
+                      })}
+                    </Grid>
                   ) : (
                     <Typography variant="body1" sx={{ color: 'text.secondary' }}>
                       No features available.
                     </Typography>
                   )}
-                </Box>
-
-                {/* Recording Booths Section */}
-                <Box sx={{ mb: 3 }}>
-                  <Typography variant="h6" sx={{ color: 'text.primary' }}>Recording Booths</Typography>
-                  <Typography 
-                    variant="body1" 
-                    sx={{ 
-                      color: 'text.secondary', 
-                      wordWrap: 'break-word', 
-                      whiteSpace: 'pre-wrap' 
-                    }}
-                  >
-                    {recordingBooths}
-                  </Typography>
                 </Box>
 
                 {/* Lounge Area Section */}
@@ -616,22 +643,6 @@ const StudioProfile = () => {
                   >
                     {loungeArea}
                   </Typography>
-                </Box>
-
-                {/* Studio Features Section */}
-                <Box sx={{ mb: 3 }}>
-                  <Typography variant="h6" sx={{ color: 'text.primary' }}>Studio Features</Typography>
-                  {studioFeatures.length > 0 ? (
-                    <ul>
-                      {studioFeatures.map((feature, index) => (
-                        <li key={index} style={{ color: 'text.secondary' }}>{feature}</li>
-                      ))}
-                    </ul>
-                  ) : (
-                    <Typography variant="body1" sx={{ color: 'text.secondary' }}>
-                      No features available.
-                    </Typography>
-                  )}
                 </Box>
 
                 <Typography variant="body1" sx={{ mt: 4, textAlign: 'center', color: 'text.primary', fontWeight: 'medium' }}>
@@ -831,97 +842,492 @@ const StudioProfile = () => {
           </Grid>
         </Container>
         
-        {/* Full Screen Gallery Modal - Already has dark theme */}
+        {/* Full Screen Gallery Modal - Enhanced Design with Improvements */}
         <Dialog
           open={galleryOpen}
           onClose={closeGallery}
-          maxWidth="lg"
+          maxWidth="xl"
           fullWidth
+          TransitionProps={{
+            timeout: 700,
+          }}
           BackdropProps={{
-            sx: { backgroundColor: 'rgba(0, 0, 0, 0.95)' } // Already dark
+            sx: { 
+              backgroundColor: 'rgba(0, 0, 0, 0.97)',
+              animation: 'backdropReveal 0.8s cubic-bezier(0.25, 0.1, 0.25, 1)',
+              '@keyframes backdropReveal': {
+                '0%': {
+                  opacity: 0,
+                },
+                '100%': {
+                  opacity: 1,
+                }
+              }
+            }
           }}
           PaperProps={{
             sx: { 
               bgcolor: 'transparent',
               boxShadow: 'none',
               overflow: 'hidden',
-              maxHeight: '90vh',
+              maxHeight: '98vh',
               height: 'auto',
-              m: 2
+              m: 0,
+              border: '1px solid rgba(255,255,255,0.05)',
+              borderRadius: 2,
+              animation: 'galleryEntranceDramatic 0.9s cubic-bezier(0.22, 1, 0.36, 1)',
+              '@keyframes galleryEntranceDramatic': {
+                '0%': {
+                  opacity: 0,
+                  transform: 'scale(0.85) translateY(40px) perspective(1000px) rotateX(5deg)',
+                  filter: 'blur(10px)'
+                },
+                '40%': {
+                  opacity: 0.8,
+                  filter: 'blur(5px)'
+                },
+                '70%': {
+                  filter: 'blur(0px)'
+                },
+                '100%': {
+                  opacity: 1,
+                  transform: 'scale(1) translateY(0) perspective(1000px) rotateX(0deg)',
+                  filter: 'blur(0px)'
+                }
+              }
             }
           }}
         >
-          <DialogContent sx={{ p: 0, position: 'relative', overflow: 'hidden' }}>
-            <IconButton 
-              onClick={closeGallery}
-              sx={{ 
-                position: 'absolute', 
-                top: 16, 
-                right: 16, 
-                bgcolor: 'rgba(0,0,0,0.6)',
-                color: 'white',
-                '&:hover': { bgcolor: 'rgba(0,0,0,0.8)' },
-                zIndex: 10
-              }}
-            >
-              <Close />
-            </IconButton>
+          <DialogContent 
+            sx={{ 
+              p: 0, 
+              position: 'relative', 
+              overflow: 'hidden', 
+              display: 'flex', 
+              flexDirection: 'column',
+              '& > *': {
+                animation: 'contentFadeIn 0.8s ease-out forwards',
+              },
+              '@keyframes contentFadeIn': {
+                '0%': { opacity: 0 },
+                '30%': { opacity: 0 },
+                '100%': { opacity: 1 }
+              }
+            }}
+          >
+            {/* Header with controls */}
+            <Box sx={{ 
+              display: 'flex', 
+              justifyContent: 'space-between', 
+              alignItems: 'center', 
+              p: 2, 
+              borderBottom: '1px solid rgba(255,255,255,0.1)',
+              backdropFilter: 'blur(10px)',
+              background: 'linear-gradient(to bottom, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.6) 100%)',
+              boxShadow: '0 2px 8px rgba(0,0,0,0.2)'
+            }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <Typography variant="h6" sx={{ 
+                  color: 'white', 
+                  fontWeight: 'medium',
+                  textShadow: '0 2px 4px rgba(0,0,0,0.5)'
+                }}>
+                  {studio?.studioName || 'Studio Gallery'}
+                </Typography>
+                <Divider orientation="vertical" flexItem sx={{ mx: 2, bgcolor: 'rgba(255,255,255,0.2)' }} />
+                <Box 
+                  sx={{ 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    bgcolor: 'rgba(0,0,0,0.4)', 
+                    px: 1.5, 
+                    py: 0.5, 
+                    borderRadius: 4,
+                    border: '1px solid rgba(255,255,255,0.1)'
+                  }}
+                >
+                  <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.9)' }}>
+                    {galleryImageIndex + 1} / {displayImages.length}
+                  </Typography>
+                </Box>
+              </Box>
+              
+              <Box sx={{ display: 'flex', gap: 1 }}>
+                <IconButton 
+                  onClick={closeGallery}
+                  sx={{ 
+                    color: 'white',
+                    bgcolor: 'rgba(255,255,255,0.05)',
+                    '&:hover': { 
+                      bgcolor: 'rgba(255,255,255,0.1)',
+                      transform: 'scale(1.05)'
+                    },
+                    transition: 'all 0.2s ease'
+                  }}
+                >
+                  <Close />
+                </IconButton>
+              </Box>
+            </Box>
             
-            <Box sx={{ position: 'relative', width: '100%', height: '80vh', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-              <Box
-                component="img"
-                src={getImageUrl(displayImages[galleryImageIndex])}
-                alt={`Studio Image ${galleryImageIndex + 1}`}
-                onError={handleImageError}
-                sx={{
-                  maxWidth: '100%',
-                  maxHeight: '80vh',
-                  objectFit: 'contain'
-                }}
-              />
-              
-              <IconButton 
-                onClick={handlePrevImage}
-                sx={{ 
-                  position: 'absolute', 
-                  left: 16, 
-                  bgcolor: 'rgba(0,0,0,0.6)',
-                  color: 'white',
-                  '&:hover': { bgcolor: 'rgba(0,0,0,0.8)' }
-                }}
-              >
-                <ArrowBackIos />
-              </IconButton>
-              
-              <IconButton 
-                onClick={handleNextImage}
-                sx={{ 
-                  position: 'absolute', 
-                  right: 16, 
-                  bgcolor: 'rgba(0,0,0,0.6)',
-                  color: 'white',
-                  '&:hover': { bgcolor: 'rgba(0,0,0,0.8)' }
-                }}
-              >
-                <ArrowForwardIos />
-              </IconButton>
-              
-              <Typography 
-                variant="body2" 
-                sx={{ 
-                  position: 'absolute', 
-                  bottom: 16, 
-                  left: '50%', 
-                  transform: 'translateX(-50%)', 
-                  color: 'white',
-                  bgcolor: 'rgba(0,0,0,0.7)',
+            {/* Main content area with two sections */}
+            <Box sx={{ 
+              display: 'flex', 
+              flexDirection: { xs: 'column', md: 'row' }, 
+              height: 'calc(98vh - 64px)' 
+            }}>
+              {/* Left side - Featured Image */}
+              <Box sx={{ 
+                flex: 3, 
+                display: 'flex', 
+                flexDirection: 'column',
+                alignItems: 'center', 
+                justifyContent: 'center', 
+                position: 'relative',
+                overflow: 'hidden', 
+                background: 'radial-gradient(circle, rgba(20,20,20,0.3) 0%, rgba(0,0,0,0.7) 100%)',
+                p: 2
+              }}>
+                <Box sx={{ 
+                  position: 'relative', 
+                  width: '100%', 
+                  height: '100%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}>
+                  {/* Previous image navigation button - Smaller size */}
+                  <IconButton 
+                    onClick={handlePrevImage}
+                    sx={{ 
+                      position: 'absolute', 
+                      left: 16, 
+                      display: 'flex',
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                      bgcolor: 'rgba(0,0,0,0.5)',
+                      color: 'white',
+                      transform: 'scale(1)',
+                      width: 40,
+                      height: 40,
+                      '&:hover': { 
+                        bgcolor: 'rgba(0,0,0,0.8)',
+                        transform: 'scale(1.1)',
+                        boxShadow: '0 0 15px rgba(0, 188, 212, 0.4)'
+                      },
+                      transition: 'all 0.2s ease',
+                      zIndex: 2
+                    }}
+                  >
+                    <ArrowBackIos sx={{ fontSize: 18, ml: 1 }} />
+                  </IconButton>
+                  
+                  {/* Main image with animation effect */}
+                  <Box
+                    key={galleryImageIndex} // This forces React to recreate the element when the image changes
+                    component="img"
+                    src={getImageUrl(displayImages[galleryImageIndex])}
+                    alt={`Studio Image ${galleryImageIndex + 1}`}
+                    onError={handleImageError}
+                    sx={{
+                      maxWidth: '100%',
+                      maxHeight: '100%',
+                      objectFit: 'contain',
+                      borderRadius: 2,
+                      boxShadow: '0 8px 24px rgba(0,0,0,0.5)',
+                      animation: 'fadeInImage 0.4s ease-in-out',
+                      '@keyframes fadeInImage': {
+                        '0%': {
+                          opacity: 0,
+                          transform: 'scale(0.96)'
+                        },
+                        '100%': {
+                          opacity: 1,
+                          transform: 'scale(1)'
+                        }
+                      }
+                    }}
+                  />
+                  
+                  {/* Next image navigation button - Smaller size */}
+                  <IconButton 
+                    onClick={handleNextImage}
+                    sx={{ 
+                      position: 'absolute', 
+                      right: 16,
+                      display: 'flex',
+                      justifyContent: 'center',
+                      alignItems: 'center', 
+                      bgcolor: 'rgba(0,0,0,0.5)',
+                      color: 'white',
+                      transform: 'scale(1)',
+                      width: 40,
+                      height: 40,
+                      '&:hover': { 
+                        bgcolor: 'rgba(0,0,0,0.8)',
+                        transform: 'scale(1.1)',
+                        boxShadow: '0 0 15px rgba(0, 188, 212, 0.4)'
+                      },
+                      transition: 'all 0.2s ease',
+                      zIndex: 2
+                    }}
+                  >
+                    <ArrowForwardIos sx={{ fontSize: 18 }} />
+                  </IconButton>
+                </Box>
+
+                {/* Image navigation buttons at bottom for mobile - Also smaller */}
+                <Box sx={{
+                  display: { xs: 'flex', md: 'none' },
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  gap: 6,
+                  mt: 2,
+                  width: '100%'
+                }}>
+                  <IconButton
+                    onClick={handlePrevImage}
+                    sx={{
+                      bgcolor: 'rgba(0,0,0,0.6)',
+                      color: 'white',
+                      width: 36,
+                      height: 36,
+                      display: 'flex',
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                      '&:hover': {
+                        bgcolor: 'rgba(0, 188, 212, 0.3)',
+                        boxShadow: '0 0 10px rgba(0, 188, 212, 0.3)'
+                      }
+                    }}
+                  >
+                    <ArrowBackIos sx={{ fontSize: 16, ml: 0.8 }} />
+                  </IconButton>
+                  
+                  <Typography variant="body2" sx={{ color: 'white' }}>
+                    {galleryImageIndex + 1} / {displayImages.length}
+                  </Typography>
+                  
+                  <IconButton
+                    onClick={handleNextImage}
+                    sx={{
+                      bgcolor: 'rgba(0,0,0,0.6)',
+                      color: 'white',
+                      width: 36,
+                      height: 36,
+                      display: 'flex',
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                      '&:hover': {
+                        bgcolor: 'rgba(0, 188, 212, 0.3)',
+                        boxShadow: '0 0 10px rgba(0, 188, 212, 0.3)'
+                      }
+                    }}
+                  >
+                    <ArrowForwardIos sx={{ fontSize: 16 }} />
+                  </IconButton>
+                </Box>
+                
+                {/* Image caption area */}
+                <Box sx={{
+                  mt: 2,
                   px: 2,
-                  py: 0.5,
-                  borderRadius: 1
+                  py: 1,
+                  borderRadius: 1,
+                  backdropFilter: 'blur(10px)',
+                  bgcolor: 'rgba(0,0,0,0.4)',
+                  border: '1px solid rgba(255,255,255,0.05)',
+                  maxWidth: '80%',
+                  alignSelf: 'center',
+                  display: { xs: 'none', sm: 'block' }
+                }}>
+                  <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.8)', textAlign: 'center' }}>
+                    {studio?.studioName} - Image {galleryImageIndex + 1}
+                  </Typography>
+                </Box>
+              </Box>
+              
+              {/* Right side - Thumbnails */}
+              <Box sx={{ 
+                flex: 1, 
+                background: 'linear-gradient(to right, rgba(18,18,18,0.8), rgba(0,0,0,0.95))',
+                borderLeft: '1px solid rgba(255,255,255,0.1)',
+                overflowY: 'auto',
+                display: { xs: 'none', md: 'block' }, // Hide on mobile
+                p: 1.5,
+                '&::-webkit-scrollbar': {
+                  width: '6px',
+                },
+                '&::-webkit-scrollbar-track': {
+                  bgcolor: 'transparent',
+                },
+                '&::-webkit-scrollbar-thumb': {
+                  bgcolor: 'rgba(255,255,255,0.2)',
+                  borderRadius: '3px',
+                },
+                '&::-webkit-scrollbar-thumb:hover': {
+                  bgcolor: 'rgba(255,255,255,0.3)',
+                }
+              }}>
+                <Typography 
+                  variant="subtitle2" 
+                  sx={{ 
+                    color: 'rgba(255,255,255,0.7)', 
+                    mb: 1.5, 
+                    pl: 1,
+                    borderBottom: '1px solid rgba(255,255,255,0.1)',
+                    pb: 0.5
+                  }}
+                >
+                  All Images ({displayImages.length})
+                </Typography>
+                <Grid container spacing={1.5}>
+                  {displayImages.map((img, index) => (
+                    <Grid item xs={6} key={index}>
+                      <Box
+                        onClick={() => setGalleryImageIndex(index)}
+                        sx={{
+                          width: '100%',
+                          height: 120,
+                          borderRadius: 1.5,
+                          overflow: 'hidden',
+                          border: galleryImageIndex === index ? '2px solid #00BCD4' : '2px solid transparent',
+                          opacity: galleryImageIndex === index ? 1 : 0.7,
+                          transition: 'all 0.2s ease',
+                          cursor: 'pointer',
+                          '&:hover': {
+                            opacity: 1,
+                            transform: galleryImageIndex === index ? 'scale(1)' : 'scale(1.03)',
+                            boxShadow: '0 4px 12px rgba(0,0,0,0.6)'
+                          },
+                          position: 'relative',
+                          boxShadow: galleryImageIndex === index ? 
+                            '0 0 0 2px rgba(0, 188, 212, 0.5), 0 4px 12px rgba(0,0,0,0.5)' : 
+                            '0 2px 8px rgba(0,0,0,0.5)'
+                        }}
+                      >
+                        <Box
+                          component="img"
+                          src={getImageUrl(img)}
+                          alt={`Thumbnail ${index + 1}`}
+                          onError={handleImageError}
+                          sx={{
+                            width: '100%',
+                            height: '100%',
+                            objectFit: 'cover',
+                          }}
+                        />
+                        {galleryImageIndex === index && (
+                          <Box sx={{
+                            position: 'absolute',
+                            bottom: 0,
+                            left: 0,
+                            right: 0,
+                            height: '4px',
+                            bgcolor: '#00BCD4',
+                            boxShadow: '0 0 8px rgba(0, 188, 212, 0.8)'
+                          }}/>
+                        )}
+                        <Box sx={{
+                          position: 'absolute',
+                          bottom: 4,
+                          right: 4,
+                          bgcolor: 'rgba(0,0,0,0.6)',
+                          color: 'white',
+                          width: 20,
+                          height: 20,
+                          borderRadius: '50%',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          fontSize: '0.7rem',
+                          fontWeight: 'bold',
+                          border: '1px solid rgba(255,255,255,0.2)'
+                        }}>
+                          {index + 1}
+                        </Box>
+                      </Box>
+                    </Grid>
+                  ))}
+                </Grid>
+              </Box>
+              
+              {/* Mobile thumbnails (horizontal scroll) */}
+              <Box 
+                sx={{ 
+                  display: { xs: 'flex', md: 'none' },
+                  overflowX: 'auto',
+                  gap: 1.5,
+                  p: 2,
+                  background: 'linear-gradient(to top, rgba(0,0,0,0.9), rgba(18,18,18,0.8))',
+                  borderTop: '1px solid rgba(255,255,255,0.1)',
+                  '&::-webkit-scrollbar': {
+                    height: '4px',
+                  },
+                  '&::-webkit-scrollbar-track': {
+                    bgcolor: 'transparent',
+                  },
+                  '&::-webkit-scrollbar-thumb': {
+                    bgcolor: 'rgba(255,255,255,0.2)',
+                    borderRadius: '3px',
+                  }
                 }}
               >
-                {galleryImageIndex + 1} / {displayImages.length}
-              </Typography>
+                {displayImages.map((img, index) => (
+                  <Box
+                    key={index}
+                    onClick={() => setGalleryImageIndex(index)}
+                    sx={{
+                      minWidth: 90,
+                      height: 70,
+                      borderRadius: 1.5,
+                      overflow: 'hidden',
+                      border: galleryImageIndex === index ? '2px solid #00BCD4' : '2px solid transparent',
+                      opacity: galleryImageIndex === index ? 1 : 0.7,
+                      transition: 'all 0.2s ease',
+                      cursor: 'pointer',
+                      position: 'relative',
+                      '&:hover': {
+                        opacity: 1,
+                        transform: 'scale(1.05)',
+                      },
+                      boxShadow: galleryImageIndex === index ? 
+                        '0 0 0 2px rgba(0, 188, 212, 0.5), 0 4px 12px rgba(0,0,0,0.5)' : 
+                        '0 2px 8px rgba(0,0,0,0.5)'
+                    }}
+                  >
+                    <Box
+                      component="img"
+                      src={getImageUrl(img)}
+                      alt={`Thumbnail ${index + 1}`}
+                      onError={handleImageError}
+                      sx={{
+                        width: '100%',
+                        height: '100%',
+                        objectFit: 'cover'
+                      }}
+                    />
+                    <Box sx={{
+                      position: 'absolute',
+                      bottom: 4,
+                      right: 4,
+                      bgcolor: galleryImageIndex === index ? 'rgba(0, 188, 212, 0.9)' : 'rgba(0,0,0,0.6)',
+                      color: 'white',
+                      width: 18,
+                      height: 18,
+                      borderRadius: '50%',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: '0.65rem',
+                      fontWeight: 'bold',
+                      border: '1px solid rgba(255,255,255,0.2)'
+                    }}>
+                      {index + 1}
+                    </Box>
+                  </Box>
+                ))}
+              </Box>
             </Box>
           </DialogContent>
         </Dialog>
