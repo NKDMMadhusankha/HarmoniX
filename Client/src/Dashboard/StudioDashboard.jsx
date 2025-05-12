@@ -194,6 +194,40 @@ const StudioProfileDashboard = () => {
   const [newService, setNewService] = useState('');
   const [newFeature, setNewFeature] = useState('');
 
+  const [category, setCategory] = useState('');
+  const [items, setItems] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
+
+  const handleAddGear = async () => {
+    try {
+      const token = localStorage.getItem('authToken'); 
+      console.log('handleAddGear - Retrieved token:', token); 
+      if (!token) {
+        setErrorMessage('Authentication token not found. Please log in again.');
+        console.error('handleAddGear - authToken not found in localStorage'); 
+        return;
+      }
+      const response = await axios.post(
+        'http://localhost:5000/api/studio/gear',
+        { category, items: items.split(',').map(item => item.trim()) },
+        { headers: { 'x-auth-token': token } } // Corrected header to x-auth-token
+      );
+      if (response.data.success) {
+        setSuccessMessage('Studio gear added successfully!');
+        setCategory('');
+        setItems('');
+        // Optionally, re-fetch studio data to show the new gear
+        // fetchStudioData(); 
+      } else {
+        setErrorMessage(response.data.message || 'Failed to add studio gear.');
+      }
+    } catch (error) {
+      console.error('Error adding studio gear:', error.response ? error.response.data : error.message);
+      setErrorMessage(error.response?.data?.message || 'An error occurred while adding studio gear.');
+    }
+  };
+
   useEffect(() => {
     const fetchStudioData = async () => {
       try {
@@ -450,18 +484,43 @@ const StudioProfileDashboard = () => {
   const removeImage = async (index) => {
     try {
       const url = studioImages[index];
-      // Properly extract S3 key from URL
-      const urlObj = new URL(url);
-      const key = decodeURIComponent(urlObj.pathname.substring(1)); // Remove leading slash
+      if (!url) {
+        setSnackbarMessage('Image not found.');
+        setSnackbarSeverity('error');
+        setSnackbarOpen(true);
+        return;
+      }
+
+      // Extract the S3 key by directly manipulating the string
+      let key = url.substring(url.indexOf('studios/'));
+      if (key.startsWith('studios/') === false) {
+          console.error('Invalid URL format: Missing "studios/" prefix');
+          setSnackbarMessage('Invalid URL format.');
+          setSnackbarSeverity('error');
+          setSnackbarOpen(true);
+          return;
+      }
 
       const token = localStorage.getItem('authToken');
-      const response = await fetch(`http://localhost:5000/api/studio/images/${encodeURIComponent(key)}`, {
+      if (!token) {
+        setSnackbarMessage('Authentication required.');
+        setSnackbarSeverity('error');
+        setSnackbarOpen(true);
+        return;
+      }
+
+      const encodedKey = encodeURIComponent(key);
+      const response = await fetch(`http://localhost:5000/api/studio/images/${encodedKey}`, {
         method: 'DELETE',
         headers: { 'x-auth-token': token }
       });
 
       if (response.ok) {
-        setStudioImages((prevImages) => prevImages.filter((_, i) => i !== index));
+        setStudioImages((prevImages) => {
+          const newImages = [...prevImages];
+          newImages.splice(index, 1); // Remove the image at the specified index
+          return newImages;
+        });
         setSnackbarMessage('Image removed successfully!');
         setSnackbarSeverity('success');
       } else {
@@ -1507,6 +1566,29 @@ const StudioProfileDashboard = () => {
               </Button>
             </Box>
           )}
+
+          {/* Add Studio Gear Form */}
+          <Paper sx={{ p: 3, mb: 4, bgcolor: 'background.paper' }}>
+            <Typography variant="h6" sx={{ color: 'text.primary', mb: 2 }}>Add New Studio Gear</Typography>
+            <TextField
+              label="Category"
+              fullWidth
+              value={category}
+              onChange={(e) => setCategory(e.target.value)}
+              sx={{ mb: 2 }}
+            />
+            <TextField
+              label="Items (comma-separated)"
+              fullWidth
+              value={items}
+              onChange={(e) => setItems(e.target.value)}
+              sx={{ mb: 2 }}
+            />
+            <Button variant="contained" color="primary" onClick={handleAddGear}>Add Gear</Button>
+
+            {successMessage && <Typography sx={{ color: 'green', mt: 2 }}>{successMessage}</Typography>}
+            {errorMessage && <Typography sx={{ color: 'red', mt: 2 }}>{errorMessage}</Typography>}
+          </Paper>
         </Container>
         
         {/* Full Screen Gallery Modal - Already has dark theme */}

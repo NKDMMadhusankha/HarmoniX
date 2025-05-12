@@ -91,6 +91,7 @@ const HarmoniXNavbar = () => {
   const [featuresAnchorEl, setFeaturesAnchorEl] = useState(null);
   const [mobileFeatureOpen, setMobileFeatureOpen] = useState(false);
   const [profileMenuAnchorEl, setProfileMenuAnchorEl] = useState(null);
+  const [profileImage, setProfileImage] = useState(null);
   
   // Ref for the features menu container
   const featuresMenuRef = useRef(null);
@@ -172,6 +173,13 @@ const HarmoniXNavbar = () => {
     toggleMobileMenu();
   };
 
+  const handleLogout = () => {
+    // Clear user authentication data (e.g., token) from localStorage
+    localStorage.removeItem('authToken');
+    // Redirect to the home page or login page
+    navigate('/login');
+  };
+
   // Add scrollbar width calculation
   useEffect(() => {
     // Calculate scrollbar width and set as CSS variable
@@ -196,6 +204,31 @@ const HarmoniXNavbar = () => {
     // Recalculate on window resize
     window.addEventListener('resize', calculateScrollbarWidth);
     return () => window.removeEventListener('resize', calculateScrollbarWidth);
+  }, []);
+
+  useEffect(() => {
+    const fetchProfileImage = async () => {
+      const token = localStorage.getItem('authToken');
+      if (!token) return;
+
+      try {
+        const response = await fetch('http://localhost:5000/api/profile/data', {
+          method: 'GET',
+          headers: { 'Authorization': `Bearer ${token}` },
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          setProfileImage(data.profileImageUrl);
+        } else {
+          console.error('Failed to fetch profile image');
+        }
+      } catch (error) {
+        console.error('Error fetching profile image:', error);
+      }
+    };
+
+    fetchProfileImage();
   }, []);
 
   return (
@@ -585,11 +618,22 @@ const HarmoniXNavbar = () => {
 
                 {/* Profile dropdown - right aligned */}
                 <Box sx={{ flex: 1, display: 'flex', justifyContent: 'flex-end' }}>
-                  <IconButton
-                    onClick={handleProfileMenuOpen}
-                    sx={{ color: 'white' }}
-                  >
-                    <AccountCircleIcon sx={{ fontSize: '2.3rem', color: 'white' }} />
+                  <IconButton onClick={handleProfileMenuOpen} sx={{ color: 'white' }}>
+                    {profileImage ? (
+                      <Box
+                        component="img"
+                        src={profileImage}
+                        alt="Profile"
+                        sx={{
+                          width: 40,
+                          height: 40,
+                          borderRadius: '50%',
+                          objectFit: 'cover',
+                        }}
+                      />
+                    ) : (
+                      <AccountCircleIcon sx={{ fontSize: '2.3rem', color: 'white' }} />
+                    )}
                   </IconButton>
                   <Menu
                     anchorEl={profileMenuAnchorEl}
@@ -625,11 +669,7 @@ const HarmoniXNavbar = () => {
                       Profile
                     </MenuItem>
                     <MenuItem 
-                      onClick={() => {
-                        // Add your logout logic here
-                        console.log('User logged out');
-                        handleProfileMenuClose();
-                      }} 
+                      onClick={handleLogout} 
                       sx={{ 
                         color: 'white', 
                         backgroundColor: '#f44336', // Red background color
@@ -657,7 +697,7 @@ const HarmoniXNavbar = () => {
         }} />
         
         {/* Add this to fix the scrollbar issue */}
-        <style jsx global>{`
+        <style>{`
           body {
             overflow-x: hidden !important;
           }

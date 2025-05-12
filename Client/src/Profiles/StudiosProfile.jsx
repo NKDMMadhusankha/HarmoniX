@@ -174,12 +174,17 @@ const StudioProfile = () => {
     const fetchStudioData = async () => {
       try {
         setLoading(true);
-        const response = await axios.get(`http://localhost:5000/api/studio/${id}`);
+        const response = await axios.get(`http://localhost:5000/api/studio/${id}`, {
+          headers: {
+            'Cache-Control': 'no-cache',
+          },
+        });
+
         if (response.data.success) {
           setStudio(response.data.studio);
           setStudioImages(response.data.studio.studioImages || []);
           setAbout(response.data.studio.about || '');
-          setStudioDescription(response.data.studio.description || '');
+          setStudioDescription(response.data.studio.studioDescription || '');
           setServices(response.data.studio.services || []);
           setFeatures(response.data.studio.features || []);
           setGear(response.data.studio.studioGear || []);
@@ -187,6 +192,7 @@ const StudioProfile = () => {
           setError('Failed to fetch studio data.');
         }
       } catch (err) {
+        console.error('Error fetching studio data:', err);
         setError('An error occurred while fetching studio data.');
       } finally {
         setLoading(false);
@@ -246,7 +252,7 @@ const StudioProfile = () => {
   };
 
   // If no images are available, show a placeholder
-  const defaultImage = 'https://via.placeholder.com/400x300?text=No+Image+Available';
+  const defaultImage = '/assets/default-placeholder.png'; // Updated placeholder image path
   const displayImages = studioImages.length > 0 ? studioImages : [defaultImage];
   
   if (loading) {
@@ -265,41 +271,16 @@ const StudioProfile = () => {
           {/* Studio Title & Actions */}
           <Box sx={{ pt: 4, pb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <Typography variant="h4" component="h1" sx={{ color: 'text.primary' }}>
-              {studio?.name}
+              {studio?.studioName || 'Studio Name Not Available'}
             </Typography>
-            <Box>
-              {/* <IconButton aria-label="share" sx={{ color: 'text.secondary' }}>
-                <Share />
-              </IconButton>
-              <IconButton aria-label="save" sx={{ color: 'text.secondary' }}>
-                <Bookmark />
-              </IconButton> */}
-            </Box>
           </Box>
 
           {/* Location - Updated to be clickable */}
           <Box sx={{ display: 'flex', alignItems: 'start', mb: 3 }}>
             <LocationOn sx={{ color: 'error.main', mr: 1, mt: 0.5 }} />
             <Box>
-              <Link 
-                component="button"
-                variant="subtitle1" 
-                onClick={openInGoogleMaps}
-                sx={{ 
-                  color: 'primary.main',
-                  textDecoration: 'none',
-                  display: 'block',
-                  textAlign: 'left',
-                  '&:hover': {
-                    textDecoration: 'underline',
-                    color: 'primary.light'
-                  }
-                }}
-              >
-                149 Mill Road, Katubedda, Moratuwa
-              </Link>
-              <Typography variant="body2" sx={{ color: 'text.secondary', mt: 0.5 }}>
-                Sri Lanka
+              <Typography variant="subtitle1" sx={{ color: 'primary.main' }}>
+                {studio?.address || 'Address Not Available'}
               </Typography>
             </Box>
           </Box>
@@ -460,36 +441,68 @@ const StudioProfile = () => {
                 <Typography variant="body1" sx={{ mb: 2, color: 'text.secondary' }}>
                   {studio?.description}
                 </Typography>
+
+                {/* About the Studio Section */}
+                <Box sx={{ mb: 3 }}>
+                  <Typography variant="h6" sx={{ color: 'text.primary' }}>About the Studio</Typography>
+                  <Typography variant="body1" sx={{ color: 'text.secondary' }}>
+                    {studioDescription || 'No description available.'}
+                  </Typography>
+                </Box>
                 
-                <Typography variant="h6" sx={{ mt: 3, mb: 1, color: 'text.primary' }}>
-                  Services
-                </Typography>
-                <Typography variant="body1" sx={{ mb: 1, color: 'text.secondary' }}>
-                  <strong>Recording:</strong> Our studio is perfectly equipped for vocal recording and composition.
-                </Typography>
-                <Typography variant="body1" sx={{ mb: 1, color: 'text.secondary' }}>
-                  <strong>Mixing:</strong> Use our facilities to mix your tracks with professional quality, 
-                  with the help of our experienced sound engineers.
-                </Typography>
-                <Typography variant="body1" sx={{ mb: 3, color: 'text.secondary' }}>
-                  <strong>Mastering:</strong> Final polish for your tracks using our high-end equipment.
-                </Typography>
-                
-                <Typography variant="h6" sx={{ mt: 3, mb: 2, color: 'text.primary' }}>
-                  Studio Equipment
-                </Typography>
-                
-                {studioGear.map((category, index) => (
-                  <Box key={index} sx={{ mb: 2 }}>
-                    <Typography variant="subtitle1" sx={{ fontWeight: 'bold', color: 'primary.main' }}>
-                      {category.category}:
+                {/* Services Section */}
+                <Box sx={{ mb: 3 }}>
+                  <Typography variant="h6" sx={{ color: 'text.primary' }}>Services</Typography>
+                  {services.length > 0 ? (
+                    <ul>
+                      {services.map((service, index) => (
+                        <li key={index} style={{ color: 'text.secondary' }}>{service}</li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <Typography variant="body1" sx={{ color: 'text.secondary' }}>
+                      No services available.
                     </Typography>
-                    <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                      {category.items.join(' • ')}
+                  )}
+                </Box>
+
+                {/* Studio Equipment Section */}
+                <Box sx={{ mb: 3 }}>
+                  <Typography variant="h6" sx={{ color: 'text.primary' }}>Studio Equipment</Typography>
+                  {gear.length > 0 ? (
+                    gear.map((g, index) => (
+                      <Box key={index} sx={{ mb: 2 }}>
+                        <Typography variant="subtitle1" sx={{ fontWeight: 'bold', color: 'primary.main' }}>
+                          {g.category}:
+                        </Typography>
+                        <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                          {g.items.join(' • ')}
+                        </Typography>
+                      </Box>
+                    ))
+                  ) : (
+                    <Typography variant="body1" sx={{ color: 'text.secondary' }}>
+                      No studio equipment available.
                     </Typography>
-                  </Box>
-                ))}
-                
+                  )}
+                </Box>
+
+                {/* Studio Features Section */}
+                <Box sx={{ mb: 3 }}>
+                  <Typography variant="h6" sx={{ color: 'text.primary' }}>Studio Features</Typography>
+                  {features.length > 0 ? (
+                    <ul>
+                      {features.map((feature, index) => (
+                        <li key={index} style={{ color: 'text.secondary' }}>{feature}</li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <Typography variant="body1" sx={{ color: 'text.secondary' }}>
+                      No features available.
+                    </Typography>
+                  )}
+                </Box>
+
                 <Typography variant="h6" sx={{ mt: 3, mb: 1, color: 'text.primary' }}>
                   Recording Booths
                 </Typography>

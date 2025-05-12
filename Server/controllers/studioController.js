@@ -232,6 +232,7 @@ exports.getStudioProfile = async (req, res) => {
 exports.deleteStudioImage = async (req, res) => {
   try {
     const { key } = req.params;
+
     
     // Configure S3 client with proper permissions
     const s3 = new S3Client({
@@ -275,5 +276,29 @@ exports.getStudioImagesById = async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ success: false, message: 'Server error' });
+  }
+};
+
+exports.addStudioGear = async (req, res) => {
+  try {
+    const { category, items } = req.body;
+
+    if (!category || !items || !Array.isArray(items)) {
+      return res.status(400).json({ success: false, message: 'Invalid data. Category and items are required.' });
+    }
+
+    const studio = await Studio.findById(req.user.id);
+    if (!studio) {
+      return res.status(404).json({ success: false, message: 'Studio not found.' });
+    }
+
+    // Add new gear to the studioGear array
+    studio.studioGear.push({ category, items });
+    await studio.save();
+
+    res.json({ success: true, message: 'Studio gear added successfully.', studioGear: studio.studioGear });
+  } catch (error) {
+    console.error('Error adding studio gear:', error);
+    res.status(500).json({ success: false, message: 'Server error while adding studio gear.' });
   }
 };

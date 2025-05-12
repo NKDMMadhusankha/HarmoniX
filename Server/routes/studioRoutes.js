@@ -86,6 +86,9 @@ router.put('/gear', authMiddleware(['studio']), async (req, res) => {
   }
 });
 
+// Add new studio gear
+router.post('/gear', authMiddleware(['studio']), studioController.addStudioGear);
+
 // Add this route for image uploads
 router.post(
   '/upload',

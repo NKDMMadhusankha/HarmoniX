@@ -394,7 +394,7 @@ const AboutUs = () => {
       </Container>
       
       {/* Global styles for animations */}
-      <style jsx global>{`
+      <style>{`
         @keyframes blink {
           0% { opacity: 0; }
           50% { opacity: 1; }
