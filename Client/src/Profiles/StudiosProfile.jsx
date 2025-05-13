@@ -154,16 +154,16 @@ const timeSlots = [
 ];
 
 // Studio gear list
-const studioGear = [
-  { category: 'Interface', items: ['UAD Apollo Twin X', 'SSL 2+'] },
-  { category: 'Microphones', items: ['Neumann TLM 103', 'Shure SM7B', 'AKG C414'] },
-  { category: 'Monitors', items: ['Yamaha HS8', 'Avantone Mixcubes'] },
-  { category: 'Preamps', items: ['Neve 1073 SPX', 'Warm Audio WA8000'] },
-  { category: 'Compressors', items: ['Tube-Tech CL1B', 'Wesaudio Dione', 'Neve 33609'] },
-  { category: 'EQ', items: ['Wesaudio Prometheus', 'Pultec EQP-1A'] },
-  { category: 'Reverb', items: ['Lexicon PCM96', 'Bricasti M7'] },
-  { category: 'Monitoring', items: ['Dangerous Music Monitor ST', 'Barefoot Footprint 01'] },
-];
+// const studioGear = [
+//   { category: 'Interface', items: ['UAD Apollo Twin X', 'SSL 2+'] },
+//   { category: 'Microphones', items: ['Neumann TLM 103', 'Shure SM7B', 'AKG C414'] },
+//   { category: 'Monitors', items: ['Yamaha HS8', 'Avantone Mixcubes'] },
+//   { category: 'Preamps', items: ['Neve 1073 SPX', 'Warm Audio WA8000'] },
+//   { category: 'Compressors', items: ['Tube-Tech CL1B', 'Wesaudio Dione', 'Neve 33609'] },
+//   { category: 'EQ', items: ['Wesaudio Prometheus', 'Pultec EQP-1A'] },
+//   { category: 'Reverb', items: ['Lexicon PCM96', 'Bricasti M7'] },
+//   { category: 'Monitoring', items: ['Dangerous Music Monitor ST', 'Barefoot Footprint 01'] },
+// ];
 
 const getImageUrl = (key) => {
   if (!key) return '/assets/default-placeholder.png';
@@ -193,6 +193,7 @@ const StudioProfile = () => {
   const { id } = useParams();
   const [availableTimeSlots, setAvailableTimeSlots] = useState([]);
   const [selectedTimeRange, setSelectedTimeRange] = useState(null); // Add state for time range selection
+  const [availability, setAvailability] = useState([]);
 
   // Add an onError handler to replace broken images with a default placeholder
   const handleImageError = (event) => {
@@ -240,7 +241,20 @@ const StudioProfile = () => {
       }
     };
 
+    const fetchAvailability = async () => {
+      try {
+        const response = await axios.get(`http://localhost:5000/api/studio/${id}/availability`);
+        if (response.data.success) {
+          console.log('Fetched availability data:', response.data.availability);
+          setAvailability(response.data.availability || []);
+        }
+      } catch (error) {
+        console.error('Error fetching availability:', error);
+      }
+    };
+
     fetchStudioData();
+    fetchAvailability();
   }, [id]);
 
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
@@ -295,13 +309,17 @@ const StudioProfile = () => {
   const displayImages = studioImages; // Use only fetched images
 
   const handleDateChange = (newDate) => {
+    const dateStr = newDate.toISOString().split('T')[0];
+    console.log('Selected date:', dateStr);
+
+    // Debug: Log the availability for the selected date
+    const dayAvailability = availability.find(a => a.date === dateStr);
+    console.log('Availability for selected date:', dayAvailability);
+
     setSelectedDate(newDate);
     setSelectedStartTime('');
     setSelectedEndTime('');
-    setSelectedTimeRange(null); // Reset selected time range
-    
-    // In a real implementation, you would fetch available slots from the database
-    // based on the selected date. For now, we'll use all timeSlots as available.
+    setSelectedTimeRange(null);
     setAvailableTimeSlots(timeSlots);
   };
 
@@ -323,11 +341,43 @@ const StudioProfile = () => {
   };
 
   // Function to check if a time slot is available (for visual indicators)
-  // In a real app, this would check against bookings in the database
   const isTimeSlotAvailable = (slotValue) => {
-    // Example: Make some times unavailable for demonstration
-    const unavailableTimes = ['13:00', '14:00', '17:00', '18:00'];
-    return !unavailableTimes.includes(slotValue);
+    if (!availability || availability.length === 0) return true;
+
+    const dateStr = selectedDate.toISOString().split('T')[0];
+    const dayAvailability = availability.find(a => a.date === dateStr);
+
+    let unavailableArr = [];
+    if (dayAvailability && Array.isArray(dayAvailability.unavailable)) {
+      unavailableArr = dayAvailability.unavailable;
+    } else if (dayAvailability && dayAvailability.unavailable && typeof dayAvailability.unavailable === 'object') {
+      unavailableArr = Object.values(dayAvailability.unavailable);
+    }
+
+    // Always format slotValue to HH:MM for comparison
+    let formattedSlot = slotValue;
+    if (!slotValue.includes(':')) {
+      // Handles both '0900' and '9:00' etc.
+      if (slotValue.length === 4) {
+        formattedSlot = `${slotValue.slice(0, 2)}:${slotValue.slice(2)}`;
+      } else if (slotValue.length === 3) {
+        formattedSlot = `0${slotValue[0]}:${slotValue.slice(1)}`;
+      }
+    }
+
+    // Compare as string
+    return !unavailableArr.some(unav => {
+      // Defensive: allow unavailable to be '09:00', '9:00', '0900', etc.
+      if (!unav) return false;
+      if (unav === formattedSlot) return true;
+      // Try to normalize both sides to HH:MM
+      let normUnav = unav;
+      if (!unav.includes(':')) {
+        if (unav.length === 4) normUnav = `${unav.slice(0, 2)}:${unav.slice(2)}`;
+        else if (unav.length === 3) normUnav = `0${unav[0]}:${unav.slice(1)}`;
+      }
+      return normUnav === formattedSlot;
+    });
   };
 
   // Function to check if a time slot is the selected start time
@@ -843,68 +893,77 @@ const StudioProfile = () => {
                 <Box sx={{ mb: 3 }}>
                   {/* Time slots display */}
                   <Grid container spacing={1}>
-                    {availableTimeSlots.map((slot) => (
-                      <Grid item xs={4} sm={3} key={slot.value}>
-                        <Button
-                          variant={isSelectedStart(slot.value) ? "contained" : "outlined"}
-                          fullWidth
-                          disabled={!isTimeSlotAvailable(slot.value)}
-                          onClick={() => handleTimeSlotSelect(slot)}
-                          sx={{
-                            height: '32px', // Fixed smaller height
-                            minHeight: 'unset', // Remove default min-height
-                            py: 0, // Remove vertical padding
-                            px: 1, // Keep some horizontal padding
-                            fontSize: '0.75rem', // Smaller font size
-                            lineHeight: 1, // Tighter line height
-                            borderColor: isTimeSlotAvailable(slot.value) 
-                              ? '#00BCD4' // Match theme primary color for available slots
-                              : '#f44336', // Red border for booked slots
-                            backgroundColor: isSelectedStart(slot.value) 
-                              ? '#00BCD4' // Match theme primary color for selected
-                              : isInSelectedRange(slot.value) 
-                                ? 'rgba(0, 188, 212, 0.15)' // Light primary color for range
-                                : 'transparent',
-                            color: isSelectedStart(slot.value) 
-                              ? 'white' 
-                              : !isTimeSlotAvailable(slot.value) 
-                                ? '#f44336' // Red text for unavailable
-                                : '#00BCD4', // Match theme primary color for available
-                            '&:hover': {
-                              backgroundColor: isTimeSlotAvailable(slot.value) && !isSelectedStart(slot.value) 
-                                ? 'rgba(0, 188, 212, 0.08)' // Match theme primary color for hover effect
-                                : undefined,
-                            },
-                            position: 'relative'
-                          }}
-                        >
-                          {slot.label}
-                          {!isTimeSlotAvailable(slot.value) && (
-                            <Box sx={{
-                              position: 'absolute',
-                              top: 0,
-                              left: 0,
-                              right: 0,
-                              bottom: 0,
-                              backgroundColor: 'rgba(244, 67, 54, 0.25)', // Darker red overlay for better visibility
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              borderRadius: 'inherit',
-                            }}>
-                              <Typography variant="caption" sx={{ 
-                                color: '#ffffff', // White text for better contrast
-                                fontSize: '0.7rem', // Slightly larger font
-                                fontWeight: 'bold', // Make it bold
-                                textShadow: '0px 0px 2px rgba(0,0,0,0.7)', // Add text shadow for legibility
+                    {availableTimeSlots.map((slot) => {
+                      const isAvailable = isTimeSlotAvailable(slot.value);
+                      const isStart = isSelectedStart(slot.value);
+                      const inRange = isInSelectedRange(slot.value);
+                    
+                      return (
+                        <Grid item xs={4} sm={3} key={slot.value}>
+                          <Button
+                            variant={isStart ? "contained" : "outlined"}
+                            fullWidth
+                            disabled={!isAvailable}
+                            onClick={() => isAvailable && handleTimeSlotSelect(slot)}
+                            sx={{
+                              height: '32px',
+                              minHeight: 'unset',
+                              py: 0,
+                              px: 1,
+                              fontSize: '0.75rem',
+                              lineHeight: 1,
+                              borderColor: isAvailable 
+                                ? (isStart || inRange) ? '#00BCD4' : 'rgba(255, 255, 255, 0.23)'
+                                : '#f44336',
+                              backgroundColor: isStart 
+                                ? '#00BCD4'
+                                : inRange
+                                  ? 'rgba(0, 188, 212, 0.15)'
+                                  : 'transparent',
+                              color: isAvailable
+                                ? (isStart ? 'white' : (inRange ? '#00BCD4' : 'text.primary'))
+                                : '#f44336',
+                              textDecoration: !isAvailable ? 'line-through' : 'none',
+                              position: 'relative',
+                              overflow: 'hidden',
+                              '&:hover': {
+                                backgroundColor: isAvailable && !isStart 
+                                  ? 'rgba(0, 188, 212, 0.08)'
+                                  : undefined,
+                              },
+                            }}
+                          >
+                            {slot.label}
+                            {!isAvailable && (
+                              <Box sx={{
+                                position: 'absolute',
+                                top: 0,
+                                left: 0,
+                                right: 0,
+                                bottom: 0,
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                backgroundColor: 'rgba(244, 67, 54, 0.25)',
+                                pointerEvents: 'none'
                               }}>
-                                Booked
-                              </Typography>
-                            </Box>
-                          )}
-                        </Button>
-                      </Grid>
-                    ))}
+                                <Typography 
+                                  variant="caption" 
+                                  sx={{
+                                    color: '#f44336',
+                                    fontWeight: 'bold',
+                                    fontSize: '0.7rem',
+                                    textShadow: '0 0 2px rgba(0,0,0,0.7)'
+                                  }}
+                                >
+                                  Booked
+                                </Typography>
+                              </Box>
+                            )}
+                          </Button>
+                        </Grid>
+                      );
+                    })}
                   </Grid>
                   
                   {/* Time range selection section - also update the end time buttons */}
