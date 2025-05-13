@@ -236,38 +236,46 @@ const StudioProfileDashboard = () => {
   const fetchAvailability = async () => {
     try {
       const token = localStorage.getItem('authToken');
-      const res = await fetch('http://localhost:5000/api/studio/availability', {
+      const response = await fetch('http://localhost:5000/api/studio/availability', {
         headers: { 'x-auth-token': token }
       });
-      if (res.ok) {
-        const data = await res.json();
-        setAvailability(data.availability || []);
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
-    } catch (e) {
-      // handle error
+      
+      const data = await response.json();
+      console.log('Fetched availability data:', data); // Add this line
+      
+      // Ensure dates are in the correct format
+      const formattedAvailability = data.availability.map(item => ({
+        date: item.date,
+        slots: item.slots || [],
+        unavailable: item.unavailable || []
+      }));
+      
+      setAvailability(formattedAvailability || []);
+    } catch (error) {
+      console.error('Error fetching availability:', error);
+      setSnackbarMessage('Error loading availability data');
+      setSnackbarSeverity('error');
+      setSnackbarOpen(true);
     }
   };
 
   // Save availability to backend (implement API as needed)
   const saveAvailability = async () => {
-    console.log('saveAvailability function called'); // <-- ADD THIS
     setIsSavingAvailability(true);
     try {
       const token = localStorage.getItem('authToken');
+      // Ensure sending proper date format (YYYY-MM-DD)
+      const availabilityToSave = availability.map(entry => ({
+        date: entry.date,
+        slots: timeSlots.map(slot => slot.value).filter(slot => !entry.unavailable?.includes(slot)),
+        unavailable: entry.unavailable || []
+      }));
 
-      console.log('Availability state BEFORE map:', availability); // <-- ADD THIS
-
-      // Ensure unavailable slots are included in the availability array
-      const updatedAvailability = availability.map((entry) => {
-        const dateStr = entry.date;
-        const unavailableSlots = entry.unavailable || [];
-        return {
-          ...entry,
-          unavailable: unavailableSlots,
-        };
-      });
-
-      console.log('Data being sent to backend:', updatedAvailability); // Add this line
+      console.log('Sending availability data:', availabilityToSave);
 
       const response = await fetch('http://localhost:5000/api/studio/availability', {
         method: 'PUT',
@@ -275,18 +283,66 @@ const StudioProfileDashboard = () => {
           'Content-Type': 'application/json',
           'x-auth-token': token,
         },
-        body: JSON.stringify({ availability: updatedAvailability }),
+        body: JSON.stringify({ availability: availabilityToSave }),
       });
+
+      const responseData = await response.json(); // Always read the response
+      console.log('Server response:', responseData);
 
       if (response.ok) {
         setSnackbarMessage('Availability updated successfully!');
         setSnackbarSeverity('success');
+        // Refresh the data from server
+        fetchAvailability();
       } else {
-        const errorData = await response.json();
-        setSnackbarMessage(errorData.message || 'Failed to update availability');
+        setSnackbarMessage(responseData.message || 'Failed to update availability');
         setSnackbarSeverity('error');
       }
-    } catch (e) {
+    } catch (error) {
+      console.error('Error saving availability:', error);
+      setSnackbarMessage('An error occurred while updating availability');
+      setSnackbarSeverity('error');
+    } finally {
+      setSnackbarOpen(true);
+      setIsSavingAvailability(false);
+    }
+  };
+
+  // Save availability with provided data (to avoid stale closure)
+  const saveAvailabilityWithData = async (data) => {
+    setIsSavingAvailability(true);
+    try {
+      const token = localStorage.getItem('authToken');
+      const availabilityToSave = data.map(entry => ({
+        date: entry.date,
+        slots: timeSlots.map(slot => slot.value).filter(slot => !entry.unavailable?.includes(slot)),
+        unavailable: entry.unavailable || []
+      }));
+
+      console.log('Sending availability data:', availabilityToSave);
+
+      const response = await fetch('http://localhost:5000/api/studio/availability', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-auth-token': token,
+        },
+        body: JSON.stringify({ availability: availabilityToSave }),
+      });
+
+      const responseData = await response.json();
+      console.log('Server response:', responseData);
+
+      if (response.ok) {
+        setSnackbarMessage('Availability updated successfully!');
+        setSnackbarSeverity('success');
+        fetchAvailability();
+      } else {
+        setSnackbarMessage(responseData.message || 'Failed to update availability');
+        setSnackbarSeverity('error');
+      }
+    } catch (error) {
+      console.error('Error saving availability:', error);
       setSnackbarMessage('An error occurred while updating availability');
       setSnackbarSeverity('error');
     } finally {
@@ -312,28 +368,30 @@ const StudioProfileDashboard = () => {
   }, [selectedAvailDate, availability]);
   // Save slots for the selected date
   const handleSaveSlotsForDate = () => {
-    console.log('handleSaveSlotsForDate function called');
     const dateStr = selectedAvailDate.toISOString().split('T')[0];
     const availableSlots = timeSlots
-      .map((slot) => slot.value)
-      .filter((slot) => !selectedUnavailableSlots.includes(slot));
+      .map(slot => slot.value)
+      .filter(slot => !selectedUnavailableSlots.includes(slot));
 
-    setAvailability((prev) => {
-      const others = prev.filter((a) => a.date !== dateStr);
-      const newState = [
+    setAvailability(prev => {
+      // Remove any existing entry for this date
+      const others = prev.filter(a => a.date !== dateStr);
+      // Add the new entry
+      const newAvailability = [
         ...others,
-        { date: dateStr, slots: availableSlots, unavailable: selectedUnavailableSlots }
+        {
+          date: dateStr,
+          slots: availableSlots,
+          unavailable: [...selectedUnavailableSlots] // Make sure to use a new array
+        }
       ];
-      console.log('New availability state after handleSaveSlotsForDate:', newState);
-      return newState;
+      // Immediately persist to backend with the latest state
+      setTimeout(() => {
+        saveAvailabilityWithData(newAvailability);
+      }, 0);
+      return newAvailability;
     });
-    
-    // Call saveAvailability directly after updating the state to ensure it's saved to database
-    setTimeout(() => {
-      console.log('Auto-calling saveAvailability after state update');
-      saveAvailability();
-    }, 100);
-    
+
     setSnackbarMessage('Slots updated for selected date');
     setSnackbarSeverity('info');
     setSnackbarOpen(true);
@@ -1928,12 +1986,15 @@ const StudioProfileDashboard = () => {
                 <Typography variant="h6" sx={{ mb: 3, color: 'text.primary' }}>
                   Manage Availability
                 </Typography>
+                
                 <Grid container spacing={3}>
                   <Grid item xs={12} md={6}>
                     <LocalizationProvider dateAdapter={AdapterDateFns}>
                       <DateCalendar
                         value={selectedAvailDate}
-                        onChange={setSelectedAvailDate}
+                        onChange={(newDate) => {
+                          setSelectedAvailDate(newDate);
+                        }}
                         disablePast
                         sx={{
                           color: 'text.primary',
@@ -1944,10 +2005,12 @@ const StudioProfileDashboard = () => {
                       />
                     </LocalizationProvider>
                   </Grid>
+                  
                   <Grid item xs={12} md={6}>
                     <Typography variant="subtitle1" sx={{ mb: 1, color: 'text.primary' }}>
-                      Select Not Available Time Slots
+                      Select Not Available Time Slots for {selectedAvailDate.toLocaleDateString()}
                     </Typography>
+                    
                     <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mb: 2 }}>
                       {timeSlots.map((slot) => {
                         const isUnavailable = selectedUnavailableSlots.includes(slot.value);
@@ -1970,29 +2033,51 @@ const StudioProfileDashboard = () => {
                         );
                       })}
                     </Box>
+                    
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      onClick={handleSaveSlotsForDate}
+                      disabled={isSavingAvailability}
+                      sx={{ mt: 2 }}
+                    >
+                      {isSavingAvailability ? 'Saving...' : 'Save Changes'}
+                    </Button>
                   </Grid>
                 </Grid>
+                
                 <Divider sx={{ my: 3 }} />
                 <Typography variant="subtitle2" sx={{ color: 'text.secondary', mb: 1 }}>
                   Upcoming Availability
                 </Typography>
+                
                 <Box sx={{ maxHeight: 200, overflowY: 'auto' }}>
-                  {availability
-                    .sort((a, b) => a.date.localeCompare(b.date))
-                    .slice(0, 10)
-                    .map((a) => (
-                      <Box key={a.date} sx={{ mb: 1 }}>
-                        <Typography variant="body2" sx={{ color: 'primary.main', fontWeight: 500 }}>
-                          {a.date}
-                        </Typography>
-                        <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                          Available: {a.slots.map((s) => timeSlots.find(t => t.value === s)?.label || s).join(', ') || 'None'}
-                        </Typography>
-                        <Typography variant="body2" sx={{ color: 'error.main' }}>
-                          Not Available: {a.unavailable?.map((s) => timeSlots.find(t => t.value === s)?.label || s).join(', ') || 'None'}
-                        </Typography>
-                      </Box>
-                    ))}
+                  {availability.length === 0 ? (
+                    <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                      No availability set yet
+                    </Typography>
+                  ) : (
+                    availability
+                      .sort((a, b) => new Date(a.date) - new Date(b.date))
+                      .slice(0, 10)
+                      .map((a) => (
+                        <Box key={a.date} sx={{ mb: 1 }}>
+                          <Typography variant="body2" sx={{ color: 'primary.main', fontWeight: 500 }}>
+                            {new Date(a.date).toLocaleDateString()}
+                          </Typography>
+                          <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                            Available: {a.slots && a.slots.length > 0 
+                              ? a.slots.map(s => timeSlots.find(t => t.value === s)?.label || s).join(', ')
+                              : 'None'}
+                          </Typography>
+                          {a.unavailable && a.unavailable.length > 0 && (
+                            <Typography variant="body2" sx={{ color: 'error.main' }}>
+                              Not Available: {a.unavailable.map(s => timeSlots.find(t => t.value === s)?.label || s).join(', ')}
+                            </Typography>
+                          )}
+                        </Box>
+                      ))
+                  )}
                 </Box>
               </Paper>
             )}
@@ -2009,7 +2094,7 @@ const StudioProfileDashboard = () => {
             sx: { backgroundColor: 'rgba(0, 0, 0, 0.95)' }
           }}
           PaperProps={{
-            sx: { 
+            sx:{ 
               bgcolor: 'transparent',
               boxShadow: 'none',
               overflow: 'hidden',

@@ -73,9 +73,9 @@ hourlyRate: Number,
 minimumDuration: Number
 },
 availability: [{
-  date: { type: String, required: true }, // e.g., '2024-06-10'
-  slots: { type: [String], default: [] }, // available slots
-  unavailable: { type: [String], default: [] } // not available slots
+  date: { type: String, required: true }, // format: 'YYYY-MM-DD'
+  slots: { type: [String], default: [] }, // e.g. ['09:00', '10:00']
+  unavailable: { type: [String], default: [] } // e.g. ['11:00', '12:00']
 }]
 });
 

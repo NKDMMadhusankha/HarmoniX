@@ -380,13 +380,17 @@ exports.getStudioAvailability = async (req, res) => {
 // Update studio availability for the logged-in studio
 exports.updateStudioAvailability = async (req, res) => {
   try {
+    console.log('Received availability update request:', req.body); // Add this line
+    
     const { availability } = req.body;
     if (!Array.isArray(availability)) {
       return res.status(400).json({ success: false, message: 'Invalid availability format' });
     }
 
-    // Ensure the availability array includes both available and unavailable slots
+    // Add more detailed logging
+    console.log('Sanitizing availability data...');
     const sanitizedAvailability = availability.map(entry => {
+      console.log('Processing entry:', entry);
       const { date, slots, unavailable } = entry;
       return {
         date,
@@ -395,14 +399,19 @@ exports.updateStudioAvailability = async (req, res) => {
       };
     });
 
+    console.log('Updating database with:', sanitizedAvailability);
+    
     const studio = await Studio.findByIdAndUpdate(
       req.user.id,
       { $set: { availability: sanitizedAvailability } },
       { new: true }
     ).select('availability');
 
+    console.log('Update successful. New availability:', studio.availability);
+    
     res.json({ success: true, availability: studio.availability });
   } catch (err) {
+    console.error('Error in updateStudioAvailability:', err);
     res.status(500).json({ success: false, message: 'Server error' });
   }
 };
