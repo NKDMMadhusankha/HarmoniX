@@ -104,6 +104,10 @@ router.get('/all', async (req, res) => {
   }
 });
 
+// Add routes for studio availability
+router.get('/availability', authMiddleware(['studio']), studioController.getStudioAvailability);
+router.put('/availability', authMiddleware(['studio']), studioController.updateStudioAvailability);
+
 // Add a route to fetch a studio by ID, including the 'about' field
 router.get('/:id', studioController.getStudioProfile);
 

@@ -359,3 +359,32 @@ exports.addStudioGear = async (req, res) => {
     res.status(500).json({ success: false, message: 'Server error while adding studio gear.' });
   }
 };
+
+// Get studio availability for the logged-in studio
+exports.getStudioAvailability = async (req, res) => {
+  try {
+    const studio = await Studio.findById(req.user.id).select('availability');
+    if (!studio) return res.status(404).json({ message: 'Studio not found' });
+    res.json({ success: true, availability: studio.availability || [] });
+  } catch (err) {
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+};
+
+// Update studio availability for the logged-in studio
+exports.updateStudioAvailability = async (req, res) => {
+  try {
+    const { availability } = req.body;
+    if (!Array.isArray(availability)) {
+      return res.status(400).json({ success: false, message: 'Invalid availability format' });
+    }
+    const studio = await Studio.findByIdAndUpdate(
+      req.user.id,
+      { $set: { availability } },
+      { new: true }
+    ).select('availability');
+    res.json({ success: true, availability: studio.availability });
+  } catch (err) {
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+};

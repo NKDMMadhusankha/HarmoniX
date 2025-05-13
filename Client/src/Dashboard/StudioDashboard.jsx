@@ -229,10 +229,8 @@ const StudioProfileDashboard = () => {
   // Availability state for admin
   const [availability, setAvailability] = useState([]); // [{date: '2024-06-10', slots: ['09:00', ...], unavailable: ['13:00', ...]}]
   const [selectedAvailDate, setSelectedAvailDate] = useState(new Date());
-  const [selectedAvailSlots, setSelectedAvailSlots] = useState([]);
   const [selectedUnavailableSlots, setSelectedUnavailableSlots] = useState([]);
   const [isSavingAvailability, setIsSavingAvailability] = useState(false);
-  const [slotMode, setSlotMode] = useState('available'); // 'available' or 'unavailable'
 
   // Fetch availability from backend (implement API as needed)
   const fetchAvailability = async () => {
@@ -255,7 +253,7 @@ const StudioProfileDashboard = () => {
     setIsSavingAvailability(true);
     try {
       const token = localStorage.getItem('authToken');
-      await fetch('http://localhost:5000/api/studio/availability', {
+      const response = await fetch('http://localhost:5000/api/studio/availability', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -263,55 +261,52 @@ const StudioProfileDashboard = () => {
         },
         body: JSON.stringify({ availability })
       });
-      setSnackbarMessage('Availability updated!');
-      setSnackbarSeverity('success');
-      setSnackbarOpen(true);
+
+      if (response.ok) {
+        setSnackbarMessage('Availability updated successfully!');
+        setSnackbarSeverity('success');
+      } else {
+        const errorData = await response.json();
+        setSnackbarMessage(errorData.message || 'Failed to update availability');
+        setSnackbarSeverity('error');
+      }
     } catch (e) {
-      setSnackbarMessage('Failed to update availability');
+      setSnackbarMessage('An error occurred while updating availability');
       setSnackbarSeverity('error');
-      setSnackbarOpen(true);
     } finally {
+      setSnackbarOpen(true);
       setIsSavingAvailability(false);
     }
   };
 
-  // Toggle slot for available/unavailable
+  // Toggle slot for unavailable
   const handleAvailSlotToggle = (slot) => {
-    if (slotMode === 'available') {
-      setSelectedAvailSlots((prev) =>
-        prev.includes(slot)
-          ? prev.filter((s) => s !== slot)
-          : [...prev, slot]
-      );
-      // Remove from unavailable if set as available
-      setSelectedUnavailableSlots((prev) => prev.filter((s) => s !== slot));
-    } else {
-      setSelectedUnavailableSlots((prev) =>
-        prev.includes(slot)
-          ? prev.filter((s) => s !== slot)
-          : [...prev, slot]
-      );
-      // Remove from available if set as unavailable
-      setSelectedAvailSlots((prev) => prev.filter((s) => s !== slot));
-    }
+    setSelectedUnavailableSlots((prev) =>
+      prev.includes(slot)
+        ? prev.filter((s) => s !== slot)
+        : [...prev, slot]
+    );
   };
 
   // When date changes, load slots for that date
   useEffect(() => {
     const dateStr = selectedAvailDate.toISOString().split('T')[0];
     const found = availability.find((a) => a.date === dateStr);
-    setSelectedAvailSlots(found ? (found.slots || []) : []);
     setSelectedUnavailableSlots(found ? (found.unavailable || []) : []);
   }, [selectedAvailDate, availability]);
 
   // Save slots for the selected date
   const handleSaveSlotsForDate = () => {
     const dateStr = selectedAvailDate.toISOString().split('T')[0];
+    const availableSlots = timeSlots
+      .map((slot) => slot.value)
+      .filter((slot) => !selectedUnavailableSlots.includes(slot));
+
     setAvailability((prev) => {
       const others = prev.filter((a) => a.date !== dateStr);
       return [
         ...others,
-        { date: dateStr, slots: selectedAvailSlots, unavailable: selectedUnavailableSlots }
+        { date: dateStr, slots: availableSlots, unavailable: selectedUnavailableSlots }
       ];
     });
     setSnackbarMessage('Slots updated for selected date');
@@ -1926,17 +1921,16 @@ const StudioProfileDashboard = () => {
                   </Grid>
                   <Grid item xs={12} md={6}>
                     <Typography variant="subtitle1" sx={{ mb: 1, color: 'text.primary' }}>
-                      Select Time Slots
+                      Select Not Available Time Slots
                     </Typography>
                     <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mb: 2 }}>
                       {timeSlots.map((slot) => {
-                        const isAvailable = selectedAvailSlots.includes(slot.value);
                         const isUnavailable = selectedUnavailableSlots.includes(slot.value);
                         return (
                           <Button
                             key={slot.value}
-                            variant={isAvailable ? 'contained' : isUnavailable ? 'contained' : 'outlined'}
-                            color={isAvailable ? 'primary' : isUnavailable ? 'error' : 'inherit'}
+                            variant={isUnavailable ? 'contained' : 'outlined'}
+                            color={isUnavailable ? 'error' : 'inherit'}
                             size="small"
                             sx={{
                               minWidth: 80,
@@ -1950,25 +1944,6 @@ const StudioProfileDashboard = () => {
                           </Button>
                         );
                       })}
-                    </Box>
-                    <Box sx={{ mb: 2 }}>
-                      <Button
-                        variant={slotMode === 'available' ? 'contained' : 'outlined'}
-                        color="primary"
-                        size="small"
-                        sx={{ mr: 1 }}
-                        onClick={() => setSlotMode('available')}
-                      >
-                        Set Available
-                      </Button>
-                      <Button
-                        variant={slotMode === 'unavailable' ? 'contained' : 'outlined'}
-                        color="error"
-                        size="small"
-                        onClick={() => setSlotMode('unavailable')}
-                      >
-                        Set Not Available
-                      </Button>
                     </Box>
                   </Grid>
                 </Grid>
