@@ -33,7 +33,13 @@ import {
   Info,
   KeyboardArrowDown,
   Close,
-  LocationOn
+  LocationOn,
+  Facebook,
+  Instagram,
+  Twitter,
+  YouTube,
+  Language,
+  LinkedIn
 } from '@mui/icons-material';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { LocalizationProvider, DateCalendar } from '@mui/x-date-pickers';
@@ -182,7 +188,11 @@ const StudioProfile = () => {
   const [country, setCountry] = useState(''); // Add state for 'country'
   const [loungeArea, setLoungeArea] = useState('');
   const [studioFeatures, setStudioFeatures] = useState([]);
+  const [socialMedia, setSocialMedia] = useState({});
+  const [bookingSettings, setBookingSettings] = useState({ hourlyRate: 5000, minimumDuration: 2 });
   const { id } = useParams();
+  const [availableTimeSlots, setAvailableTimeSlots] = useState([]);
+  const [selectedTimeRange, setSelectedTimeRange] = useState(null); // Add state for time range selection
 
   // Add an onError handler to replace broken images with a default placeholder
   const handleImageError = (event) => {
@@ -214,6 +224,11 @@ const StudioProfile = () => {
           setCountry(studioData.country || '');
           setLoungeArea(studioData.loungeArea || 'No details available.');
           setStudioFeatures(studioData.studioFeatures || []);
+          setSocialMedia(studioData.socialMedia || {});
+          setBookingSettings({
+            hourlyRate: studioData.bookingSettings?.hourlyRate ?? studioData.hourlyRate ?? 5000,
+            minimumDuration: studioData.bookingSettings?.minimumDuration ?? studioData.minimumDuration ?? 2
+          });
         } else {
           setError('Failed to fetch studio data.');
         }
@@ -232,13 +247,9 @@ const StudioProfile = () => {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [selectedStartTime, setSelectedStartTime] = useState('');
   const [selectedEndTime, setSelectedEndTime] = useState('');
-  const [showCalendar, setShowCalendar] = useState(false);
   const [galleryOpen, setGalleryOpen] = useState(false);
   const [galleryImageIndex, setGalleryImageIndex] = useState(0);
   
-  // Hourly rate in LKR
-  const hourlyRate = 5000;
-
   // Handle image navigation
   const handleNextImage = () => {
     setGalleryImageIndex((prevIndex) => 
@@ -283,6 +294,58 @@ const StudioProfile = () => {
   // If no images are available, show a placeholder
   const displayImages = studioImages; // Use only fetched images
 
+  const handleDateChange = (newDate) => {
+    setSelectedDate(newDate);
+    setSelectedStartTime('');
+    setSelectedEndTime('');
+    setSelectedTimeRange(null); // Reset selected time range
+    
+    // In a real implementation, you would fetch available slots from the database
+    // based on the selected date. For now, we'll use all timeSlots as available.
+    setAvailableTimeSlots(timeSlots);
+  };
+
+  // New function to handle time slot selection
+  const handleTimeSlotSelect = (startSlot) => {
+    const startTime = startSlot.value;
+    setSelectedStartTime(startTime);
+    
+    // Reset end time when start time changes
+    setSelectedEndTime('');
+    setSelectedTimeRange(null);
+  };
+
+  // New function to handle time range selection
+  const handleTimeRangeSelect = (startTime, endTime) => {
+    setSelectedStartTime(startTime);
+    setSelectedEndTime(endTime);
+    setSelectedTimeRange({ start: startTime, end: endTime });
+  };
+
+  // Function to check if a time slot is available (for visual indicators)
+  // In a real app, this would check against bookings in the database
+  const isTimeSlotAvailable = (slotValue) => {
+    // Example: Make some times unavailable for demonstration
+    const unavailableTimes = ['13:00', '14:00', '17:00', '18:00'];
+    return !unavailableTimes.includes(slotValue);
+  };
+
+  // Function to check if a time slot is the selected start time
+  const isSelectedStart = (slotValue) => {
+    return selectedStartTime === slotValue;
+  };
+
+  // Function to check if a time slot is part of the selected range
+  const isInSelectedRange = (slotValue) => {
+    if (!selectedStartTime || !selectedEndTime) return false;
+    
+    const slotHour = parseInt(slotValue.split(':')[0]);
+    const startHour = parseInt(selectedStartTime.split(':')[0]);
+    const endHour = parseInt(selectedEndTime.split(':')[0]);
+    
+    return slotHour > startHour && slotHour <= endHour;
+  };
+
   if (loading) {
     return <Loader />; // Use the Loader component
   }
@@ -294,6 +357,34 @@ const StudioProfile = () => {
   if (displayImages.length === 0) {
     return <div>No images available for this studio.</div>; // Handle case where no images are fetched
   }
+
+  // Social media brand colors
+  const socialBrandColors = {
+    Instagram: {
+      gradient: 'linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%)',
+      color: '#E1306C'
+    },
+    Twitter: {
+      color: '#1DA1F2'
+    },
+    Facebook: {
+      color: '#4267B2'
+    },
+    YouTube: {
+      color: '#FF0000'
+    },
+    Website: {
+      color: '#00BCD4' // Using the app's primary color for website
+    }
+  };
+
+  // Social media links for the studio - Updated to use actual data from socialMedia state
+  const socialLinks = [
+    { name: 'Instagram', icon: <Instagram sx={{ color: socialBrandColors['Instagram'].color }} />, url: socialMedia?.instagram || '#' },
+    { name: 'Facebook', icon: <Facebook sx={{ color: socialBrandColors['Facebook'].color }} />, url: socialMedia?.facebook || '#' },
+    { name: 'Twitter', icon: <Twitter sx={{ color: socialBrandColors['Twitter'].color }} />, url: socialMedia?.twitter || '#' },
+    { name: 'Website', icon: <Language sx={{ color: socialBrandColors['Website'].color }} />, url: socialMedia?.website || '#' }
+  ].filter(link => link.url && link.url !== '#'); // Only include links that have a URL
 
   return (
     <ThemeProvider theme={darkTheme}>
@@ -630,158 +721,251 @@ const StudioProfile = () => {
                   )}
                 </Box>
 
-                {/* Lounge Area Section */}
+                {/* Social Media Links - Using Actual Data with Brand Colors */}
                 <Box sx={{ mb: 3 }}>
-                  <Typography variant="h6" sx={{ color: 'text.primary' }}>Lounge Area</Typography>
-                  <Typography 
-                    variant="body1" 
-                    sx={{ 
-                      color: 'text.secondary', 
-                      wordWrap: 'break-word', 
-                      whiteSpace: 'pre-wrap' 
-                    }}
-                  >
-                    {loungeArea}
-                  </Typography>
+                  <Typography variant="h6" sx={{ color: 'text.primary', mb: 2 }}>Connect With Us</Typography>
+                  
+                  {socialLinks.length > 0 ? (
+                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2 }}>
+                      {socialLinks.map((link, index) => (
+                        <Button
+                          key={index}
+                          variant="outlined"
+                          startIcon={link.icon}
+                          href={link.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          sx={{
+                            borderRadius: 2,
+                            borderColor: 'rgba(255, 255, 255, 0.12)',
+                            color: 'text.secondary',
+                            position: 'relative',
+                            overflow: 'hidden',
+                            transition: 'all 0.3s ease',
+                            '&:hover': {
+                              borderColor: socialBrandColors[link.name]?.color || 'primary.main',
+                              color: socialBrandColors[link.name]?.color || 'primary.main',
+                              transform: 'translateY(-3px)',
+                              boxShadow: `0 4px 12px ${socialBrandColors[link.name]?.color}40 || rgba(0, 188, 212, 0.25)`,
+                              ...(socialBrandColors[link.name]?.gradient && {
+                                '&::before': {
+                                  opacity: 0.15
+                                }
+                              })
+                            },
+                            ...(socialBrandColors[link.name]?.gradient && {
+                              '&::before': {
+                                content: '""',
+                                position: 'absolute',
+                                top: 0,
+                                left: 0,
+                                right: 0,
+                                bottom: 0,
+                                background: socialBrandColors[link.name].gradient,
+                                opacity: 0,
+                                transition: 'opacity 0.3s ease',
+                                zIndex: -1
+                              }
+                            })
+                          }}
+                        >
+                          {link.name}
+                        </Button>
+                      ))}
+                    </Box>
+                  ) : (
+                    <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                      No social media links available.
+                    </Typography>
+                  )}
+                  
+                  {socialLinks.length > 0 && (
+                    <Typography variant="body2" sx={{ mt: 1.5, color: 'text.secondary', fontStyle: 'italic' }}>
+                      Follow us on social media to stay updated with our latest sessions and events.
+                    </Typography>
+                  )}
                 </Box>
 
                 <Typography variant="body1" sx={{ mt: 4, textAlign: 'center', color: 'text.primary', fontWeight: 'medium' }}>
-                  We look forward to welcoming you to AudioHaus and helping you realize your musical projects in a professional and inspiring environment.
+                  We look forward to welcoming you to <Box component="span" sx={{ fontWeight: 'bold' }}>{studio?.studioName || 'our studio'}</Box> and helping you realize your musical projects in a professional and inspiring environment.
                 </Typography>
               </Paper>
             </Grid>
             
             {/* Right Column - Booking Widget */}
             <Grid item xs={12} md={5}>
-              <Paper sx={{ p: 3, position: 'sticky', top: 20, bgcolor: 'background.paper', boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)', mb: 4 }}>
+              <Paper sx={{ 
+                p: 3, 
+                position: 'sticky', 
+                top: 80, // Increased from 20 to leave space for navbar
+                zIndex: 10, // Add z-index to ensure proper stacking
+                bgcolor: 'background.paper', 
+                boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)', 
+                mb: 4
+              }}>
                 <Typography variant="h5" component="h2" sx={{ mb: 3, color: 'text.primary' }}>
-                  For Booking
+                  FOR BOOKING
                 </Typography>
                 
-                {/* Date Selection */}
+                {/* Date Selection - Always show calendar */}
                 <Typography variant="subtitle1" sx={{ mb: 1, color: 'text.primary' }}>
-                  Date and time
+                  Date
                 </Typography>
                 <Box sx={{ mb: 3 }}>
-                  <TextField
-                    fullWidth
-                    value={formatDate(selectedDate)}
-                    onClick={() => setShowCalendar(!showCalendar)}
-                    InputProps={{
-                      readOnly: true,
-                      endAdornment: (
-                        <InputAdornment position="end">
-                          <KeyboardArrowDown />
-                        </InputAdornment>
-                      )
-                    }}
-                    sx={{
-                      '& .MuiOutlinedInput-root': {
-                        '& fieldset': {
-                          borderColor: 'rgba(255, 255, 255, 0.23)',
-                        },
-                        '&:hover fieldset': {
-                          borderColor: 'rgba(255, 255, 255, 0.5)',
-                        },
-                      }
-                    }}
-                  />
-                  
-                  {showCalendar && (
-                    <Paper elevation={3} sx={{ mt: 1, p: 1, width: '100%' }}>
-                      <LocalizationProvider dateAdapter={AdapterDateFns}>
-                        <DateCalendar
-                          value={selectedDate}
-                          onChange={(newDate) => {
-                            setSelectedDate(newDate);
-                            setShowCalendar(false);
-                          }}
-                          disablePast
-                          sx={{
+                  <Paper elevation={3} sx={{ p: 1, width: '100%' }}>
+                    <LocalizationProvider dateAdapter={AdapterDateFns}>
+                      <DateCalendar
+                        value={selectedDate}
+                        onChange={handleDateChange}
+                        disablePast
+                        sx={{
+                          color: 'text.primary',
+                          '& .MuiPickersDay-root': {
                             color: 'text.primary',
-                            '& .MuiPickersDay-root': {
-                              color: 'text.primary',
-                            },
-                            '& .MuiPickersDay-today': {
-                              borderColor: 'primary.main',
-                            },
-                            '& .Mui-selected': {
-                              backgroundColor: 'primary.main',
-                            }
-                          }}
-                        />
-                      </LocalizationProvider>
-                    </Paper>
-                  )}
+                          },
+                          '& .MuiPickersDay-today': {
+                            borderColor: 'primary.main',
+                          },
+                          '& .Mui-selected': {
+                            backgroundColor: 'primary.main',
+                          }
+                        }}
+                      />
+                    </LocalizationProvider>
+                  </Paper>
                 </Box>
                 
-                {/* Time Selection */}
-                <Grid container spacing={2} sx={{ mb: 3 }}>
-                  <Grid item xs={6}>
-                    <TextField
-                      select
-                      label="Start Time"
-                      fullWidth
-                      value={selectedStartTime}
-                      onChange={(e) => setSelectedStartTime(e.target.value)}
-                      sx={{
-                        '& .MuiInputLabel-root': {
-                          color: 'text.secondary',
-                        },
-                        '& .MuiOutlinedInput-root': {
-                          '& fieldset': {
-                            borderColor: 'rgba(255, 255, 255, 0.23)',
-                          },
-                          '&:hover fieldset': {
-                            borderColor: 'rgba(255, 255, 255, 0.5)',
-                          },
-                        }
-                      }}
-                    >
-                      {timeSlots.map((option) => (
-                        <MenuItem key={option.value} value={option.value}>
-                          {option.label}
-                        </MenuItem>
-                      ))}
-                    </TextField>
+                {/* Available Time Slots - Visual Time Selection */}
+                <Typography variant="subtitle1" sx={{ mb: 1, color: 'text.primary' }}>
+                  Available Times for {formatDate(selectedDate)}
+                </Typography>
+                
+                <Box sx={{ mb: 3 }}>
+                  {/* Time slots display */}
+                  <Grid container spacing={1}>
+                    {availableTimeSlots.map((slot) => (
+                      <Grid item xs={4} sm={3} key={slot.value}>
+                        <Button
+                          variant={isSelectedStart(slot.value) ? "contained" : "outlined"}
+                          fullWidth
+                          disabled={!isTimeSlotAvailable(slot.value)}
+                          onClick={() => handleTimeSlotSelect(slot)}
+                          sx={{
+                            height: '32px', // Fixed smaller height
+                            minHeight: 'unset', // Remove default min-height
+                            py: 0, // Remove vertical padding
+                            px: 1, // Keep some horizontal padding
+                            fontSize: '0.75rem', // Smaller font size
+                            lineHeight: 1, // Tighter line height
+                            borderColor: isTimeSlotAvailable(slot.value) 
+                              ? '#00BCD4' // Match theme primary color for available slots
+                              : '#f44336', // Red border for booked slots
+                            backgroundColor: isSelectedStart(slot.value) 
+                              ? '#00BCD4' // Match theme primary color for selected
+                              : isInSelectedRange(slot.value) 
+                                ? 'rgba(0, 188, 212, 0.15)' // Light primary color for range
+                                : 'transparent',
+                            color: isSelectedStart(slot.value) 
+                              ? 'white' 
+                              : !isTimeSlotAvailable(slot.value) 
+                                ? '#f44336' // Red text for unavailable
+                                : '#00BCD4', // Match theme primary color for available
+                            '&:hover': {
+                              backgroundColor: isTimeSlotAvailable(slot.value) && !isSelectedStart(slot.value) 
+                                ? 'rgba(0, 188, 212, 0.08)' // Match theme primary color for hover effect
+                                : undefined,
+                            },
+                            position: 'relative'
+                          }}
+                        >
+                          {slot.label}
+                          {!isTimeSlotAvailable(slot.value) && (
+                            <Box sx={{
+                              position: 'absolute',
+                              top: 0,
+                              left: 0,
+                              right: 0,
+                              bottom: 0,
+                              backgroundColor: 'rgba(244, 67, 54, 0.25)', // Darker red overlay for better visibility
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              borderRadius: 'inherit',
+                            }}>
+                              <Typography variant="caption" sx={{ 
+                                color: '#ffffff', // White text for better contrast
+                                fontSize: '0.7rem', // Slightly larger font
+                                fontWeight: 'bold', // Make it bold
+                                textShadow: '0px 0px 2px rgba(0,0,0,0.7)', // Add text shadow for legibility
+                              }}>
+                                Booked
+                              </Typography>
+                            </Box>
+                          )}
+                        </Button>
+                      </Grid>
+                    ))}
                   </Grid>
-                  <Grid item xs={6}>
-                    <TextField
-                      select
-                      label="End Time"
-                      fullWidth
-                      value={selectedEndTime}
-                      onChange={(e) => setSelectedEndTime(e.target.value)}
-                      disabled={!selectedStartTime}
-                      sx={{
-                        '& .MuiInputLabel-root': {
-                          color: 'text.secondary',
-                        },
-                        '& .MuiOutlinedInput-root': {
-                          '& fieldset': {
-                            borderColor: 'rgba(255, 255, 255, 0.23)',
-                          },
-                          '&:hover fieldset': {
-                            borderColor: 'rgba(255, 255, 255, 0.5)',
-                          },
-                        }
-                      }}
-                    >
-                      {timeSlots
-                        .filter((slot) => {
-                          if (!selectedStartTime) return false;
-                          const startHour = parseInt(selectedStartTime.split(':')[0]);
-                          const slotHour = parseInt(slot.value.split(':')[0]);
-                          return slotHour > startHour;
-                        })
-                        .map((option) => (
-                          <MenuItem key={option.value} value={option.value}>
-                            {option.label}
-                          </MenuItem>
-                        ))}
-                    </TextField>
-                  </Grid>
-                </Grid>
+                  
+                  {/* Time range selection section - also update the end time buttons */}
+                  {selectedStartTime && (
+                    <Box sx={{ mt: 3 }}>
+                      <Typography variant="body2" sx={{ mb: 1, color: 'text.secondary' }}>
+                        Select end time for your session:
+                      </Typography>
+                      <Grid container spacing={1}>
+                        {timeSlots
+                          .filter((slot) => {
+                            if (!selectedStartTime) return false;
+                            const startHour = parseInt(selectedStartTime.split(':')[0]);
+                            const slotHour = parseInt(slot.value.split(':')[0]);
+                            // Only show slots that are at least 2 hours after start (minimum booking duration)
+                            return slotHour >= startHour + 2;
+                          })
+                          .map((slot) => (
+                            <Grid item xs={4} sm={3} key={`end-${slot.value}`}>
+                              <Button
+                                variant={selectedEndTime === slot.value ? "contained" : "outlined"}
+                                fullWidth
+                                onClick={() => handleTimeRangeSelect(selectedStartTime, slot.value)}
+                                sx={{
+                                  height: '32px', // Fixed smaller height
+                                  minHeight: 'unset', // Remove default min-height
+                                  py: 0, // Remove vertical padding
+                                  px: 1, // Keep some horizontal padding
+                                  fontSize: '0.75rem', // Smaller font size
+                                  lineHeight: 1, // Tighter line height
+                                  borderColor: '#2196F3', // Blue border
+                                  backgroundColor: selectedEndTime === slot.value ? '#2196F3' : 'transparent',
+                                  color: selectedEndTime === slot.value ? 'white' : '#2196F3',
+                                  '&:hover': {
+                                    backgroundColor: selectedEndTime !== slot.value ? 'rgba(33, 150, 243, 0.08)' : undefined,
+                                  }
+                                }}
+                              >
+                                {slot.label}
+                              </Button>
+                            </Grid>
+                          ))}
+                      </Grid>
+                    </Box>
+                  )}
+                  
+                  {/* Selected time range display - updated to blue */}
+                  {selectedStartTime && selectedEndTime && (
+                    <Box sx={{ 
+                      mt: 2,
+                      p: 1.5,
+                      bgcolor: 'rgba(33, 150, 243, 0.1)',
+                      borderRadius: 1,
+                      border: '1px solid rgba(33, 150, 243, 0.5)'
+                    }}>
+                      <Typography variant="body2" sx={{ color: 'text.primary', textAlign: 'center' }}>
+                        Selected Time: {timeSlots.find(s => s.value === selectedStartTime)?.label} - {timeSlots.find(s => s.value === selectedEndTime)?.label}
+                      </Typography>
+                    </Box>
+                  )}
+                </Box>
                 
                 {/* Minimum Duration Info */}
                 <Box 
@@ -790,13 +974,13 @@ const StudioProfile = () => {
                     alignItems: 'center', 
                     mb: 3,
                     p: 1,
-                    bgcolor: 'rgba(255, 193, 7, 0.15)', // Darker yellow background for dark mode
+                    bgcolor: 'rgba(255, 193, 7, 0.15)',
                     borderRadius: 1
                   }}
                 >
-                  <Info sx={{ mr: 1, color: 'warning.light' }} /> {/* Lighter warning color for dark mode */}
+                  <Info sx={{ mr: 1, color: 'warning.light' }} />
                   <Typography variant="body2" sx={{ color: 'text.primary' }}>
-                    2 hr minimum
+                    {bookingSettings.minimumDuration} hr minimum
                     <Typography variant="caption" display="block" sx={{ color: 'text.secondary' }}>
                       The host is more likely to accept if your request meets their minimum duration.
                     </Typography>
@@ -810,7 +994,7 @@ const StudioProfile = () => {
                     Rate
                   </Typography>
                   <Typography variant="body1" sx={{ color: 'text.primary', fontWeight: 'medium' }}>
-                    LKR {hourlyRate.toLocaleString()} / hour
+                    LKR {bookingSettings.hourlyRate.toLocaleString()} / hour
                   </Typography>
                 </Box>
                 
@@ -842,458 +1026,176 @@ const StudioProfile = () => {
           </Grid>
         </Container>
         
-        {/* Full Screen Gallery Modal - Enhanced Design with Improvements */}
+        {/* Full Screen Gallery Modal - Updated with completely transparent styling */}
         <Dialog
           open={galleryOpen}
           onClose={closeGallery}
           maxWidth="xl"
           fullWidth
-          TransitionProps={{
-            timeout: 700,
-          }}
-          BackdropProps={{
-            sx: { 
-              backgroundColor: 'rgba(0, 0, 0, 0.97)',
-              animation: 'backdropReveal 0.8s cubic-bezier(0.25, 0.1, 0.25, 1)',
-              '@keyframes backdropReveal': {
-                '0%': {
-                  opacity: 0,
-                },
-                '100%': {
-                  opacity: 1,
-                }
-              }
-            }
-          }}
           PaperProps={{
-            sx: { 
+            sx: {
               bgcolor: 'transparent',
+              backgroundImage: 'none', // Remove gradient completely
               boxShadow: 'none',
               overflow: 'hidden',
               maxHeight: '98vh',
               height: 'auto',
               m: 0,
-              border: '1px solid rgba(255,255,255,0.05)',
-              borderRadius: 2,
-              animation: 'galleryEntranceDramatic 0.9s cubic-bezier(0.22, 1, 0.36, 1)',
-              '@keyframes galleryEntranceDramatic': {
-                '0%': {
-                  opacity: 0,
-                  transform: 'scale(0.85) translateY(40px) perspective(1000px) rotateX(5deg)',
-                  filter: 'blur(10px)'
-                },
-                '40%': {
-                  opacity: 0.8,
-                  filter: 'blur(5px)'
-                },
-                '70%': {
-                  filter: 'blur(0px)'
-                },
-                '100%': {
-                  opacity: 1,
-                  transform: 'scale(1) translateY(0) perspective(1000px) rotateX(0deg)',
-                  filter: 'blur(0px)'
-                }
-              }
+              borderRadius: 0,
+            }
+          }}
+          BackdropProps={{
+            sx: { 
+              backgroundColor: 'rgba(0, 0, 0, 0.95)',
             }
           }}
         >
-          <DialogContent 
-            sx={{ 
-              p: 0, 
-              position: 'relative', 
-              overflow: 'hidden', 
-              display: 'flex', 
-              flexDirection: 'column',
-              '& > *': {
-                animation: 'contentFadeIn 0.8s ease-out forwards',
-              },
-              '@keyframes contentFadeIn': {
-                '0%': { opacity: 0 },
-                '30%': { opacity: 0 },
-                '100%': { opacity: 1 }
-              }
-            }}
-          >
-            {/* Header with controls */}
+          <DialogContent sx={{ p: 0, position: 'relative', background: 'transparent' }}>
+            {/* Header with controls - Fully transparent */}
             <Box sx={{ 
-              display: 'flex', 
-              justifyContent: 'space-between', 
-              alignItems: 'center', 
-              p: 2, 
-              borderBottom: '1px solid rgba(255,255,255,0.1)',
-              backdropFilter: 'blur(10px)',
-              background: 'linear-gradient(to bottom, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.6) 100%)',
-              boxShadow: '0 2px 8px rgba(0,0,0,0.2)'
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              p: 2,
+              borderBottom: 'none', // Remove border
+              bgcolor: 'transparent',
+              backgroundImage: 'none', // Remove gradient
             }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                <Typography variant="h6" sx={{ 
-                  color: 'white', 
-                  fontWeight: 'medium',
-                  textShadow: '0 2px 4px rgba(0,0,0,0.5)'
-                }}>
-                  {studio?.studioName || 'Studio Gallery'}
-                </Typography>
-                <Divider orientation="vertical" flexItem sx={{ mx: 2, bgcolor: 'rgba(255,255,255,0.2)' }} />
-                <Box 
-                  sx={{ 
-                    display: 'flex', 
-                    alignItems: 'center', 
-                    bgcolor: 'rgba(0,0,0,0.4)', 
-                    px: 1.5, 
-                    py: 0.5, 
-                    borderRadius: 4,
-                    border: '1px solid rgba(255,255,255,0.1)'
-                  }}
-                >
-                  <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.9)' }}>
-                    {galleryImageIndex + 1} / {displayImages.length}
-                  </Typography>
-                </Box>
-              </Box>
+              <Typography variant="h6" sx={{ color: 'white', fontWeight: 'medium' }}>
+                {studio?.studioName || 'Studio Gallery'}
+              </Typography>
               
-              <Box sx={{ display: 'flex', gap: 1 }}>
-                <IconButton 
-                  onClick={closeGallery}
-                  sx={{ 
-                    color: 'white',
-                    bgcolor: 'rgba(255,255,255,0.05)',
-                    '&:hover': { 
-                      bgcolor: 'rgba(255,255,255,0.1)',
-                      transform: 'scale(1.05)'
-                    },
-                    transition: 'all 0.2s ease'
-                  }}
-                >
-                  <Close />
-                </IconButton>
-              </Box>
-            </Box>
-            
-            {/* Main content area with two sections */}
-            <Box sx={{ 
-              display: 'flex', 
-              flexDirection: { xs: 'column', md: 'row' }, 
-              height: 'calc(98vh - 64px)' 
-            }}>
-              {/* Left side - Featured Image */}
-              <Box sx={{ 
-                flex: 3, 
-                display: 'flex', 
-                flexDirection: 'column',
-                alignItems: 'center', 
-                justifyContent: 'center', 
-                position: 'relative',
-                overflow: 'hidden', 
-                background: 'radial-gradient(circle, rgba(20,20,20,0.3) 0%, rgba(0,0,0,0.7) 100%)',
-                p: 2
-              }}>
-                <Box sx={{ 
-                  position: 'relative', 
-                  width: '100%', 
-                  height: '100%',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center'
-                }}>
-                  {/* Previous image navigation button - Smaller size */}
-                  <IconButton 
-                    onClick={handlePrevImage}
-                    sx={{ 
-                      position: 'absolute', 
-                      left: 16, 
-                      display: 'flex',
-                      justifyContent: 'center',
-                      alignItems: 'center',
-                      bgcolor: 'rgba(0,0,0,0.5)',
-                      color: 'white',
-                      transform: 'scale(1)',
-                      width: 40,
-                      height: 40,
-                      '&:hover': { 
-                        bgcolor: 'rgba(0,0,0,0.8)',
-                        transform: 'scale(1.1)',
-                        boxShadow: '0 0 15px rgba(0, 188, 212, 0.4)'
-                      },
-                      transition: 'all 0.2s ease',
-                      zIndex: 2
-                    }}
-                  >
-                    <ArrowBackIos sx={{ fontSize: 18, ml: 1 }} />
-                  </IconButton>
-                  
-                  {/* Main image with animation effect */}
-                  <Box
-                    key={galleryImageIndex} // This forces React to recreate the element when the image changes
-                    component="img"
-                    src={getImageUrl(displayImages[galleryImageIndex])}
-                    alt={`Studio Image ${galleryImageIndex + 1}`}
-                    onError={handleImageError}
-                    sx={{
-                      maxWidth: '100%',
-                      maxHeight: '100%',
-                      objectFit: 'contain',
-                      borderRadius: 2,
-                      boxShadow: '0 8px 24px rgba(0,0,0,0.5)',
-                      animation: 'fadeInImage 0.4s ease-in-out',
-                      '@keyframes fadeInImage': {
-                        '0%': {
-                          opacity: 0,
-                          transform: 'scale(0.96)'
-                        },
-                        '100%': {
-                          opacity: 1,
-                          transform: 'scale(1)'
-                        }
-                      }
-                    }}
-                  />
-                  
-                  {/* Next image navigation button - Smaller size */}
-                  <IconButton 
-                    onClick={handleNextImage}
-                    sx={{ 
-                      position: 'absolute', 
-                      right: 16,
-                      display: 'flex',
-                      justifyContent: 'center',
-                      alignItems: 'center', 
-                      bgcolor: 'rgba(0,0,0,0.5)',
-                      color: 'white',
-                      transform: 'scale(1)',
-                      width: 40,
-                      height: 40,
-                      '&:hover': { 
-                        bgcolor: 'rgba(0,0,0,0.8)',
-                        transform: 'scale(1.1)',
-                        boxShadow: '0 0 15px rgba(0, 188, 212, 0.4)'
-                      },
-                      transition: 'all 0.2s ease',
-                      zIndex: 2
-                    }}
-                  >
-                    <ArrowForwardIos sx={{ fontSize: 18 }} />
-                  </IconButton>
-                </Box>
-
-                {/* Image navigation buttons at bottom for mobile - Also smaller */}
-                <Box sx={{
-                  display: { xs: 'flex', md: 'none' },
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                  gap: 6,
-                  mt: 2,
-                  width: '100%'
-                }}>
-                  <IconButton
-                    onClick={handlePrevImage}
-                    sx={{
-                      bgcolor: 'rgba(0,0,0,0.6)',
-                      color: 'white',
-                      width: 36,
-                      height: 36,
-                      display: 'flex',
-                      justifyContent: 'center',
-                      alignItems: 'center',
-                      '&:hover': {
-                        bgcolor: 'rgba(0, 188, 212, 0.3)',
-                        boxShadow: '0 0 10px rgba(0, 188, 212, 0.3)'
-                      }
-                    }}
-                  >
-                    <ArrowBackIos sx={{ fontSize: 16, ml: 0.8 }} />
-                  </IconButton>
-                  
-                  <Typography variant="body2" sx={{ color: 'white' }}>
-                    {galleryImageIndex + 1} / {displayImages.length}
-                  </Typography>
-                  
-                  <IconButton
-                    onClick={handleNextImage}
-                    sx={{
-                      bgcolor: 'rgba(0,0,0,0.6)',
-                      color: 'white',
-                      width: 36,
-                      height: 36,
-                      display: 'flex',
-                      justifyContent: 'center',
-                      alignItems: 'center',
-                      '&:hover': {
-                        bgcolor: 'rgba(0, 188, 212, 0.3)',
-                        boxShadow: '0 0 10px rgba(0, 188, 212, 0.3)'
-                      }
-                    }}
-                  >
-                    <ArrowForwardIos sx={{ fontSize: 16 }} />
-                  </IconButton>
-                </Box>
-                
-                {/* Image caption area */}
-                <Box sx={{
-                  mt: 2,
-                  px: 2,
-                  py: 1,
-                  borderRadius: 1,
-                  backdropFilter: 'blur(10px)',
-                  bgcolor: 'rgba(0,0,0,0.4)',
-                  border: '1px solid rgba(255,255,255,0.05)',
-                  maxWidth: '80%',
-                  alignSelf: 'center',
-                  display: { xs: 'none', sm: 'block' }
-                }}>
-                  <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.8)', textAlign: 'center' }}>
-                    {studio?.studioName} - Image {galleryImageIndex + 1}
-                  </Typography>
-                </Box>
-              </Box>
-              
-              {/* Right side - Thumbnails */}
-              <Box sx={{ 
-                flex: 1, 
-                background: 'linear-gradient(to right, rgba(18,18,18,0.8), rgba(0,0,0,0.95))',
-                borderLeft: '1px solid rgba(255,255,255,0.1)',
-                overflowY: 'auto',
-                display: { xs: 'none', md: 'block' }, // Hide on mobile
-                p: 1.5,
-                '&::-webkit-scrollbar': {
-                  width: '6px',
-                },
-                '&::-webkit-scrollbar-track': {
-                  bgcolor: 'transparent',
-                },
-                '&::-webkit-scrollbar-thumb': {
-                  bgcolor: 'rgba(255,255,255,0.2)',
-                  borderRadius: '3px',
-                },
-                '&::-webkit-scrollbar-thumb:hover': {
-                  bgcolor: 'rgba(255,255,255,0.3)',
-                }
-              }}>
-                <Typography 
-                  variant="subtitle2" 
-                  sx={{ 
-                    color: 'rgba(255,255,255,0.7)', 
-                    mb: 1.5, 
-                    pl: 1,
-                    borderBottom: '1px solid rgba(255,255,255,0.1)',
-                    pb: 0.5
-                  }}
-                >
-                  All Images ({displayImages.length})
-                </Typography>
-                <Grid container spacing={1.5}>
-                  {displayImages.map((img, index) => (
-                    <Grid item xs={6} key={index}>
-                      <Box
-                        onClick={() => setGalleryImageIndex(index)}
-                        sx={{
-                          width: '100%',
-                          height: 120,
-                          borderRadius: 1.5,
-                          overflow: 'hidden',
-                          border: galleryImageIndex === index ? '2px solid #00BCD4' : '2px solid transparent',
-                          opacity: galleryImageIndex === index ? 1 : 0.7,
-                          transition: 'all 0.2s ease',
-                          cursor: 'pointer',
-                          '&:hover': {
-                            opacity: 1,
-                            transform: galleryImageIndex === index ? 'scale(1)' : 'scale(1.03)',
-                            boxShadow: '0 4px 12px rgba(0,0,0,0.6)'
-                          },
-                          position: 'relative',
-                          boxShadow: galleryImageIndex === index ? 
-                            '0 0 0 2px rgba(0, 188, 212, 0.5), 0 4px 12px rgba(0,0,0,0.5)' : 
-                            '0 2px 8px rgba(0,0,0,0.5)'
-                        }}
-                      >
-                        <Box
-                          component="img"
-                          src={getImageUrl(img)}
-                          alt={`Thumbnail ${index + 1}`}
-                          onError={handleImageError}
-                          sx={{
-                            width: '100%',
-                            height: '100%',
-                            objectFit: 'cover',
-                          }}
-                        />
-                        {galleryImageIndex === index && (
-                          <Box sx={{
-                            position: 'absolute',
-                            bottom: 0,
-                            left: 0,
-                            right: 0,
-                            height: '4px',
-                            bgcolor: '#00BCD4',
-                            boxShadow: '0 0 8px rgba(0, 188, 212, 0.8)'
-                          }}/>
-                        )}
-                        <Box sx={{
-                          position: 'absolute',
-                          bottom: 4,
-                          right: 4,
-                          bgcolor: 'rgba(0,0,0,0.6)',
-                          color: 'white',
-                          width: 20,
-                          height: 20,
-                          borderRadius: '50%',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          fontSize: '0.7rem',
-                          fontWeight: 'bold',
-                          border: '1px solid rgba(255,255,255,0.2)'
-                        }}>
-                          {index + 1}
-                        </Box>
-                      </Box>
-                    </Grid>
-                  ))}
-                </Grid>
-              </Box>
-              
-              {/* Mobile thumbnails (horizontal scroll) */}
-              <Box 
+              <IconButton 
+                onClick={closeGallery}
                 sx={{ 
-                  display: { xs: 'flex', md: 'none' },
-                  overflowX: 'auto',
-                  gap: 1.5,
-                  p: 2,
-                  background: 'linear-gradient(to top, rgba(0,0,0,0.9), rgba(18,18,18,0.8))',
-                  borderTop: '1px solid rgba(255,255,255,0.1)',
-                  '&::-webkit-scrollbar': {
-                    height: '4px',
-                  },
-                  '&::-webkit-scrollbar-track': {
-                    bgcolor: 'transparent',
-                  },
-                  '&::-webkit-scrollbar-thumb': {
-                    bgcolor: 'rgba(255,255,255,0.2)',
-                    borderRadius: '3px',
+                  color: 'white',
+                  '&:hover': { 
+                    backgroundColor: 'rgba(255,255,255,0.1)'
                   }
                 }}
               >
+                <Close />
+              </IconButton>
+            </Box>
+            
+            {/* Main image content */}
+            <Box sx={{
+              display: 'flex',
+              flexDirection: 'column',
+              height: 'calc(100% - 64px)', // Adjust for header height
+              width: '100%',
+              background: 'transparent'
+            }}>
+              {/* Main image with navigation - Smaller size */}
+              <Box sx={{
+                flex: 1,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                position: 'relative',
+                overflow: 'hidden',
+                height: '70vh', // Reduced from 80vh
+                maxHeight: '70vh', // Add maximum height constraint
+              }}>
+                {/* Previous image button */}
+                <IconButton 
+                  onClick={handlePrevImage}
+                  sx={{
+                    position: 'absolute',
+                    left: 16,
+                    color: 'white',
+                    backgroundColor: 'rgba(0, 0, 0, 0.3)',
+                    '&:hover': {
+                      backgroundColor: 'rgba(0, 0, 0, 0.5)'
+                    },
+                    zIndex: 2
+                  }}
+                >
+                  <ArrowBackIos />
+                </IconButton>
+
+                {/* Current image - With size constraints */}
+                <Box
+                  component="img"
+                  src={getImageUrl(displayImages[galleryImageIndex])}
+                  alt={`Studio image ${galleryImageIndex + 1}`}
+                  onError={handleImageError}
+                  sx={{
+                    maxWidth: '90%',
+                    maxHeight: '90%',
+                    objectFit: 'contain',
+                    width: 'auto', // Let width adjust automatically
+                    height: 'auto', // Let height adjust automatically
+                  }}
+                />
+
+                {/* Next image button */}
+                <IconButton 
+                  onClick={handleNextImage}
+                  sx={{
+                    position: 'absolute',
+                    right: 16,
+                    color: 'white',
+                    backgroundColor: 'rgba(0, 0, 0, 0.3)',
+                    '&:hover': {
+                      backgroundColor: 'rgba(0, 0, 0, 0.5)'
+                    },
+                    zIndex: 2
+                  }}
+                >
+                  <ArrowForwardIos />
+                </IconButton>
+
+                {/* Image counter */}
+                <Box sx={{
+                  position: 'absolute',
+                  bottom: 16,
+                  left: '50%',
+                  transform: 'translateX(-50%)',
+                  backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                  color: 'white',
+                  px: 2,
+                  py: 1,
+                  borderRadius: 2,
+                  zIndex: 2
+                }}>
+                  <Typography variant="body2">
+                    {galleryImageIndex + 1} / {displayImages.length}
+                  </Typography>
+                </Box>
+              </Box>
+
+              {/* Thumbnail strip - Fully transparent background */}
+              <Box sx={{
+                display: 'flex',
+                justifyContent: 'center',
+                gap: 1,
+                p: 2,
+                overflowX: 'auto',
+                backgroundColor: 'transparent', // Changed from dark background to transparent
+                '&::-webkit-scrollbar': {
+                  height: '6px'
+                },
+                '&::-webkit-scrollbar-thumb': {
+                  backgroundColor: 'rgba(255, 255, 255, 0.3)',
+                  borderRadius: '3px'
+                }
+              }}>
                 {displayImages.map((img, index) => (
                   <Box
                     key={index}
                     onClick={() => setGalleryImageIndex(index)}
                     sx={{
-                      minWidth: 90,
-                      height: 70,
-                      borderRadius: 1.5,
-                      overflow: 'hidden',
-                      border: galleryImageIndex === index ? '2px solid #00BCD4' : '2px solid transparent',
-                      opacity: galleryImageIndex === index ? 1 : 0.7,
-                      transition: 'all 0.2s ease',
+                      width: 100,
+                      height: 75,
+                      flexShrink: 0,
                       cursor: 'pointer',
                       position: 'relative',
+                      opacity: galleryImageIndex === index ? 1 : 0.7,
+                      transition: 'opacity 0.2s',
                       '&:hover': {
-                        opacity: 1,
-                        transform: 'scale(1.05)',
-                      },
-                      boxShadow: galleryImageIndex === index ? 
-                        '0 0 0 2px rgba(0, 188, 212, 0.5), 0 4px 12px rgba(0,0,0,0.5)' : 
-                        '0 2px 8px rgba(0,0,0,0.5)'
+                        opacity: 1
+                      }
                     }}
                   >
                     <Box
@@ -1304,27 +1206,22 @@ const StudioProfile = () => {
                       sx={{
                         width: '100%',
                         height: '100%',
-                        objectFit: 'cover'
+                        objectFit: 'cover',
+                        borderRadius: 1
                       }}
                     />
-                    <Box sx={{
-                      position: 'absolute',
-                      bottom: 4,
-                      right: 4,
-                      bgcolor: galleryImageIndex === index ? 'rgba(0, 188, 212, 0.9)' : 'rgba(0,0,0,0.6)',
-                      color: 'white',
-                      width: 18,
-                      height: 18,
-                      borderRadius: '50%',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      fontSize: '0.65rem',
-                      fontWeight: 'bold',
-                      border: '1px solid rgba(255,255,255,0.2)'
-                    }}>
-                      {index + 1}
-                    </Box>
+                    {galleryImageIndex === index && (
+                      <Box sx={{
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        border: '2px solid',
+                        borderColor: 'primary.main',
+                        borderRadius: 1
+                      }} />
+                    )}
                   </Box>
                 ))}
               </Box>

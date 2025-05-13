@@ -14,23 +14,10 @@ router.post('/register', studioController.registerStudio);
 router.post('/login', studioController.loginStudio);
 
 // Get current studio profile (protected route)
-router.get('/me', authMiddleware(['studio']), studioController.getStudioProfile);
+router.get('/me', authMiddleware(['studio']), studioController.getMyStudioProfile);
 
-// Update studio profile
-router.put('/update', authMiddleware(['studio']), async (req, res) => {
-  try {
-    const updates = req.body;
-    const studio = await Studio.findByIdAndUpdate(
-      req.user.id,
-      { $set: updates },
-      { new: true, runValidators: true }
-    ).select('-password -refreshToken');
-
-    res.json({ success: true, studio });
-  } catch (err) {
-    res.status(500).json({ success: false, message: 'Server error' });
-  }
-});
+// Update studio profile (use controller for validation and logic)
+router.put('/update', authMiddleware(['studio']), studioController.updateStudioProfile);
 
 // Handle image uploads
 router.put('/images', authMiddleware(['studio']), async (req, res) => {
@@ -66,6 +53,9 @@ router.put('/gear', authMiddleware(['studio']), async (req, res) => {
         break;
       case 'removeItem':
         update = { $pull: { 'studioGear.$[category].items': payload.item } };
+        break;
+      case 'bulkUpdate':
+        update = { $set: { studioGear: payload } };
         break;
       default:
         return res.status(400).json({ success: false, message: 'Invalid operation' });

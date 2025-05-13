@@ -45,7 +45,7 @@ studioDescription: String,
 socialMedia: {
 instagram: String,
 twitter: String,
-linkedin: String,
+facebook: String,
 website: String
 },
 termsAgreed: {

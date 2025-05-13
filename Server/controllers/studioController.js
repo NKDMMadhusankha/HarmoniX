@@ -108,31 +108,66 @@ res.status(500).json({ message: 'Server error during login' });
 };
 
 exports.updateStudioProfile = async (req, res) => {
-try {
-const updates = Object.keys(req.body);
-const allowedUpdates = [
-'services', 'features', 'bookingSettings',
-'studioDescription', 'recordingBooths', 'loungeArea'
-];
+  try {
+    // Expanded allowed fields to match frontend
+    const allowedUpdates = [
+      'studioName', 'address', 'country', 'studioDescription', 'services', 'features',
+      'recordingBooths', 'loungeArea', 'socialMedia', 'hourlyRate', 'minimumDuration',
+      'city', 'postalCode', 'bookingSettings'
+    ];
+    const updates = Object.keys(req.body);
+    const isValidOperation = updates.every(update => allowedUpdates.includes(update));
+    if (!isValidOperation) {
+      return res.status(400).json({ message: 'Invalid updates!' });
+    }
 
-const isValidOperation = updates.every(update =>
-allowedUpdates.includes(update)
-);
+    // Map frontend field names to backend schema if needed
+    const updateData = { ...req.body };
+    if (updateData.name) {
+      updateData.studioName = updateData.name;
+      delete updateData.name;
+    }
+    if (updateData.description) {
+      updateData.studioDescription = updateData.description;
+      delete updateData.description;
+    }
+    if (updateData.minimumDuration) {
+      updateData['bookingSettings.minimumDuration'] = updateData.minimumDuration;
+      delete updateData.minimumDuration;
+    }
+    if (updateData.hourlyRate) {
+      updateData['bookingSettings.hourlyRate'] = updateData.hourlyRate;
+      // Optionally keep hourlyRate at root for backward compatibility
+    }
 
-if (!isValidOperation) {
-return res.status(400).json({ message: 'Invalid updates!' });
-}
+    // Ensure features is always an array
+    if (!Array.isArray(updateData.features)) {
+      updateData.features = Array.isArray(req.body.features)
+        ? req.body.features
+        : (typeof req.body.features === 'string' && req.body.features ? [req.body.features] : []);
+    }
 
-const studio = await Studio.findByIdAndUpdate(
-req.user.id,
-req.body,
-{ new: true, runValidators: true }
-).select('-password -refreshToken');
+    // Clean up socialMedia: add facebook, remove linkedin
+    if (updateData.socialMedia) {
+      if (updateData.socialMedia.linkedin !== undefined) {
+        delete updateData.socialMedia.linkedin;
+      }
+      // Ensure facebook is present if sent from frontend
+      if (!('facebook' in updateData.socialMedia) && req.body.socialMedia.facebook) {
+        updateData.socialMedia.facebook = req.body.socialMedia.facebook;
+      }
+    }
 
-res.json({ success: true, studio });
-} catch (error) {
-res.status(500).json({ success: false, message: 'Server error' });
-}
+    const studio = await Studio.findByIdAndUpdate(
+      req.user.id,
+      { $set: updateData },
+      { new: true, runValidators: true }
+    ).select('-password -refreshToken');
+
+    res.json({ success: true, studio });
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
 };
 
 exports.uploadStudioImage = async (req, res) => {
@@ -225,6 +260,28 @@ exports.getStudioProfile = async (req, res) => {
     });
   } catch (err) {
     console.error('Error fetching studio profile:', err);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+// Get current studio profile for logged-in user
+exports.getMyStudioProfile = async (req, res) => {
+  try {
+    const studio = await Studio.findById(req.user.id).select('-password -refreshToken');
+    if (!studio) return res.status(404).json({ message: 'Studio not found' });
+
+    // Generate full URLs for studio images
+    const imageUrls = studio.studioImages.map(key => {
+      if (key.startsWith('http')) return key;
+      return `https://${process.env.AWS_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${key}`;
+    });
+
+    res.status(200).json({
+      ...studio.toObject(),
+      studioImages: imageUrls
+    });
+  } catch (err) {
+    console.error('Error fetching my studio profile:', err);
     res.status(500).json({ message: 'Server error' });
   }
 };
