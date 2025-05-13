@@ -250,16 +250,32 @@ const StudioProfileDashboard = () => {
 
   // Save availability to backend (implement API as needed)
   const saveAvailability = async () => {
+    console.log('saveAvailability function called'); // <-- ADD THIS
     setIsSavingAvailability(true);
     try {
       const token = localStorage.getItem('authToken');
+
+      console.log('Availability state BEFORE map:', availability); // <-- ADD THIS
+
+      // Ensure unavailable slots are included in the availability array
+      const updatedAvailability = availability.map((entry) => {
+        const dateStr = entry.date;
+        const unavailableSlots = entry.unavailable || [];
+        return {
+          ...entry,
+          unavailable: unavailableSlots,
+        };
+      });
+
+      console.log('Data being sent to backend:', updatedAvailability); // Add this line
+
       const response = await fetch('http://localhost:5000/api/studio/availability', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          'x-auth-token': token
+          'x-auth-token': token,
         },
-        body: JSON.stringify({ availability })
+        body: JSON.stringify({ availability: updatedAvailability }),
       });
 
       if (response.ok) {
@@ -294,9 +310,9 @@ const StudioProfileDashboard = () => {
     const found = availability.find((a) => a.date === dateStr);
     setSelectedUnavailableSlots(found ? (found.unavailable || []) : []);
   }, [selectedAvailDate, availability]);
-
   // Save slots for the selected date
   const handleSaveSlotsForDate = () => {
+    console.log('handleSaveSlotsForDate function called');
     const dateStr = selectedAvailDate.toISOString().split('T')[0];
     const availableSlots = timeSlots
       .map((slot) => slot.value)
@@ -304,11 +320,20 @@ const StudioProfileDashboard = () => {
 
     setAvailability((prev) => {
       const others = prev.filter((a) => a.date !== dateStr);
-      return [
+      const newState = [
         ...others,
         { date: dateStr, slots: availableSlots, unavailable: selectedUnavailableSlots }
       ];
+      console.log('New availability state after handleSaveSlotsForDate:', newState);
+      return newState;
     });
+    
+    // Call saveAvailability directly after updating the state to ensure it's saved to database
+    setTimeout(() => {
+      console.log('Auto-calling saveAvailability after state update');
+      saveAvailability();
+    }, 100);
+    
     setSnackbarMessage('Slots updated for selected date');
     setSnackbarSeverity('info');
     setSnackbarOpen(true);

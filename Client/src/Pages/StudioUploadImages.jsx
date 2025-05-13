@@ -74,7 +74,20 @@ const StudioUploadImages = () => {
   };
 
   const handleSubmit = async () => {
-    const totalImages = existingImages.length + images.length;
+    // Filter out empty/invalid images and remove duplicates
+    const validExistingImages = existingImages.filter(Boolean).filter((v, i, arr) => arr.indexOf(v) === i);
+    const validImages = images.filter(Boolean);
+
+    // Only count images that are not already in existingImages
+    const allImageUrls = [...validExistingImages];
+    validImages.forEach(img => {
+      // Prevent duplicate File objects by name+size+type
+      if (!allImageUrls.some(url => typeof url === 'string' ? false : (url.name === img.name && url.size === img.size && url.type === img.type))) {
+        allImageUrls.push(img);
+      }
+    });
+
+    const totalImages = allImageUrls.length;
     if (totalImages < 6) {
       setError('Please upload at least 6 images in total');
       return;
@@ -83,12 +96,10 @@ const StudioUploadImages = () => {
     setLoading(true);
     try {
       const formData = new FormData();
-      images.forEach(image => {
+      validImages.forEach(image => {
         formData.append('studioImages', image);
       });
-      
-      // Add existing images to form data
-      existingImages.forEach(imageUrl => {
+      validExistingImages.forEach(imageUrl => {
         formData.append('existingImages', imageUrl);
       });
 

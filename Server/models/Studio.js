@@ -72,13 +72,11 @@ bookingSettings: {
 hourlyRate: Number,
 minimumDuration: Number
 },
-availability: [
-{
-date: { type: String, required: true }, // e.g., '2024-06-10'
-slots: [String], // available slots, e.g., ['09:00', ...]
-unavailable: [String] // not available slots, e.g., ['13:00', ...]
-}
-]
+availability: [{
+  date: { type: String, required: true }, // e.g., '2024-06-10'
+  slots: { type: [String], default: [] }, // available slots
+  unavailable: { type: [String], default: [] } // not available slots
+}]
 });
 
 // Hash password before saving

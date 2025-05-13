@@ -195,40 +195,46 @@ exports.uploadStudioImage = async (req, res) => {
 
 exports.uploadStudioImages = async (req, res) => {
   try {
-    if (!req.files || req.files.length < 6) {
+    // Parse existingImages from form-data (may be string or array)
+    let existingImages = req.body.existingImages || [];
+    if (typeof existingImages === 'string') {
+      existingImages = [existingImages];
+    }
+
+    // Upload new files to S3
+    let uploadedUrls = [];
+    if (req.files && req.files.length > 0) {
+      uploadedUrls = await Promise.all(req.files.map(file => uploadToS3(file, req.user.id)));
+    }
+
+    // Combine existing and new images
+    const allImages = [...existingImages, ...uploadedUrls];
+
+    // Remove falsy/empty values and duplicates
+    const uniqueImages = allImages.filter(Boolean).filter((v, i, arr) => arr.indexOf(v) === i);
+
+    if (uniqueImages.length < 6) {
       return res.status(400).json({ 
         success: false, 
         message: 'Please upload at least 6 images' 
       });
     }
 
-    const uploadPromises = req.files.map(file => uploadToS3(file, req.user.id));
-    const uploadedUrls = await Promise.all(uploadPromises);
-
     // Update the studio's images in the database
     const studio = await Studio.findByIdAndUpdate(
       req.user.id,
       { 
         $set: { 
-          studioImages: uploadedUrls,
+          studioImages: uniqueImages,
           hasUploadedImages: true 
         } 
       },
       { new: true }
     ).select('studioImages');
 
-    // Generate presigned URLs for immediate display
-    const signedImageUrls = await Promise.all(
-      studio.studioImages.map(async (imageUrl) => {
-        // Extract the key from the full URL
-        const key = imageUrl.split('.com/')[1];
-        return await generateSignedUrl(key);
-      })
-    );
-
     res.status(200).json({ 
       success: true, 
-      studioImages: signedImageUrls 
+      studioImages: studio.studioImages 
     });
   } catch (err) {
     console.error('Error uploading studio images:', err);
@@ -378,11 +384,23 @@ exports.updateStudioAvailability = async (req, res) => {
     if (!Array.isArray(availability)) {
       return res.status(400).json({ success: false, message: 'Invalid availability format' });
     }
+
+    // Ensure the availability array includes both available and unavailable slots
+    const sanitizedAvailability = availability.map(entry => {
+      const { date, slots, unavailable } = entry;
+      return {
+        date,
+        slots: slots || [],
+        unavailable: unavailable || []
+      };
+    });
+
     const studio = await Studio.findByIdAndUpdate(
       req.user.id,
-      { $set: { availability } },
+      { $set: { availability: sanitizedAvailability } },
       { new: true }
     ).select('availability');
+
     res.json({ success: true, availability: studio.availability });
   } catch (err) {
     res.status(500).json({ success: false, message: 'Server error' });
