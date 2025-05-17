@@ -47,7 +47,7 @@ import Navbar from '../Components/Navbar';
 import Footer from '../Components/Footer';
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
-import Loader from '../Components/Loader'; // Import the Loader component
+import Loader from '../Components/Loader';
 
 // Create a dark theme with teal accents
 const darkTheme = createTheme({
@@ -397,7 +397,7 @@ const StudioProfile = () => {
   };
 
   if (loading) {
-    return <Loader />; // Use the Loader component
+    return <Loader />;
   }
 
   if (error) {

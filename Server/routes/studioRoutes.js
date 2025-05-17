@@ -114,4 +114,7 @@ router.get('/:id', studioController.getStudioProfile);
 // Add a route to fetch studio images by ID
 router.get('/:id/images', studioController.getStudioImagesById);
 
+// Public route to get availability for a specific studio by ID
+router.get('/:id/availability', studioController.getStudioAvailabilityById);
+
 module.exports = router;

@@ -92,6 +92,7 @@ const HarmoniXNavbar = () => {
   const [mobileFeatureOpen, setMobileFeatureOpen] = useState(false);
   const [profileMenuAnchorEl, setProfileMenuAnchorEl] = useState(null);
   const [profileImage, setProfileImage] = useState(null);
+  const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem('authToken'));
   
   // Ref for the features menu container
   const featuresMenuRef = useRef(null);
@@ -176,6 +177,7 @@ const HarmoniXNavbar = () => {
   const handleLogout = () => {
     // Clear user authentication data (e.g., token) from localStorage
     localStorage.removeItem('authToken');
+    setIsLoggedIn(false);
     // Redirect to the home page or login page
     navigate('/login');
   };
@@ -204,6 +206,13 @@ const HarmoniXNavbar = () => {
     // Recalculate on window resize
     window.addEventListener('resize', calculateScrollbarWidth);
     return () => window.removeEventListener('resize', calculateScrollbarWidth);
+  }, []);
+
+  useEffect(() => {
+    // Listen for changes to authToken in localStorage (e.g., login/logout in other tabs)
+    const checkLogin = () => setIsLoggedIn(!!localStorage.getItem('authToken'));
+    window.addEventListener('storage', checkLogin);
+    return () => window.removeEventListener('storage', checkLogin);
   }, []);
 
   return (
@@ -643,21 +652,25 @@ const HarmoniXNavbar = () => {
                       </ListItemIcon>
                       Profile
                     </MenuItem>
-                    <MenuItem 
-                      onClick={handleLogout} 
-                      sx={{ 
-                        color: 'white', 
-                        backgroundColor: '#f44336', // Red background color
-                        '&:hover': {
-                          backgroundColor: '#d32f2f' // Darker red on hover
-                        }
-                      }}
-                    >
-                      <ListItemIcon sx={{ color: 'white' }}>
-                        <LogoutIcon />
-                      </ListItemIcon>
-                      Log Out
-                    </MenuItem>
+                    {isLoggedIn && (
+                      <MenuItem 
+                        onClick={handleLogout} 
+                        sx={{ 
+                          color: '#f44336',
+                          backgroundColor: 'transparent',
+                          '&:hover': {
+                            backgroundColor: 'rgba(244, 67, 54, 0.1)',
+                            transform: 'translateY(-2px)'
+                          },
+                          transition: 'transform 0.2s ease'
+                        }}
+                      >
+                        <ListItemIcon sx={{ color: '#f44336' }}>
+                          <LogoutIcon />
+                        </ListItemIcon>
+                        Log Out
+                      </MenuItem>
+                    )}
                   </Menu>
                 </Box>
               </>

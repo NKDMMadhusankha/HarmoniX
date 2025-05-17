@@ -415,3 +415,14 @@ exports.updateStudioAvailability = async (req, res) => {
     res.status(500).json({ success: false, message: 'Server error' });
   }
 };
+
+// Public: Get availability for a specific studio by ID
+exports.getStudioAvailabilityById = async (req, res) => {
+  try {
+    const studio = await Studio.findById(req.params.id).select('availability');
+    if (!studio) return res.status(404).json({ message: 'Studio not found' });
+    res.json({ success: true, availability: studio.availability || [] });
+  } catch (err) {
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+};
