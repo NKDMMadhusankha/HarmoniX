@@ -21,7 +21,9 @@ import {
   Dialog,
   DialogContent,
   Backdrop,
-  Link
+  Link,
+  Snackbar,
+  Alert
 } from '@mui/material';
 import { 
   ArrowBackIos, 
@@ -153,18 +155,6 @@ const timeSlots = [
   { value: '22:00', label: '10:00 PM'},
 ];
 
-// Studio gear list
-// const studioGear = [
-//   { category: 'Interface', items: ['UAD Apollo Twin X', 'SSL 2+'] },
-//   { category: 'Microphones', items: ['Neumann TLM 103', 'Shure SM7B', 'AKG C414'] },
-//   { category: 'Monitors', items: ['Yamaha HS8', 'Avantone Mixcubes'] },
-//   { category: 'Preamps', items: ['Neve 1073 SPX', 'Warm Audio WA8000'] },
-//   { category: 'Compressors', items: ['Tube-Tech CL1B', 'Wesaudio Dione', 'Neve 33609'] },
-//   { category: 'EQ', items: ['Wesaudio Prometheus', 'Pultec EQP-1A'] },
-//   { category: 'Reverb', items: ['Lexicon PCM96', 'Bricasti M7'] },
-//   { category: 'Monitoring', items: ['Dangerous Music Monitor ST', 'Barefoot Footprint 01'] },
-// ];
-
 const getImageUrl = (key) => {
   if (!key) return '/assets/default-placeholder.png';
   
@@ -194,6 +184,14 @@ const StudioProfile = () => {
   const [availableTimeSlots, setAvailableTimeSlots] = useState([]);
   const [selectedTimeRange, setSelectedTimeRange] = useState(null); // Add state for time range selection
   const [availability, setAvailability] = useState([]);
+  const [bookingFormOpen, setBookingFormOpen] = useState(false);
+  const [bookingForm, setBookingForm] = useState({
+    name: '',
+    email: '',
+    message: ''
+  });
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState('');
 
   // Add an onError handler to replace broken images with a default placeholder
   const handleImageError = (event) => {
@@ -394,6 +392,51 @@ const StudioProfile = () => {
     const endHour = parseInt(selectedEndTime.split(':')[0]);
     
     return slotHour > startHour && slotHour <= endHour;
+  };
+
+  // Function to handle opening the booking form
+  const openBookingForm = () => {
+    setBookingFormOpen(true);
+  };
+
+  // Function to handle closing the booking form
+  const closeBookingForm = () => {
+    setBookingFormOpen(false);
+  };
+
+  // Handle booking form input changes
+  const handleFormChange = (e) => {
+    const { name, value } = e.target;
+    setBookingForm(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  // Handle booking form submission
+  const handleSubmitBooking = async (e) => {
+    e.preventDefault();
+    try {
+      await axios.post('http://localhost:5000/api/studio/book', {
+        studioId: id,
+        date: selectedDate.toISOString().split('T')[0],
+        startTime: selectedStartTime,
+        endTime: selectedEndTime,
+        ...bookingForm
+      });
+      closeBookingForm();
+      setSnackbarMessage('Successfully sent booking request! The studio will reply to your request shortly.');
+      setSnackbarOpen(true);
+    } catch (err) {
+      setSnackbarMessage('Failed to send booking request. Please try again.');
+      setSnackbarOpen(true);
+      console.error('Booking request failed:', err);
+    }
+  };
+
+  const handleSnackbarClose = (event, reason) => {
+    if (reason === 'clickaway') return;
+    setSnackbarOpen(false);
   };
 
   if (loading) {
@@ -1065,6 +1108,7 @@ const StudioProfile = () => {
                   size="large"
                   disabled={!selectedDate || !selectedStartTime || !selectedEndTime}
                   sx={{ mb: 2 }}
+                  onClick={openBookingForm}
                 >
                   Request to Book
                 </Button>
@@ -1085,6 +1129,101 @@ const StudioProfile = () => {
           </Grid>
         </Container>
         
+        {/* Booking Form Modal */}
+        <Dialog
+          open={bookingFormOpen}
+          onClose={closeBookingForm}
+          maxWidth="sm"
+          fullWidth
+          PaperProps={{
+            sx: {
+              bgcolor: 'background.paper',
+              borderRadius: 2,
+            }
+          }}
+        >
+          <Box sx={{ position: 'relative', p: 3 }}>
+            <IconButton
+              onClick={closeBookingForm}
+              sx={{
+                position: 'absolute',
+                top: 8,
+                right: 8,
+                color: 'text.secondary',
+              }}
+            >
+              <Close />
+            </IconButton>
+            
+            <Typography variant="h5" component="h2" sx={{ mb: 3, color: 'text.primary' }}>
+              Complete Your Booking Request
+            </Typography>
+            
+            <Typography variant="body2" sx={{ mb: 3, color: 'text.secondary' }}>
+              Booking for {studio?.studioName} on {formatDate(selectedDate)} from {timeSlots.find(s => s.value === selectedStartTime)?.label} to {timeSlots.find(s => s.value === selectedEndTime)?.label}
+            </Typography>
+            
+            <form onSubmit={handleSubmitBooking}>
+              <Grid container spacing={2}>
+                <Grid item xs={12}>
+                  <TextField
+                    required
+                    fullWidth
+                    label="Your Name"
+                    name="name"
+                    value={bookingForm.name}
+                    onChange={handleFormChange}
+                    variant="outlined"
+                    sx={{ mb: 2 }}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <TextField
+                    required
+                    fullWidth
+                    label="Email Address"
+                    name="email"
+                    type="email"
+                    value={bookingForm.email}
+                    onChange={handleFormChange}
+                    variant="outlined"
+                    sx={{ mb: 2 }}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <TextField
+                    fullWidth
+                    label="Special Requirements (optional)"
+                    name="message"
+                    multiline
+                    rows={4}
+                    value={bookingForm.message}
+                    onChange={handleFormChange}
+                    placeholder="Tell the studio about any specific needs or questions you have for your session."
+                    variant="outlined"
+                    sx={{ mb: 3 }}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <Button
+                    type="submit"
+                    variant="contained"
+                    color="primary"
+                    fullWidth
+                    size="large"
+                  >
+                    Submit Request
+                  </Button>
+                </Grid>
+              </Grid>
+            </form>
+            
+            <Typography variant="caption" sx={{ display: 'block', textAlign: 'center', mt: 2, color: 'text.secondary' }}>
+              Your booking is not confirmed until approved by the studio owner.
+            </Typography>
+          </Box>
+        </Dialog>
+
         {/* Full Screen Gallery Modal - Updated with completely transparent styling */}
         <Dialog
           open={galleryOpen}
@@ -1287,6 +1426,19 @@ const StudioProfile = () => {
             </Box>
           </DialogContent>
         </Dialog>
+
+        {/* Snackbar for booking request feedback */}
+        <Snackbar
+          open={snackbarOpen}
+          autoHideDuration={5000}
+          onClose={handleSnackbarClose}
+          anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+        >
+          <Alert onClose={handleSnackbarClose} severity={snackbarMessage.startsWith('Successfully') ? 'success' : 'error'} sx={{ width: '100%' }}>
+            {snackbarMessage}
+          </Alert>
+        </Snackbar>
+
         <Footer />
       </Box>
     </ThemeProvider>

@@ -5,6 +5,7 @@ const studioController = require('../controllers/studioController');
 const Studio = require('../models/Studio');
 const authMiddleware = require('../middleware/authMiddleware');
 const multer = require('multer');
+const studioContact = require('../controllers/studioContact');
 
 // Configure multer for file uploads
 const upload = multer({ storage: multer.memoryStorage() });
@@ -116,5 +117,8 @@ router.get('/:id/images', studioController.getStudioImagesById);
 
 // Public route to get availability for a specific studio by ID
 router.get('/:id/availability', studioController.getStudioAvailabilityById);
+
+// Send booking request email to studio
+router.post('/book', studioContact.sendBookingRequest);
 
 module.exports = router;
