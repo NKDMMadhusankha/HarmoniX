@@ -336,12 +336,15 @@ const HarmoniXNavbar = () => {
                 {navItemsWithoutFeatures.map((item, index) => (
                   <ListItem 
                     button 
-                    key={item} 
-                    onClick={() => handleMobileNavigation(
+                    key={item}
+                    component={Link}
+                    to={
                       item === 'About Us' ? '/about' : 
                       item === 'Contact' ? '/contact' :
-                      item.toLowerCase().replace(' ', '-')
-                    )}
+                      item === 'Support' ? '/page-support' :
+                      `/${item.toLowerCase().replace(' ', '-')}`
+                    }
+                    onClick={toggleMobileMenu}
                     sx={{ 
                       py: 2,
                       borderBottom: '1px solid rgba(255,255,255,0.1)'
@@ -586,6 +589,16 @@ const HarmoniXNavbar = () => {
                       <a 
                         key={item} 
                         href="/about" 
+                        style={{ textDecoration: 'none' }}
+                      >
+                        <Button sx={{ my: 2, color: 'white', display: 'block', mx: 1 }}>
+                          {item}
+                        </Button>
+                      </a>
+                    ) : item === 'Support' ? (
+                      <a 
+                        key={item} 
+                        href="/page-support" 
                         style={{ textDecoration: 'none' }}
                       >
                         <Button sx={{ my: 2, color: 'white', display: 'block', mx: 1 }}>

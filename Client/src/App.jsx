@@ -48,8 +48,11 @@ import StudioProfile from './Pages/Studios';
 import ProducersPage from './Pages/ProducersPage';
 import ProducerDetailsPage from './Pages/ProducerDetailsPage';
 
+import FAQSupport from "./Pages/FAQSupport";
+
 
 import ClientProfile from "./Profiles/ClientProfile";
+import { Support } from "@mui/icons-material";
 
 const App = () => {
   return (
@@ -61,6 +64,9 @@ const App = () => {
           <Route path="/about-producing" element={<AboutProducing />} />
           <Route path="/about-mixing" element={<AboutMixing />} />
           <Route path="/about-mastering" element={<AboutMastering />} />
+          <Route path="/page-support" element={<FAQSupport />} />
+
+          
 
           <Route path="/register" element={<Register />} />
           <Route path="/login" element={<Login />} />
