@@ -25,12 +25,12 @@ import pro5 from '../assets/girl2.jpg';
 import pro6 from '../assets/boy4.jpg';
 
 const testimonials = [
-  { name: 'SANDUN PERERA', position: 'Singer-Songwriter', quote: "Finding the right producer for my single was effortless thanks to this platform.", image: pro1 },
-  { name: 'ISHARA FERNANDO', position: 'Founder of Island Vibes Studio', quote: "This platform streamlined the way we connect with clients and manage studio bookings.", image: pro2 },
-  { name: 'NIPUNI RATHNAYAKE', position: 'Music Producer', quote: "The recommendation system helped me get noticed by artists I never imagined working with.", image: pro3 },
-  { name: 'THARINDU JAYASINGHE', position: 'Indie Artist', quote: "I discovered incredible collaborators who understood exactly what I needed musically.", image: pro4 },
-  { name: 'HIRUNI SENANAYAKE', position: 'Vocal Coach & Engineer', quote: "Managing projects and sessions has never been this easy.", image: pro5 },
-  { name: 'KASUN DISSANAYAKE', position: 'Beat Maker', quote: "From connecting with clients to showcasing my work—everything is smooth and professional.", image: pro6 }
+  { name: 'Lahiru De Costa', position: 'Singer-Songwriter', quote: "Finding the right producer for my single was effortless thanks to this platform.", image: pro1 },
+  { name: 'Billy Fernando', position: 'Founder of Island Vibes Studio', quote: "This platform streamlined the way we connect with clients and manage studio bookings.", image: pro2 },
+  { name: 'Leen Muthukuda', position: 'Music Producer', quote: "The recommendation system helped me get noticed by artists I never imagined working with.", image: pro3 },
+  { name: 'Charitha aththalage', position: 'Indie Artist', quote: "I discovered incredible collaborators who understood exactly what I needed musically.", image: pro4 },
+  { name: 'yashodha Adikari', position: 'Vocal Coach & Engineer', quote: "Managing projects and sessions has never been this easy.", image: pro5 },
+  { name: 'Pasan Liyanage', position: 'Beat Maker', quote: "From connecting with clients to showcasing my work—everything is smooth and professional.", image: pro6 }
 ];
 
 const CompactTestimonialCard = ({ testimonial }) => (
@@ -51,7 +51,7 @@ const ClientTestimonials = () => {
   return (
     <Box sx={{ backgroundColor: '#F2F5FE', py: 6, textAlign: 'center', position: 'relative', clipPath: 'polygon(0 0, 100% 20%, 100% 100%, 0% 100%)' }}>
       <Container maxWidth="lg">
-        <Typography variant="h2" sx={{ mb: 4, fontWeight: 700, fontFamily: 'initial', mt: 10 }}>What Our Client Say !</Typography>
+        <Typography variant="h2" sx={{ mb: 4, fontWeight: 700, fontFamily: 'initial', mt: 10 }}>Hear from the Musicians !</Typography>
         
         <Box sx={{ position: 'relative', pb: 6 }}>
           <Swiper

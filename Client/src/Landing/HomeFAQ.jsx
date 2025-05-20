@@ -65,6 +65,10 @@ const MusicCollaborationFAQs = () => {
                   variant="outlined" 
                   color="primary"
                   sx={{ borderRadius: 20 , padding: '10px 20px' }}
+                  onClick={() => {
+                    navigate('/page-support');
+                    window.location.reload();
+                  }}
                 >
                   More Questions
                 </Button>
