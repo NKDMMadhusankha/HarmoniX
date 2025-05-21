@@ -102,7 +102,7 @@ const HarmoniXNavbar = () => {
   const featureOptions = ['Mixing Engineer', 'Mastering Engineer', 'Music Producer', 'Recording Studios','lyricist',]; //'Singers & Vocalists'
   const featureIcons = [<TuneIcon />, <GraphicEqIcon />, <QueueMusicIcon />, <HomeWorkIcon />, <LyricsIcon />, <PersonIcon />];
   
-  const navItemsWithoutFeatures = ['Resources', 'Support', 'About Us', 'Contact'];
+  const navItemsWithoutFeatures = [ 'Support', 'About Us', 'Contact'];
   const navItemIcons = [<MenuBookIcon />, <SupportAgentIcon />, <InfoIcon />, <ContactMailIcon />];
   
   const toggleMobileMenu = () => {

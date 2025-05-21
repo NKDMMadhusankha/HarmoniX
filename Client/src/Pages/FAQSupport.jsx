@@ -45,6 +45,8 @@ const FAQ = () => {
     { id: 'all', name: 'All Questions' },
     { id: 'account', name: 'Account & Profile' },
     { id: 'collaboration', name: 'Collaboration' },
+    
+    { id: 'payments', name: 'Navinna Madhusankha' },
     { id: 'payments', name: 'Agreements & Rights' },
     { id: 'platform', name: 'Platform Usage' }  // Replaced Technical Support with Platform Usage
   ];

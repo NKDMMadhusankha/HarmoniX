@@ -155,6 +155,7 @@ const ProducerCard = ({ image, producerInfo, onSeeMore }) => {
           >
             SEE MORE
           </Button>
+          
         </CardActions>
       </Card>
     </Grid>

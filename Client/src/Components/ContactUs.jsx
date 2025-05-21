@@ -387,8 +387,11 @@ const ContactPage = () => {
                             }
                           }}
                         />
+                        
                       </motion.div>
+                      
                     </Grid>
+                    
                     <Grid item xs={6}>
                       <motion.div
                         initial={{ opacity: 0, x: 20 }}

@@ -17,8 +17,8 @@ import 'swiper/css';
 import 'swiper/css/navigation';
 import 'swiper/css/pagination';
 
-import pro1 from '../assets/boy1.png';
-import pro2 from '../assets/boy2.jpeg';
+import pro1 from '../assets/boy1.jpg';
+import pro2 from '../assets/boy2.jpg';
 import pro3 from '../assets/girl1.jpeg';
 import pro4 from '../assets/boy3.jpg';
 import pro5 from '../assets/girl2.jpg';
